@@ -1,0 +1,300 @@
+
+<!--   <nav class="menu sidenav">
+      {#each menuItems as item}
+          <a href="#{item.target}" target="_blank" rel="noopener">
+            {item.name}
+          </a>
+      {/each}
+  </nav>
+ -->
+
+
+
+    <!-- <p>{pkg.content.summary}</p>
+
+    {#each pkg.content.sections as section (section.header)}
+      <h3>{section.title}</h3>
+      <table>
+        <tr>
+          <th>type</th>
+          <th>count</th>
+          <th>duration</th>
+        </tr>
+        {#each (section["summary.content_type"] || []) as content_type}
+        <tr>
+          <td>{content_type}</td>
+          <td>{section["summary.count"][content_type]}</td>
+          <td>{section["summary.duration"][content_type]}</td>
+        </tr>
+        {/each}
+      </table>
+    {/each}
+-->
+
+<script>
+
+function toggleAccordion() {
+  /* Toggle between adding and removing the "active" class,
+  to highlight the button that controls the panel */
+  this.classList.toggle("active");
+
+  /* Toggle between hiding and showing the active panel */
+  var panel = this.nextElementSibling;
+  if (panel.style.display === "block") {
+    panel.style.display = "none";
+  } else {
+    panel.style.display = "block";
+  }
+}
+
+
+$: buttons = [
+    {
+        "_id": "_b1",
+        "result": "_b1_result",
+        "function": ((ret) => runCount(ret)),
+        "title": "Test 1",
+        "description": "should yield the same values as in overview",
+        "hidden": true,
+    },{
+        "_id": "_b2",
+        "result": "_b2_result",
+        "function": ((ret) => runSearch(ret)),
+        "title": "Search 1",
+        "description": "simple test search",
+        "hidden": false
+    },{
+        "_id": "_b3",
+        "result": "_b3_result",
+        "function": ((ret) => runPDF(ret)),
+        "title": "PDF 1",
+        "description": "simple test search",
+        "hidden": false
+    },
+];
+
+function set_el_html(name, val) {
+    const el = document.getElementById(`${name}_result`);
+    el.innerHTML = val;
+}
+
+async function runSearch(kw) {
+    set_el_html('_b2', 'hi');
+}
+
+async function runPDF(kw) {
+
+}
+
+async function runCount() {
+    // const _b1_el = document.getElementById("_b1");
+    const _b1_result_el = document.getElementById("_b1_result");
+    // console.log(_b1_el);
+
+    axios.get("/api/counts", {
+            params: {
+
+            }
+        })
+        .then((response) => {
+            console.log(response, _b1_result_el.innerHTML);
+            let result = response.data;
+            _b1_result_el.innerHTML = `
+            ${Object.keys(result[0])}:${Object.values(result[0])},
+            ${Object.keys(result[1])}:${Object.values(result[1])}
+            ${Object.keys(result[2])}:${Object.values(result[2])}`;
+        })
+        .catch((error) => {
+            console.log("got error on fetch", error);
+        });
+}
+
+</script>
+
+<style>
+
+.data {
+    display: grid;
+    justify-content: center;
+}
+
+table {
+
+    /*border-width: 0px;*/
+    padding: 20 20 20 20;
+}
+
+#_b1 {
+
+}
+
+#_b1_result {
+
+}
+
+tr {
+}
+</style>
+
+    <table id="_dashboard">
+        <tr>
+            <th>button</th>
+            <th>result</th>
+        </tr>
+        {#each buttons as button}
+        {#if button.hidden == false}
+            <tr>
+                <td>
+                    <button id="{button._id}" on:click={button.function}>{button.title}</button>
+                </td>
+                <td id="_b1_result">-</td>
+            </tr>
+        {/if}
+        {/each}
+    </table>
+
+    <tr>
+      <th>Filenames</th>
+      <th>Topics</th>
+      <th>Neighbor Titles</th>
+      <th>Neighbor Keywords</th>
+      <th>File Ext</th>
+      <th>File Mime</th>
+      <th>File Size</th>
+      <th>Metadata Version</th>
+      <th>Metadata Format</th>
+      <th>Metadata CreatedAt</th>
+      <th>blake2b hash</th>
+
+    <ul>
+      {#each data.locations as entry}
+        <li class="filename">{entry}</li>
+      {/each}
+      </ul>
+    </td>
+    <td>
+      <ul>
+      {#each data.tags as tag}
+        <li class="status">
+          {tag}
+        </li>
+      {/each}
+      </ul>
+    </td>
+    <td>
+      <ul>
+      {#each data.neighbors as neigh}
+        <li class="filename">{neigh[0]}</li>
+      {/each}
+      </ul>
+    </td>
+    <td>
+      <ul>
+      {#each data.neighbors as neigh}
+        <li class="status">{neigh[1]}</li>
+      {/each}
+      </ul>
+    </td>
+    {/await}
+    <td>{file["file.ext"]}</td>
+    <td>{file["file.mime"]}</td>
+    <td>{file["file.size"]}</td>
+    <td>{file["metadata.version"]}</td>
+    <td>{file["metadata.format"]}</td>
+    <td>{file["metadata.created_at"]}</td>
+    <td>{file["hash.blake2b"]}</td>
+
+<style>
+
+/*
+section {
+  width: 50%;
+  padding: 0.3em;
+  border: 1px solid black;
+  overflow: scroll;
+  height: 200px;
+}
+div {
+  width: 50%;
+  padding: 0.2em;
+  border: 1px solid blue;
+  margin: 0.15em 0;
+}
+
+ ---- */
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+.sidenav {
+  width: 130px;
+  position: fixed;
+  z-index: 1;
+  top: 20px;
+  left: 10px;
+  background: #eee;
+  overflow-x: hidden;
+  padding: 8px 0;
+}
+
+.sidenav a {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 20px;
+  color: #2196F3;
+  display: block;
+}
+
+.sidenav a:hover {
+  color: #064579;
+}
+
+/* Style the buttons that are used to open and close the accordion panel */
+.accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .accordion:hover {
+  background-color: #ccc;
+}
+
+.editor {
+  width:800px;
+  height:600px;
+  border:1px
+  solid #ccc;
+  /*overflow: visible !important;*/
+}
+
+/* Style the accordion panel. Note: hidden by default */
+div.panel {
+  padding: 0 18px;
+  /*background-color: white;*/
+  display: none;
+  resize: vertical;
+  /*overflow: hidden;*/
+}
+
+.accordion:after {
+  content: '\02795'; /* Unicode character for "plus" sign (+) */
+  font-size: 13px;
+  color: #777;
+  float: right;
+  margin-left: 5px;
+}
+
+.active:after {
+  content: "\2796"; /* Unicode character for "minus" sign (-) */
+}
+</style>

@@ -4,7 +4,9 @@ import Overview from "./Overview.svelte";
 import { onMount } from 'svelte';
 
 const axios = require('axios');
-onMount(async () => {});
+onMount(async () => {
+    console.log('Dashboard mounted');
+});
 
 </script>
 

@@ -1,20 +1,24 @@
 <script>
 import { onMount } from 'svelte';
 
+import { createEventDispatcher } from 'svelte';
+
+// const dispatch = createEventDispatcher();
+
 export let queue = [];
 $: queue;
-// $: console.log('queue -->', queue);
+$: console.log('queue -->', queue);
 
-// function usable() {
-//   return {
-//     update(e) {
+function usable() {
+  return {
+    update(e) {
 
-//     },
-//     destroy() {
+    },
+    destroy() {
 
-//     }
-//   };
-// }
+    }
+  };
+}
 
 const fetchFromLocalStorage = (item) => {
     return JSON.parse(localStorage.getItem(item));
@@ -27,12 +31,13 @@ const saveToLocalStorage = (item, value) => {
 const removeEntry = (e) => e.target.parentElement.remove();
 const saveEntry = (e) => {
     console.log(e);
-    saveToLocalStorage("log-1", e);
+    // saveToLocalStorage("log-1", e);
 };
 
 function addEntry(e) {
-    queue.push({ text: '' })
-    queue = queue;
+  console.log('adding entry to listqueue:', e);
+  queue.push({ text: e })
+  queue = queue;
 }
 
 // below code borrowed from https://www.w3schools.com/howto/howto_js_todolist.asp
@@ -65,7 +70,7 @@ function newElement() {
 }
 
 onMount(async () => {
-  // console.log('mounted');
+  console.log('ListQueue mounted');
   // queue = [fetchFromLocalStorage("log-1")];
   // console.log([fetchFromLocalStorage("log-1")]);
 
@@ -98,13 +103,15 @@ onMount(async () => {
       ev.target.classList.toggle('checked');
     }
   }, false);
-
 });
+
+
 
 function markAsDone(item) {
   console.log('------>', e);
   // TODO remove from this queue and pass to callback/update to next queue
-  return queue.remove(item)
+  item.checked = true;
+  dispatch('dequeue', item);
 }
 
 </script>
@@ -119,8 +126,8 @@ function markAsDone(item) {
         </div>
       </li> -->
       {#each queue as item}
-      <!-- use:usable={queue} on:click={() => markAsDone(item) }  -->
-        <li class="{ item.checked ? 'checked' : ''}">{item.text}</li>
+      <!--   -->
+        <li use:usable={queue} on:click={() => markAsDone(item)} class="{ item.checked ? 'checked' : ''}">{item['file.title']}</li>
       {/each}
     </ul>
 </section>

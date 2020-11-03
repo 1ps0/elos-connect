@@ -12,8 +12,7 @@ hits: Array(15) [ "grammar", "disk", "expert" ] // ...
 */
 import { onMount } from 'svelte';
 
-import jquery from './jquery-1.11.1.js';
-import PdfViewer from "./PdfViewer.svelte";
+import jquery from './lib/jquery-1.11.1.js';
 
 export let file;
 export let viewer_file;

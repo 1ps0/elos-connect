@@ -9,11 +9,13 @@ $: pkgs;
 
 async function fetch_(uri, cb) {
   const ret = await fetch(uri);
-  cb(await ret.json());
+  let ret_json = await ret.json();
+  console.log('[]',ret_json);
+  cb(ret_json);
 };
 
 async function fetch_pkg_index() {
-  let loc = `/api/pkg/`;
+  let loc = `/api/pkg`;
 
   await fetch_(loc, (ret) => {
     pkgs = ret;
@@ -21,6 +23,7 @@ async function fetch_pkg_index() {
 }
 
 onMount(() => {
+  console.log("PkgIndex mounted");
   fetch_pkg_index();
 });
 

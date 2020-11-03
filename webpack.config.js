@@ -1,4 +1,5 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const path = require('path');
 
 const mode = process.env.NODE_ENV || 'development';
@@ -6,13 +7,14 @@ const prod = mode === 'production';
 
 module.exports = {
 	entry: {
-		bundle: ['./src/main.js']
+		bundle: ['./src/main.js'],
+    // "pdf.worker": "pdfjs-dist/build/pdf.worker.entry",
 	},
 	resolve: {
 		alias: {
 			svelte: path.resolve('node_modules', 'svelte')
 		},
-		extensions: ['.mjs', '.js', '.svelte'],
+		extensions: ['.mjs', '.js', '.svelte', '.js', '.html'],
 		mainFields: ['svelte', 'browser', 'module', 'main']
 	},
 	output: {
@@ -22,6 +24,16 @@ module.exports = {
 	},
 	module: {
 		rules: [
+			{
+				test: /\.html$/,
+				use: {
+					loader: 'svelte-loader',
+					options: {
+						emitCss: true,
+						hotReload: true
+					}
+				}
+			},
 			{
 				test: /\.svelte$/,
 				use: {
@@ -42,6 +54,10 @@ module.exports = {
 					prod ? MiniCssExtractPlugin.loader : 'style-loader',
 					'css-loader'
 				]
+			},
+			{
+				test: /\.ttf$/,
+				use: ['file-loader']
 			}
 		]
 	},
@@ -49,6 +65,9 @@ module.exports = {
 	plugins: [
 		new MiniCssExtractPlugin({
 			filename: '[name].css'
+		}),
+		new MonacoWebpackPlugin({
+			languages: ['typescript', 'javascript', 'css']
 		})
 	],
 	devtool: prod ? false: 'source-map',

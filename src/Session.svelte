@@ -1,11 +1,14 @@
 <script>
 
+// import PkgEdit from "./PkgEdit.svelte";
 // import Schedule from "./Schedule.svelte";
 import CountdownTimer from "./CountdownTimer.svelte";
 import AnnotationLog from "./AnnotationLog.svelte";
 import ListQueue from "./ListQueue.svelte";
 
 let timer;
+let doneObj;
+let todoObj;
 
 let prompts = [
   {
@@ -50,7 +53,13 @@ let todoQueue = [
     text: "social native"
   }
 ];
-let doneQueue = [];
+let doneQueue = [
+  {
+    is_me: false,
+    profile: "",
+    text: "Pay Insurance this month"
+  }
+];
 let notesLog = [
   {
     is_me: false,
@@ -74,10 +83,10 @@ let notesLog = [
   </table>
 -->
   <!-- <Schedule /> -->
-  <AnnotationLog messages={notesLog} />
-  <ListQueue queue={todoQueue} />
+  <!-- <AnnotationLog messages={notesLog} /> -->
+  <ListQueue queue={todoQueue} on:dequeue />
   <CountdownTimer timer={timer} />
-  <ListQueue queue={doneQueue} />
+  <ListQueue queue={doneQueue} on:dequeue />
 </section>
 
 <style>

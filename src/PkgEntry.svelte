@@ -1,33 +1,24 @@
 <script>
-import jquery from './jquery-1.11.1.js';
 import { onMount } from 'svelte';
+import Editor from "./Editor.svelte";
 
 export let pkg = {};
+$: console.log('PkgEntry: ', pkg);
 
-let title = "";//pkg["content"]["title"];
+let title = "placeholder title"; //pkg["content"]["title"];
 let attributed = pkg["metadata.teachers"];
 let keywords = pkg["metadata.skills.keywords"];
 
-function fetch__(uri) {
-  axios.get("/api/counts", { params: {} } )
-    .then((response) => {
-      console.log(response);
-      data.status = response;
-    })
-    .catch((error) => {
-      console.log("got error on fetch", error);
-    });
-
-}
 async function fetch_(uri, cb) {
   const ret = await fetch(uri);
   cb(await ret.json());
 };
 
 async function fetch_pkg_index() {
-  let loc = `/api/pkg/`;
+  let loc = `/api/pkg?name=${pkg["name"]}`;
 
   await fetch_(loc, (ret) => {
+    console.log(ret);
     pkg = ret;
   });
 }
@@ -44,66 +35,19 @@ function package_type() {
   }
 }
 
-function toggleVisible() {
-  if (jquery(".expandable").is(':visible')) {
-    jquery(".expandable").hide();
-    jquery(".visibility-button").text('show expanded');
-  } else {
-    jquery(".expandable").show();
-    jquery(".visibility-button").text('hide expanded');
-  }
-}
-toggleVisible();
-
-function loadPkg() {
-
-}
-
-function openInNewTab(url) {
-  var win = window.open(url, '_blank');
-  win.focus();
-}
-
-
 </script>
 
 <div class="container {package_type()}">
   <div class="main">
     <h2>{title}</h2>
-    <span on:click={openInNewTab} class="tag-box open-link">Open in New Window</span><br/>
-    <span class="tag-box">{pkg["metadata.format"]}</span><br/>
-    <h4>{attributed}</h4>
-    <span class="tag-box">{pkg["metadata.content.variation"]}</span><br/><br/>
-    {#each keywords as keyword}
-      <span class="tag-box">{keyword}</span>
-    {/each}
-    <hr/>
-    <span class="visibility-button" on:click={toggleVisible}>show expanded</span>
+    <span class="tag-box">{pkg["metadata.format"]}</span>
+     |
+    <span class="tag-box">{pkg["metadata.content.variation"]}</span>
   </div>
-  <div class="expandable">
-    <hr/>
-    <textarea id="content" bind:value={pkg}></textarea>
-    <!-- <p>{pkg.content.summary}</p>
-
-    {#each pkg.content.sections as section (section.header)}
-      <h3>{section.title}</h3>
-      <table>
-        <tr>
-          <th>type</th>
-          <th>count</th>
-          <th>duration</th>
-        </tr>
-        {#each (section["summary.content_type"] || []) as content_type}
-        <tr>
-          <td>{content_type}</td>
-          <td>{section["summary.count"][content_type]}</td>
-          <td>{section["summary.duration"][content_type]}</td>
-        </tr>
-        {/each}
-      </table>
-    {/each}
--->
-   </div>
+  <div class="editor">
+    <!-- {editor} -->
+    <!-- <Editor bind:data={pkg} /> -->
+  </div>
 </div>
 
 <style>

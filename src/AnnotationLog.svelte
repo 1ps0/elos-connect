@@ -16,7 +16,7 @@ function _usable() {
 
 </script>
 
-<section use:_={messages}>
+<section use:_usable={messages}>
   {#each messages as message}
   <div class="container {message.is_me ? '' : 'darker'}">
     <img src="{message.profile}" alt="">

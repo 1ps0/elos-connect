@@ -1,17 +1,22 @@
-<script>
+a<script>
 
 import { onMount } from 'svelte';
 import Entry from "./Entry.svelte";
+import Editor from "./Editor.svelte";
 
 // { "filetype": "pdf", "files": [], 'page_num': 1, 'page_size': 20}
 export let filetype = 'pdf';
 export let files = [];
 export let page_num = 1;
-export let page_size = 5;
+export let page_size = 10;
 export let page_offset = (page_num - 1) * page_size;
 export let keywords = 'learning';
 export let viewer_file;
+export let selected_files = [];
 
+// $: console.log('-> selected: ',selected_files)
+
+$: selected_files;
 $: viewer_file;
 $: keywords;
 $: files;
@@ -21,7 +26,7 @@ async function fetch_(uri, cb) {
   cb(await ret.json());
 };
 
-async function fetch_filelist(page, filetype, keywords='') {
+async function fetch_filelist(page, filetype, keywords='learning') {
   let loc = `/api/filetype/${filetype}?page_size=${page_size}&page_num=${page}`;
   if (keywords.length > 0) {
     loc = `${loc}&keywords=${keywords}`;
@@ -42,26 +47,31 @@ async function fetch_filenames(hash) {
   return await ret.json();
 }
 
+function add_to_package(e, file) {
+  console.log('add_to_package', e);
+  e.target.parentElement.parentElement.parentElement.hidden = true;
+
+  selected_files.push(file)
+  selected_files = selected_files;
+}
+
 onMount(() => {
+  console.log('Fileset mounted');
   fetch_filelist(1, 'pdf', keywords);
 });
 
 </script>
 
 <div>
-  <hr/>
-  <h3>File Index</h3>
   <table>
     <tr>
       <td>
-        <p class="filename">{filetype}
-          <span class="status">
+        <div class="filename">{filetype}
           {page_offset} - {page_offset + page_size} ({files.length})
-          </span>
-        </p>
-        <a class="next-button" title="Next" href="#" on:click={() => fetch_filelist(page_num+1, filetype, keywords)}>
+        </div>
+        <button class="next-button" on:click|preventDefault={() => fetch_filelist(page_num+1, filetype, keywords)}>
           Next Page
-        </a>
+        </button>
         <form on:submit={
           (e) => {
               e.preventDefault();
@@ -84,27 +94,65 @@ onMount(() => {
     </tr>
   </table>
   <table id="container-files">
+    <tr>
+      <th class="select-file"></th>
+      <th class="file-name">name</th>
+      <th class="file-mime">mime | ext</th>
+      <th class="file-open">open</th>
+      <th class="file-options">options</th>
+    </tr>
   {#each files as file}
     <tr>
-      <Entry file={file} bind:viewer_file={viewer_file}/>
+      <!-- <Entry file={file} bind:viewer_file={viewer_file}/> -->
+      <td class="select-file">
+        <input type="checkbox" value={file}/>
+      </td>
+      <td class="file-name">{file['file.title']}</td>
+      <td class="file-mime">{file['file.mime']} | {file['file.ext']}</td>
+      <td class="file-open">
+        <button on:click|preventDefault={() => (viewer_file = file.locations[0])}>open</button>
+      </td>
+      <td class="file-options">
+        <div>
+          <button on:click|preventDefault="{(e) => add_to_package(e, file)}">add to package</button>
+        </div>
+      </td>
     </tr>
-  {:else}
-  lol
   {/each}
   <ul>
 </div>
 
 <style>
 
-._data {
-  display: flex;
-  justify-content: center;
+.file-name {
+  width:55%;
+  padding: 5px;
+  margin: 2px;
 }
+
+.file-mime {
+  width:20%;
+  padding: 5px;
+  margin: 2px;
+}
+
+.file-open {
+  width:5%;
+  padding: 5px;
+  margin: 2px;
+}
+
+.file-keywords {
+  width:10%;
+  padding: 5px;
+  margin: 2px;
+}
+
 
 p {
   color: #ff3e00;
   text-transform: uppercase;
-  font-size: 4em;
+  font-size: 1em;
   font-weight: 100;
 }
 
@@ -143,6 +191,11 @@ tr {
 td {
   max-width: 200px;
 }
+
+/* -------------
+   Sticky Header
+*/
+
 
 </style>
 
