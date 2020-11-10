@@ -9,7 +9,7 @@ $: fileset_selected;
 export let defaults = {
     source: '{ 1: "Hello World" }',
     language: 'markdown',
-    theme: 'vs-dark',
+    theme: 'vs-light',
     features: ["wordWrap", ]
 };
 
@@ -69,10 +69,11 @@ onMount(async () => {
     display: block;       /* iframes are inline by default */
     background: #000;
     border: none;         /* Reset default border */
-    height: 70vh;        /* Viewport-relative units */
-    width: 80vw;
+    height: 50vh;       /* Viewport-relative units */
+    /*width: 80vw;*/
     resize: vertical;
     overflow: auto;
+    margin: 0 auto;
 }
 
 </style>

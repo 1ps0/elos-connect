@@ -30,7 +30,9 @@ module.exports = {
 					loader: 'svelte-loader',
 					options: {
 						emitCss: true,
-						hotReload: true
+						hotReload: true,
+						accessors: true,
+						hydratable: true
 					}
 				}
 			},
@@ -40,7 +42,9 @@ module.exports = {
 					loader: 'svelte-loader',
 					options: {
 						emitCss: true,
-						hotReload: true
+						hotReload: true,
+						accessors: true,
+						hydratable: true
 					}
 				}
 			},

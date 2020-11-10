@@ -153,12 +153,12 @@ const lapTimer = () => {
 
 // let timerQueue;
 // $: timerQueue;
-// const addInterval = (time) => {
-//     timerQueue.push({
-//         timer: time
-//     });
-//     timerQueue = timerQueue;
-// };
+const addInterval = (time) => {
+    timerQueue.push({
+        timer: time
+    });
+    timerQueue = timerQueue;
+};
 // const removeInterval = (e) => {
 //     e.target.parentElement.remove();
 // };

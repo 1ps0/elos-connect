@@ -1,47 +1,12 @@
 <script>
-import { onMount } from 'svelte';
+import { onMount, createEventDispatcher } from 'svelte';
 
-import Editor from "./Editor.svelte";
-import PkgIndex from "./PkgIndex.svelte";
-import PkgCreate from "./PkgCreate.svelte";
-import Fileset from "./Fileset.svelte";
-import Session from "./Session.svelte";
-import Frame from "./Frame.svelte";
-import DataGrid from "./DataGrid.svelte";
+export let items = {};
+let visibleItems = [];
+$: visibleItems = Object.values(items);
+// $: console.log('menu items', visibleItems);
 
-let fileset_selected;
-let viewer_file;
-let menu_items = [
-  { target: "menu-item-create", name: "Create Pkg" },
-  { target: "menu-item-metrics", name: "Metrics" },
-  { target: "menu-item-open", name: "Open File" },
-  { target: "menu-item-notes", name: "Notes" },
-  { target: "menu-item-session", name: "Session" },
-  { target: "menu-item-pkgindex", name: "PkgIndex" },
-  { target: "menu-item-fileset", name: "Fileset" },
-  // { target: "menu-item-", name: "" },
-];
-$: menu_items;
-
-
-function searchFilter() {
-  // Declare variables
-  var input, filter, ul, li, a, i;
-  input = document.getElementById("search");
-  filter = input.value.toUpperCase();
-  ul = document.getElementById("menu");
-  li = ul.getElementsByTagName("li");
-
-  // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < li.length; i++) {
-    a = li[i].getElementsByTagName("a")[0];
-    if (a.innerHTML.toUpperCase().indexOf(filter) > -1) {
-      li[i].style.display = "";
-    } else {
-      li[i].style.display = "none";
-    }
-  }
-}
+const dispatch = createEventDispatcher();
 
 function showTab(e) {
   var name = e.currentTarget.href.split('#')[1];
@@ -64,7 +29,7 @@ function showTab(e) {
 
 onMount(async () => {
   console.log('MainMenu mounted');
-  document.getElementsByClassName("defaultOpen")[0].click();
+  // document.getElementsByClassName("defaultOpen")[0].click();
 });
 
 // <MarkdownEditor />
@@ -72,52 +37,27 @@ onMount(async () => {
 
 <section>
 
-  <input type="text" id="search" on:change={searchFilter} placeholder="Search...">
-
-  <div class="tab">
-    <ul id="menu">
-      {#each menu_items as item}
-      <li>
-        <a href="#{item.target}" class="tablinks" on:click|preventDefault={showTab}>
+  <!-- <nav id="menu" class="tab"> -->
+  <ul id="menu" >
+    {#each visibleItems as item}
+      <li class="tab">
+        <button class="tablinks" id="#{item.target}" on:click={() => dispatch("menuToggle", item.target)}>
           {item.name}
-        </a>
+        </button>
       </li>
-      {/each}
-    </ul>
-  </div>
-  <div id="menu-item-metrics" class="tablecontent defaultOpen">
-    <DataGrid />
-  </div>
+    {/each}
+  </ul>
 
- <!--
-  <div id="menu-item-create" class="tablecontent">
-    <PkgCreate />
-  </div>
-
-
-  <div id="menu-item-open" class="tabcontent">
-    <Frame bind:viewer_file={viewer_file}/>
-  </div>
-
-  <div id="menu-item-notes" class="tabcontent">
-    <Editor />
-  </div>
-
-  <div id="menu-item-session" class="tabcontent">
-    <Session />
-  </div>
-
-  <div id="menu-item-fileset" class="tabcontent">
-    <Fileset bind:viewer_file={viewer_file} bind:selected={fileset_selected}/>
-  </div>
-
-  <div id="menu-item-pkgindex" class="tabcontent">
-    <PkgIndex />
-  </div>
-  -->
 </section>
 
 <style>
+
+.remove {
+  cursor: pointer;
+  position: absolute;
+  right: 5px;
+  top: 3px;
+}
 
 /*
   Menu Tabs
@@ -151,14 +91,6 @@ section {
 .right {
   flex: 65%;
   padding: 15px;
-}
-
- /* Style the search box */
-#search {
-  width: 100%;
-  font-size: 18px;
-  padding: 11px;
-  border: 1px solid #ddd;
 }
 
 /* Style the navigation menu */
@@ -217,15 +149,6 @@ section {
 /* Create an active/current "tab li" class */
 .tab li.active {
   background-color: #ccc;
-}
-
-/* Style the tab content */
-.tabcontent {
-  float: left;
-  padding: 0px 12px;
-  border: none;
-  width: 70vw;
-  height: 90vw;
 }
 
 </style>

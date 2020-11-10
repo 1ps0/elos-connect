@@ -1,8 +1,6 @@
-a<script>
+<script>
 
 import { onMount } from 'svelte';
-import Entry from "./Entry.svelte";
-import Editor from "./Editor.svelte";
 
 // { "filetype": "pdf", "files": [], 'page_num': 1, 'page_size': 20}
 export let filetype = 'pdf';
@@ -15,6 +13,13 @@ export let viewer_file;
 export let selected_files = [];
 
 // $: console.log('-> selected: ',selected_files)
+
+export let item = {
+  h: 4,
+  w: 8,
+  target: "menu-item-fileset",
+  name: "Fileset"
+}
 
 $: selected_files;
 $: viewer_file;
@@ -103,7 +108,6 @@ onMount(() => {
     </tr>
   {#each files as file}
     <tr>
-      <!-- <Entry file={file} bind:viewer_file={viewer_file}/> -->
       <td class="select-file">
         <input type="checkbox" value={file}/>
       </td>

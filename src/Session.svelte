@@ -10,6 +10,17 @@ let timer;
 let doneObj;
 let todoObj;
 
+let metricPolls = [
+  {
+    title: "Current Stress",
+    name: "stress",
+    context: "current_time",
+    category: "personal_metric",
+    value_type: "float",
+    value_control: false
+  }
+];
+
 let prompts = [
   {
     title: "Day Start",
@@ -84,9 +95,9 @@ let notesLog = [
 -->
   <!-- <Schedule /> -->
   <!-- <AnnotationLog messages={notesLog} /> -->
-  <ListQueue queue={todoQueue} on:dequeue />
+  <ListQueue bind:queue={todoQueue} on:dequeue />
   <CountdownTimer timer={timer} />
-  <ListQueue queue={doneQueue} on:dequeue />
+  <ListQueue bind:queue={doneQueue} on:dequeue />
 </section>
 
 <style>

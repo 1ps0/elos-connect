@@ -3,7 +3,7 @@ import { onMount } from 'svelte';
 
 import { createEventDispatcher } from 'svelte';
 
-// const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
 export let queue = [];
 $: queue;
@@ -127,7 +127,7 @@ function markAsDone(item) {
       </li> -->
       {#each queue as item}
       <!--   -->
-        <li use:usable={queue} on:click={() => markAsDone(item)} class="{ item.checked ? 'checked' : ''}">{item['file.title']}</li>
+        <li use:usable={queue} on:click={() => markAsDone(item)} class="{ item.checked ? 'checked' : ''}">{item.text}</li>
       {/each}
     </ul>
 </section>
