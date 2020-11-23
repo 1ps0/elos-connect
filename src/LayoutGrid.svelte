@@ -132,5 +132,5 @@
     }
   };
 
-  const handleRepaint = debounce(updateMatrix, debounceUpdate);
+  export const handleRepaint = debounce(updateMatrix, debounceUpdate);
 </script>

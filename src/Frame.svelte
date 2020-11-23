@@ -27,7 +27,7 @@ iframe {
     border: none;         /* Reset default border */
     resize: height;
     height: 70vh;        /* Viewport-relative units */
-    width: 80vw;
+    width: 95%;
     overflow: auto;
 }
 

@@ -15,9 +15,11 @@ import Fileset from "./Fileset.svelte";
 import Session from "./Session.svelte";
 import Frame from "./Frame.svelte";
 import DataGrid from "./DataGrid.svelte";
+import EntryForm from "./EntryForm.svelte";
 
 const gen_id = () => "_" + Math.random().toString(36).substr(2, 9);
 const randomNumberInRange = (min, max) => Math.random() * (max - min) + min;
+const serializeLayout = (val) => { return JSON.stringify({...val, key: 'layout'}) };
 
 let fileset_selected;
 let viewer_file;
@@ -26,16 +28,55 @@ let cols = 40;
 let rowHeight = 100;
 let adjustAfterRemove = false;
 
+let mul = 3;
+let types = ["menu-item-create","menu-item-metrics","menu-item-open","menu-item-notes","menu-item-session","menu-item-pkgindex","menu-item-fileset", "menu-item-entryform"];
+
 let itemTypes = {
-  "menu-item-mainmenu": MainMenu,
-  "menu-item-create": PkgCreate,
-  "menu-item-metrics": DataGrid,
-  "menu-item-open": Frame,
-  "menu-item-notes": Editor,
-  "menu-item-session": Session,
-  "menu-item-pkgindex": PkgIndex,
-  "menu-item-fileset": Fileset
+  "menu-item-mainmenu": {
+    w: mul*3,
+    component: MainMenu,
+    events: { name: 'menuToggle', callback: togglePanel },
+    bind: { name: '' },
+    props: types
+  },
+  "menu-item-create": {
+    w: mul*5,
+    component: PkgCreate,
+  },
+  "menu-item-metrics": {
+    w: mul*4,
+    component: DataGrid,
+  },
+  "menu-item-open": {
+    w: mul*5,
+    component: Frame,
+  },
+  "menu-item-notes": {
+    w: mul*3,
+    component: Editor,
+  },
+  "menu-item-session": {
+    w: mul*3,
+    component: Session,
+  },
+  "menu-item-pkgindex": {
+    w: mul*8,
+    component: PkgIndex,
+  },
+  "menu-item-fileset": {
+    w: mul*8,
+    component: Fileset,
+    events: { name: 'openFile', callback: openFile }
+  },
+  "menu-item-entryform": {
+    w: mul*5,
+    component: EntryForm,
+    events: { },
+    // props:
+  },
 };
+
+let visibleItems = ['menu-item-mainmenu'];//, 'menu-item-metrics', 'menu-item-session', 'menu-item-notes'];
 
 let items = [];
 let objects = {};
@@ -53,7 +94,7 @@ $: {
   //   }
 
   //   console.log("for item", item.target, document.querySelector('#'+item.target));
-  //   objects[item.target] = new itemTypes[item.target]({
+  //   objects[item.target] = new itemTypes[item.target].component({
   //     target: document.querySelector('#'+item.target),
   //     props: {
   //       items: items
@@ -61,25 +102,23 @@ $: {
   //   });
   // });
 }
-function add(itemType, bindings) {
+function add(itemType, options={}) {
   let newItem = layoutGridHelp.item({
-    w: 5,
+    w: Math.floor(cols / visibleItems.length),
     h: 6,
     x: 0,
     y: 0,
     id: gen_id(),
-    bindings: bindings,
     target: itemType,
-    name: itemType,
-    // component: itemTypes[itemType]
+    name: itemType.slice(10).toUpperCase(),
+    ...options,
   });
-
   if (itemType in objects){
-    objects[itemType].$set({target: document.querySelector('#'+newItem.target) });
+    objects[itemType].$set({target: document.querySelector('#'+itemType) });
   }
 
   let findOutPosition = layoutGridHelp.findSpace(newItem, items, cols);
-  console.log('adding ---',newItem, findOutPosition, objects[itemType]);
+  console.log('adding ---', itemType, options, newItem);
   items = [...items, ...[{ ...newItem, ...findOutPosition }]];
 };
 
@@ -100,23 +139,28 @@ const onChange = () => {
       console.log("target doesnt exist yet", item.target);
       return;
     }
-
+    console.log(objects, items);
     if (item.target in objects) {
       console.log("found", item.target);
       return;
     }
 
-    objects[item.target] = new itemTypes[item.target]({
+    objects[item.target] = new itemTypes[item.target].component({
       target: document.querySelector('#'+item.target),
       props: {
-        items: items
+        items: item.props
       }
     });
-    console.log("for item", item.target, document.querySelector('#'+item.target), objects[item.target]);
+    console.log("for item", item.target, item.props, document.querySelector('#'+item.target), objects[item.target]);
 
-    if (item.bindings)
-      objects[item.target].$on(item.bindings.event, item.bindings.callback);
+    if (item.events) {
+      console.log('item events', item);
+      objects[item.target].$on(item.events.name, item.events.callback);
+    }
   });
+
+  // var serial = serializeLayout(items);
+  // localStorage.setItem(serial.key, serial);
 };
 
 const reset = () => {
@@ -127,33 +171,19 @@ const reset = () => {
 onMount(async () => {
     console.log('App mounted');
 
-    // for (let target in itemTypes)
-    //   add(target);
-
-    // "menu-item-create"
-    // "menu-item-pkgindex"
-
-    // add("menu-item-fileset", { callback: openFile, event: 'openFile'});
-    // add("menu-item-open", null);
-    add("menu-item-mainmenu", { callback: togglePanel, event: 'menuToggle'});
-    add("menu-item-session", null);
-    add("menu-item-metrics", null);
-
-    add("menu-item-notes", null);
-    // add("menu-item-");
-
-    function serialize(val) {
-      // items
-      return JSON.stringify({...val, key: 'layout'});
+    for (let item in visibleItems) {
+      let itemName = visibleItems[item];
+      add(itemName, itemTypes[itemName]);
     }
-    if (typeof window !== "undefined") {
-      if (!localStorage.getItem("layout")) {
-        var serial = serialize(items);
-        localStorage.setItem(serial.key, serial);
-      } else {
-        layout = JSON.parse(localStorage.getItem(serialize));
-      }
-    }
+
+    // if (typeof window !== "undefined") {
+    //   if (!localStorage.getItem("layout")) {
+    //     var serial = serializeLayout(items);
+    //     localStorage.setItem(serial.key, serial);
+    //   } else {
+    //     items = JSON.parse(localStorage.getItem(serial));
+    //   }
+    // }
 });
 
 function searchFilter(e) {
@@ -177,17 +207,20 @@ function searchFilter(e) {
 }
 
 function openFile(e) {
+    console.log('open file', e);
 
 }
 
 function togglePanel(e) {
-    let _layout = items.filter((value) => value.target === e.detail);
-    console.log('toggled panel', e.detail, _layout);
+    let itemName = e.detail;
+
+    let _layout = items.filter((value) => value.target === itemName);
+    console.log('toggled panel', e, _layout);
     adjustAfterRemove = true;
     if (_layout.length > 0)
-        remove(e.detail);
+        remove(itemName);
     else
-        add(e.detail);
+        add(itemName, itemTypes[itemName]);
 };
 
 </script>
@@ -233,7 +266,7 @@ body {
 
 main {
     margin: 0 auto;
-    font-size: 28px; /* Increased text to enable scrolling */
+    font-size: 18px; /* Increased text to enable scrolling */
     padding: 0px 10px;
 }
 

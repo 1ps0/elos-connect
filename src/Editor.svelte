@@ -6,11 +6,18 @@ import * as monaco from 'monaco-editor';
 export let fileset_selected;
 $: fileset_selected;
 
+let theme = 'vs-light';
+let language = 'markdown';
+
 export let defaults = {
     source: '{ 1: "Hello World" }',
-    language: 'markdown',
-    theme: 'vs-light',
+    language: language,
+    theme: theme,
     features: ["wordWrap", ]
+};
+
+export let controls = {
+    save: (target, data) => { console.log("saved", target, data) },
 };
 
 export let data = {};
@@ -60,16 +67,23 @@ onMount(async () => {
 
 
 </script>
-
+<div id="controls">
+    {#each controls as control (key)}
+    <button id="{key}" on:click={control}>{key.toUpperCase()}</button>
+    {/each}
+</div>
 <div id="editorRoot" on:didFocusEditorText={() => editor.layout() }></div>
 
 <style>
 
 #editorRoot {
     display: block;       /* iframes are inline by default */
-    background: #000;
     border: none;         /* Reset default border */
-    height: 50vh;       /* Viewport-relative units */
+    top: 0;
+    left: 0;
+    right: 0;
+    /*bottom: 0;*/
+    height: 50vh;       /* Viewport-relative units
     /*width: 80vw;*/
     resize: vertical;
     overflow: auto;

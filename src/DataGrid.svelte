@@ -63,13 +63,10 @@ function render_columns(columns) {
 
 function add_new_row() {
   rows.push({
-    metric_id: null,
-    entity_id: "me",
-    name: "stress",
-    value_float: null,
-    value_integer: null,
-    value_json: null,
-    value_string: null,
+    // metric_id: null,
+    // entity_id: "me",
+    // name: "stress",
+    // value_string: null,
     timestamp: Date.now()
   });
   rows = rows;
@@ -157,6 +154,7 @@ onMount(async () => {
 .grid-wrap {
   font-size: 14px;
   width: 95%;
+  height: 50vh;
   margin: 0 auto;
   resize: inherit;
   overflow: auto;

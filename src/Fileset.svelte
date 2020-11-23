@@ -1,6 +1,7 @@
 <script>
 
-import { onMount } from 'svelte';
+import { onMount, createEventDispatcher } from 'svelte';
+const dispatch = createEventDispatcher();
 
 // { "filetype": "pdf", "files": [], 'page_num': 1, 'page_size': 20}
 export let filetype = 'pdf';
@@ -114,7 +115,7 @@ onMount(() => {
       <td class="file-name">{file['file.title']}</td>
       <td class="file-mime">{file['file.mime']} | {file['file.ext']}</td>
       <td class="file-open">
-        <button on:click|preventDefault={() => (viewer_file = file.locations[0])}>open</button>
+        <button on:click|preventDefault={() => dispatch('openFile', file)}>open</button>
       </td>
       <td class="file-options">
         <div>

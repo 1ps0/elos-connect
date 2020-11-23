@@ -18,6 +18,22 @@ let metricPolls = [
     category: "personal_metric",
     value_type: "float",
     value_control: false
+  },
+  {
+    title: "Calorie Intake",
+    name: "calories",
+    context: "food",
+    category: "personal_metric",
+    value_type: "integer",
+    value_control: false
+  },
+  {
+    title: "Current Stress",
+    name: "stress",
+    context: "current_time",
+    category: "personal_metric",
+    value_type: "float",
+    value_control: false
   }
 ];
 
@@ -25,17 +41,20 @@ let prompts = [
   {
     title: "Day Start",
     message: "What is your main focus today?",
-    affinity: "morning"
+    affinity: "morning",
+    category: "prompt"
   },
   {
     title: "Day Evening",
     message: "What are you most proud of today?",
-    affinity: "evening"
+    affinity: "evening",
+    category: "prompt"
   },
   {
     title: "Day Check-in",
     message: "What's on your mind?",
-    affinity: "checkin"
+    affinity: "checkin",
+    category: "prompt"
   },
 ];
 let todoQueue = [

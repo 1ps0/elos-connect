@@ -167,19 +167,18 @@ const addInterval = (time) => {
 </script>
 
 <section class="timer-container">
-    <p>{formatTime(timer)}</p>
+    <p class="timer">{formatTime(timer)}</p>
     <slot name="before"></slot>
     <div class="control">
-        <div class="type-label custom-select" style="width:200px;">
+<!--         <div class="type-label custom-select" style="width:200px;">
           <select>
             {#each timerTypes as timerType, i}
                 <option value="{i}" class="{i == activeType ? 'active' : ''}">
                     {capitalize(timerType)}
-                    {@debug timerType, i}
                 </option>
             {/each}
           </select>
-        </div>
+        </div> -->
         <button on:click={startTimer}>Start</button>
         <button on:click={resetTimer}>Reset</button>
         <button on:click={pauseTimer}>Pause</button>
@@ -201,6 +200,11 @@ const addInterval = (time) => {
 </section>
 
 <style>
+
+p.timer {
+  text-align: center;
+  font-size: 18px;
+}
 
 .type-label {
     border: 1px solid black;
