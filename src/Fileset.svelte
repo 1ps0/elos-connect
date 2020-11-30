@@ -1,29 +1,22 @@
 <script>
 
 import { onMount, createEventDispatcher } from 'svelte';
+import { linker } from "./lib/linker.js";
+
+import SelectList from "./SelectList.svelte";
+
 const dispatch = createEventDispatcher();
 
-// { "filetype": "pdf", "files": [], 'page_num': 1, 'page_size': 20}
-export let filetype = 'pdf';
+// { "filetype": "pdf", "files": [], 'pageNum': 1, 'pageSize': 20}
 export let files = [];
-export let page_num = 1;
-export let page_size = 10;
-export let page_offset = (page_num - 1) * page_size;
-export let keywords = 'learning';
-export let viewer_file;
-export let selected_files = [];
+export let pageNum = 1;
+export let pageSize = 10;
+export let pageOffset = (pageNum - 1) * pageSize;
+export let keywords = '';
+export let selectedExtension = 'md';
+export let filetype = '';
 
-// $: console.log('-> selected: ',selected_files)
-
-export let item = {
-  h: 4,
-  w: 8,
-  target: "menu-item-fileset",
-  name: "Fileset"
-}
-
-$: selected_files;
-$: viewer_file;
+$: selectedExtension;
 $: keywords;
 $: files;
 
@@ -32,38 +25,40 @@ async function fetch_(uri, cb) {
   cb(await ret.json());
 };
 
-async function fetch_filelist(page, filetype, keywords='learning') {
-  let loc = `/api/filetype/${filetype}?page_size=${page_size}&page_num=${page}`;
+async function fetchFileList(page, fType='', keywords='') {
+  const url = new URL("/api/file/search", "http://localhost:8080");
+
+  url.searchParams.append("pageSize", pageSize);
+  url.searchParams.append("pageNum", page);
   if (keywords.length > 0) {
-    loc = `${loc}&keywords=${keywords}`;
+    url.searchParams.append("keywords", keywords);
   }
-  await fetch_(loc, (ret) => {
+  if (fType.length > 0) {
+    url.searchParams.append("filetype", fType);
+  }
+
+  await fetch_(url.href, (ret) => {
     console.log(ret);
     filetype = ret.filetype;
     files = ret.files;
-    page_num = ret.page_num;
-    page_size = ret.page_size;
-    page_offset = ret.page_offset;
+    pageNum = ret.pageNum;
+    pageSize = ret.pageSize;
+    pageOffset = ret.pageOffset;
     keywords = ret.keywords || '';
   });
-}
-
-async function fetch_filenames(hash) {
-  const ret = await fetch('/api/file/'+hash);
-  return await ret.json();
 }
 
 function add_to_package(e, file) {
   console.log('add_to_package', e);
   e.target.parentElement.parentElement.parentElement.hidden = true;
 
-  selected_files.push(file)
-  selected_files = selected_files;
+  selectedFiles.push(file)
+  selectedFiles = selectedFiles;
 }
 
 onMount(() => {
   console.log('Fileset mounted');
-  fetch_filelist(1, 'pdf', keywords);
+  fetchFileList(1, selectedExtension, keywords);
 });
 
 </script>
@@ -73,17 +68,16 @@ onMount(() => {
     <tr>
       <td>
         <div class="filename">{filetype}
-          {page_offset} - {page_offset + page_size} ({files.length})
+          {pageOffset} - {pageOffset + pageSize} ({files.length})
         </div>
-        <button class="next-button" on:click|preventDefault={() => fetch_filelist(page_num+1, filetype, keywords)}>
-          Next Page
-        </button>
+      </td>
+      <td>
         <form on:submit={
           (e) => {
               e.preventDefault();
               console.log(e);
-              page_num = 1;
-              fetch_filelist(page_num, filetype, keywords);
+              pageNum = 1;
+              fetchFileList(pageNum, filetype, keywords);
             }
           }>
           <input name="keywords" on:input={
@@ -97,31 +91,31 @@ onMount(() => {
           <label id="keyword-value">{keywords}</label>
         </form>
       </td>
+      <td>
+        <button class="next-button" on:click|preventDefault={() => fetchFileList(pageNum+1, filetype, keywords)}>
+          Next Page
+        </button>
+      </td>
     </tr>
   </table>
   <table id="container-files">
     <tr>
-      <th class="select-file"></th>
       <th class="file-name">name</th>
-      <th class="file-mime">mime | ext</th>
+      <!-- <th class="file-mime">mime | ext</th> -->
       <th class="file-open">open</th>
-      <th class="file-options">options</th>
+      <!-- <th class="file-options">options</th> -->
     </tr>
   {#each files as file}
     <tr>
-      <td class="select-file">
-        <input type="checkbox" value={file}/>
+      <td name="file-name" class="file-name">{file['file.title']}</td>
+      <td name="file-open" class="file-open">
+        <button use:linker={file}>open</button>
       </td>
-      <td class="file-name">{file['file.title']}</td>
-      <td class="file-mime">{file['file.mime']} | {file['file.ext']}</td>
-      <td class="file-open">
-        <button on:click|preventDefault={() => dispatch('openFile', file)}>open</button>
-      </td>
-      <td class="file-options">
+      <!-- <td name="file-options" class="file-options">
         <div>
           <button on:click|preventDefault="{(e) => add_to_package(e, file)}">add to package</button>
         </div>
-      </td>
+      </td> -->
     </tr>
   {/each}
   <ul>
@@ -130,7 +124,7 @@ onMount(() => {
 <style>
 
 .file-name {
-  width:55%;
+  width:15%;
   padding: 5px;
   margin: 2px;
 }
@@ -184,6 +178,10 @@ p {
   text-transform: uppercase;
   font-size: 1.2em;
   font-weight: 100;
+}
+
+section {
+  overflow: scroll;
 }
 
 table {

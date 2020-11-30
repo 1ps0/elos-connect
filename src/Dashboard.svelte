@@ -1,9 +1,12 @@
 <script>
 
-import Overview from "./Overview.svelte";
+// import Overview from "./Overview.svelte";
 import { onMount } from 'svelte';
 
-const axios = require('axios');
+let dayNow, timeNow;
+$: dayNow = (new Date()).toLocaleDateString();
+$: timeNow = (new Date()).toLocaleTimeString();
+
 onMount(async () => {
     console.log('Dashboard mounted');
 });
@@ -15,13 +18,10 @@ onMount(async () => {
         <span class="header">
             eLOS Dashboard
         </span>
-        <span class="datetime">
-            {(new Date()).toLocaleDateString()}
-             |
-            {(new Date()).toLocaleTimeString()}
-        </span>
+        <span class="datetime">{dayNow} | {timeNow}</span>
+        <img src="img/img_avatar.png" alt="Avatar" class="avatar">
     </p>
-    <Overview />
+    <!-- <Overview /> -->
     <hr/>
 </div>
 
@@ -49,4 +49,11 @@ onMount(async () => {
     padding: 10px;
 }
 
+.avatar {
+  vertical-align: middle;
+  width: 30px;
+  height: 30px;
+  float: right;
+  border-radius: 50%;
+}
 </style>

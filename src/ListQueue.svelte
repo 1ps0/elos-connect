@@ -71,9 +71,6 @@ function newElement() {
 
 onMount(async () => {
   console.log('ListQueue mounted');
-  // queue = [fetchFromLocalStorage("log-1")];
-  // console.log([fetchFromLocalStorage("log-1")]);
-
 
   // Create a "close" button and append it to each list item
   var myNodelist = document.getElementsByTagName("li");

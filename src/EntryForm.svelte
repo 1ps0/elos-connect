@@ -1,22 +1,13 @@
 <script>
 // https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_contact_form
 
-export let data = {};
-
-let action = "/action_page.php";
-let fields = [
+export let action = "/api/";
+export let fields = [
     {
         id:  "fname",
         name: "firstname",
         label: "First Name",
         placeholder: "Your name...",
-        type: "input:text"
-    },
-    {
-        id:  "lname",
-        name: "lastname",
-        label: "Last Name",
-        placeholder: "Your last name...",
         type: "input:text"
     },
     {
@@ -39,17 +30,35 @@ let fields = [
         type: "textarea"
     }
 ];
-$: data;
+export let data = {};
+
+$: data = new FormData(document.querySelector('entryform')).entries;
 $: fields;
+
+function sendData() {
+  console.log(data);
+  // axios.post(action, {
+  //   params: data
+  // })
+  // .then((response) => {
+  //   // let result = response.data;
+  //   // hideTextarea();
+  // })
+  // .catch((error) => {
+  //     console.log("PROMPT: got error on fetch", error);
+  // });
+  return 200;
+}
 
 </script>
 
 <section>
 
 <div class="container">
-  <form action="{fields._action}">
+  <form id="entryform" on:submit|preventDefault={sendData}>
     {#each fields as field (field.name)}
         <label for="{field.name}">{field.label}</label>
+
         {#if field.type === "input:text"}
         <input type="text" id="{field.name}" name="{field.name}" placeholder="{field.placeholder}">
 

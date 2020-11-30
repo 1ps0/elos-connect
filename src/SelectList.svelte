@@ -12,6 +12,7 @@ $: console.log('menu items', items, eventName, visibleItems);
 
 function toggle(e) {
   // console.log('clicked toggle --', e.target.name, e);
+  e.target.active |= true;
   dispatch(eventName, e.target.name);
 }
 
@@ -27,7 +28,14 @@ onMount(async () => {
 
   <div class="pill-nav">
     {#each items as item}
-      <a name={item} href="#{item}" on:click|preventDefault={toggle}>{item.slice(10).toUpperCase()}</a>
+      <a
+        name={item}
+        href="#{item}"
+        on:click|preventDefault={toggle}
+        class="{active}"
+      >
+        {item.slice(10).toUpperCase()}
+      </a>
     {/each}
   </div>
 </section>

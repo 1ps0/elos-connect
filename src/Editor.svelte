@@ -6,11 +6,11 @@ import * as monaco from 'monaco-editor';
 export let fileset_selected;
 $: fileset_selected;
 
-let theme = 'vs-light';
-let language = 'markdown';
+export let theme = 'vs-light';
+export let language = 'markdown';
 
-export let defaults = {
-    source: '{ 1: "Hello World" }',
+let defaults = {
+    source: '',
     language: language,
     theme: theme,
     features: ["wordWrap", ]
@@ -20,19 +20,16 @@ export let controls = {
     save: (target, data) => { console.log("saved", target, data) },
 };
 
-export let data = {};
+export let source_content = {};
+export let data = defaults;
+
+$: data.source = source_content;
 $: {
-    data = {...defaults, source: {
-            dependencies: {
-                local: fileset_selected
-            }
-        }
-    };
     if (editor) {
-        editor.setValue(JSON.stringify(data.source, null, 4));
+        editor.setValue(JSON.stringify(source_content, null, 4));
         editor.layout();
     }
-    console.log("updating data...", data);
+    console.log("updating data...", source_content);
 }
 let rootEl;
 export let editor;

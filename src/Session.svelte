@@ -1,16 +1,14 @@
 <script>
 
+import { eventHistory } from "./lib/event_history.js";
+
 // import PkgEdit from "./PkgEdit.svelte";
 // import Schedule from "./Schedule.svelte";
-import CountdownTimer from "./CountdownTimer.svelte";
+import Timer from "./Timer.svelte";
 import AnnotationLog from "./AnnotationLog.svelte";
 import ListQueue from "./ListQueue.svelte";
 
-let timer;
-let doneObj;
-let todoObj;
-
-let metricPolls = [
+let polls = [
   {
     title: "Current Stress",
     name: "stress",
@@ -34,29 +32,33 @@ let metricPolls = [
     category: "personal_metric",
     value_type: "float",
     value_control: false
-  }
-];
-
-let prompts = [
+  },
   {
     title: "Day Start",
     message: "What is your main focus today?",
     affinity: "morning",
-    category: "prompt"
+    category: "session_prompt",
+    value_type: "text",
+    value_control: false
   },
   {
     title: "Day Evening",
     message: "What are you most proud of today?",
     affinity: "evening",
-    category: "prompt"
+    category: "session_prompt",
+    value_type: "text",
+    value_control: false
   },
   {
     title: "Day Check-in",
     message: "What's on your mind?",
     affinity: "checkin",
-    category: "prompt"
+    category: "session_prompt",
+    value_type: "text",
+    value_control: false
   },
 ];
+
 let todoQueue = [
   {
     checked: false,
@@ -83,14 +85,7 @@ let todoQueue = [
     text: "social native"
   }
 ];
-let doneQueue = [
-  {
-    is_me: false,
-    profile: "",
-    text: "Pay Insurance this month"
-  }
-];
-let notesLog = [
+let eventList = [
   {
     is_me: false,
     profile: "",
@@ -115,8 +110,8 @@ let notesLog = [
   <!-- <Schedule /> -->
   <!-- <AnnotationLog messages={notesLog} /> -->
   <ListQueue bind:queue={todoQueue} on:dequeue />
-  <CountdownTimer timer={timer} />
-  <ListQueue bind:queue={doneQueue} on:dequeue />
+  <Timer />
+  <!-- <ListQueue bind:queue={doneQueue} on:dequeue /> -->
 </section>
 
 <style>

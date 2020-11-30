@@ -2,9 +2,9 @@
 
 import { onMount } from 'svelte';
 
-//"docs/A teleosemantic approach to information in the brain.pdf"
-export let viewer_file = "docs/A teleosemantic approach to information in the brain.pdf#page=4";
-$: viewer_file = `/api/load?filepath=${viewer_file}`;
+export let viewerFile = "about:blank"; //"docs/A teleosemantic approach to information in the brain.pdf"
+export let target = "#" // page=4, etc
+$: viewerFile = `/api/load?filepath=${viewerFile}${target}`;
 
 
 onMount(() => {
@@ -14,7 +14,7 @@ onMount(() => {
 </script>
 
 <div id="container">
-    <iframe src={viewer_file}></iframe>
+    <iframe src={viewerFile}></iframe>
 </div>
 
 <style>
