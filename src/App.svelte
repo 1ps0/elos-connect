@@ -1,21 +1,22 @@
 <script>
 import { onMount } from 'svelte';
-import {localForage} from "localForage";
 
 import LayoutGrid from "./LayoutGrid.svelte";
 import layoutGridHelp from "./lib/layout_grid/helper.js";
+// import { layoutItem } from "./lib/layout_item.js"
 
 import Dashboard from "./Dashboard.svelte";
 
-import MainMenu from "./MainMenu.svelte";
+import SelectList from "./SelectList.svelte";
 import Editor from "./Editor.svelte";
-import PkgIndex from "./PkgIndex.svelte";
-import PkgCreate from "./PkgCreate.svelte";
 import Fileset from "./Fileset.svelte";
 import Session from "./Session.svelte";
 import Frame from "./Frame.svelte";
 import DataGrid from "./DataGrid.svelte";
 import EntryForm from "./EntryForm.svelte";
+
+// import PkgIndex from "./PkgIndex.svelte";
+// import PkgCreate from "./PkgCreate.svelte";
 
 const gen_id = () => "_" + Math.random().toString(36).substr(2, 9);
 const randomNumberInRange = (min, max) => Math.random() * (max - min) + min;

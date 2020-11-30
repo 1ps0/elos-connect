@@ -1,20 +1,23 @@
 <script>
 import { onMount, createEventDispatcher } from 'svelte';
 
+const dispatch = createEventDispatcher();
+
+export let eventName = "menuToggle";
 export let items = {};
 let visibleItems = [];
 $: visibleItems = Object.values(items);
-// $: console.log('menu items', visibleItems);
+$: console.log('menu items', items, eventName, visibleItems);
 
-const dispatch = createEventDispatcher();
 
 function toggle(e) {
-  console.log('clicked toggle --', e.target.name, e);
-  dispatch("menuToggle", e.target.name);
+  // console.log('clicked toggle --', e.target.name, e);
+  dispatch(eventName, e.target.name);
 }
 
 onMount(async () => {
   console.log('MainMenu mounted');
+  console.log('menu items', items, eventName, visibleItems);
 });
 
 // <MarkdownEditor />
