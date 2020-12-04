@@ -1,5 +1,6 @@
 <style>
   .svlt-grid-item {
+    overflow: scroll;
     touch-action: none;
     position: absolute;
     background: #f1f1f1;

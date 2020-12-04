@@ -48,6 +48,10 @@ export function linker(node, file) {
   // const _handler = (e) => { console.log("linker handled", e); };
   const openFileHandler = (e) => {
     e.preventDefault();
+    console.log("linker-openfilehandler", {
+      source: "fileset",
+      data: file
+    });
     dispatch('openFile', {
       source: "fileset",
       data: file
@@ -60,7 +64,7 @@ export function linker(node, file) {
   // on:click|preventDefault={() =>
   node.addEventListener('click', openFileHandler);
 
-  console.log("linker found", node, file);
+  // console.log("linker found", node, file);
 
   return {
     update(newFile) {

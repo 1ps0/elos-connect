@@ -1,22 +1,21 @@
 <script>
 
-import { onMount, createEventDispatcher } from 'svelte';
+import { onMount, setContext, getContext, hasContext, createEventDispatcher } from 'svelte';
 import { linker } from "./lib/linker.js";
 
-import SelectList from "./SelectList.svelte";
-
 const dispatch = createEventDispatcher();
+const filetypeContext = getContext("filetypes");
 
 // { "filetype": "pdf", "files": [], 'pageNum': 1, 'pageSize': 20}
 export let files = [];
+export let pageOffset = 0;
 export let pageNum = 1;
 export let pageSize = 10;
-export let pageOffset = (pageNum - 1) * pageSize;
 export let keywords = '';
 export let selectedExtension = 'md';
-export let filetype = '';
+export let selectedFiles = [];
 
-$: selectedExtension;
+$: pageOffset = (pageNum - 1) * pageSize;
 $: keywords;
 $: files;
 
@@ -25,26 +24,41 @@ async function fetch_(uri, cb) {
   cb(await ret.json());
 };
 
-async function fetchFileList(page, fType='', keywords='') {
+async function fetchFileList({filetype, page, size, kwords}) {
   const url = new URL("/api/file/search", "http://localhost:8080");
 
-  url.searchParams.append("pageSize", pageSize);
-  url.searchParams.append("pageNum", page);
+  if (size) {
+    url.searchParams.append("page_size", size);
+  }
+  if (page) {
+    url.searchParams.append("page_num", page);
+  }
   if (keywords.length > 0) {
     url.searchParams.append("keywords", keywords);
   }
-  if (fType.length > 0) {
-    url.searchParams.append("filetype", fType);
+  if (filetype.length > 0) {
+    url.searchParams.append("filetype", filetype);
   }
 
+  console.log("setting url params", filetype, page, size, kwords, url.searchParams, url);
   await fetch_(url.href, (ret) => {
-    console.log(ret);
-    filetype = ret.filetype;
-    files = ret.files;
-    pageNum = ret.pageNum;
-    pageSize = ret.pageSize;
-    pageOffset = ret.pageOffset;
-    keywords = ret.keywords || '';
+    // console.log('--result', ret);
+    selectedExtension = ret.filetype;
+    if (ret.files) {
+      files = ret.files;
+    }
+    if (ret.pageNum) {
+      pageNum = ret.pageNum;
+    }
+    if (ret.pageSize) {
+      pageSize = ret.pageSize;
+    }
+    if (ret.pageOffset) {
+      pageOffset = ret.pageOffset;
+    }
+    if (ret.keywords) {
+      keywords = ret.keywords;
+    }
   });
 }
 
@@ -58,7 +72,10 @@ function add_to_package(e, file) {
 
 onMount(() => {
   console.log('Fileset mounted');
-  fetchFileList(1, selectedExtension, keywords);
+  filetypeContext.subscribe( (val) => {
+    console.log("sub:fileset:filetypes", val);
+    fetchFileList({ filetype: val });
+  });
 });
 
 </script>
@@ -67,32 +84,24 @@ onMount(() => {
   <table>
     <tr>
       <td>
-        <div class="filename">{filetype}
-          {pageOffset} - {pageOffset + pageSize} ({files.length})
+        <div class="filename">
+          <span>{selectedExtension}</span>
+          <span>{pageOffset} - {pageOffset + pageSize} ({files.length})</span>
         </div>
       </td>
       <td>
-        <form on:submit={
+        <form on:submit|preventDefault={
           (e) => {
-              e.preventDefault();
-              console.log(e);
               pageNum = 1;
-              fetchFileList(pageNum, filetype, keywords);
+              fetchFileList(pageNum, selectedExtension, keywords);
             }
           }>
-          <input name="keywords" on:input={
-            (e) => {
-              let el = document.getElementById("keyword-value");
-
-              keywords = e.target.value;
-              el.innerHTML = keywords;
-            }
-          }/>
+          <input name="keywords" bind:value={keywords} />
           <label id="keyword-value">{keywords}</label>
         </form>
       </td>
       <td>
-        <button class="next-button" on:click|preventDefault={() => fetchFileList(pageNum+1, filetype, keywords)}>
+        <button class="next-button" on:click|preventDefault={() => pageNum += 1}>
           Next Page
         </button>
       </td>

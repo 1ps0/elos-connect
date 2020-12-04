@@ -116,14 +116,13 @@ function markAsDone(item) {
 
 <section class="log-body">
     <ul id="task-list">
-      <!-- <li>
+      <li>
         <div id="add-btn">
           <input type="text" id="task-input" placeholder="">
           <span on:click={newElement}>Add</span>
         </div>
-      </li> -->
+      </li>
       {#each queue as item}
-      <!--   -->
         <li use:usable={queue} on:click={() => markAsDone(item)} class="{ item.checked ? 'checked' : ''}">{item.text}</li>
       {/each}
     </ul>

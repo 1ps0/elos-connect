@@ -1,25 +1,73 @@
 <script>
-import { onMount, createEventDispatcher } from 'svelte';
+import { onMount, createEventDispatcher, getContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
 
+const axios = require('axios');
 const dispatch = createEventDispatcher();
+const filetypeContext = getContext("filetypes");
 
 export let eventName = "menuToggle";
-export let items = {};
+export let source;
+export let transform = (e) => { return e.name.slice(10).toUpperCase() };
+
+export let item = {};
+export let items = [];
+
+$: {
+  if (source) {
+    getData(source, (response) => {
+      console.log('getting data from', source, response);
+      items = response.data.data;
+    });
+  }
+};
+
 let visibleItems = [];
-$: visibleItems = Object.values(items);
-$: console.log('menu items', items, eventName, visibleItems);
+$: visibleItems = items.map((item, idx) => {
+  // expects item: { name: "", value: x }
+  return {
+    ...item,
+    active: visibleItems.length > idx ? visibleItems[idx].active : false
+  };
+});
 
 
-function toggle(e) {
-  // console.log('clicked toggle --', e.target.name, e);
-  e.target.active |= true;
-  dispatch(eventName, e.target.name);
+// $: console.log('menu items', items, eventName, visibleItems);
+
+function toggleActive(e) {
+  let item = visibleItems.filter((value) => value.name === e.originalTarget.name);
+  if (item.length > 0)
+    item = item[0];
+
+  // console.log("toggleactive", visibleItems, e, item);
+  item.active = !item.active;
+}
+
+function sendEvent(e) {
+  // console.log('clicked sendEvent --', eventName, e.target, e);
+  toggleActive(e);
+  if (eventName === "filterType") {
+    filetypeContext.update((_) => e.target.name);
+  } else {
+    dispatch(eventName, e.target);
+  }
+}
+
+const getData = (uri, callback) => {
+  axios.get(uri)
+    .then(callback)
+    .catch((error) => {
+      console.log("got error on fetch", error);
+    });
 }
 
 onMount(async () => {
-  console.log('MainMenu mounted');
-  console.log('menu items', items, eventName, visibleItems);
+  console.log('SelectList mounted', item);
+  // console.log('selectlist', items, eventName, visibleItems);
+
+  dispatch("didMount", item);
 });
+
 
 // <MarkdownEditor />
 </script>
@@ -27,14 +75,14 @@ onMount(async () => {
 <section>
 
   <div class="pill-nav">
-    {#each items as item}
+    {#each visibleItems as item}
       <a
-        name={item}
-        href="#{item}"
-        on:click|preventDefault={toggle}
-        class="{active}"
+        name={item.name}
+        href="#{item.name}"
+        on:click|preventDefault={sendEvent}
+        class:active={item.active}
       >
-        {item.slice(10).toUpperCase()}
+        {transform(item)}
       </a>
     {/each}
   </div>
@@ -48,7 +96,7 @@ onMount(async () => {
   text-align: center;
   padding: 14px;
   text-decoration: none;
-  font-size: 17px;
+  /*font-size: 17px;*/
   border-radius: 5px;
 }
 

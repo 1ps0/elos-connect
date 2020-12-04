@@ -7,6 +7,7 @@
 <div class="svlt-grid-container" style="height: {containerHeight}px" bind:this={container}>
   {#each items as item, i (item.id)}
     <MoveResize
+      on:load={handleRepaint}
       on:repaint={handleRepaint}
       id={item.id}
       resizable={item.resizable}
@@ -122,7 +123,7 @@
     if (activeItem) {
       activeItem = Object.assign(activeItem, detail.shadow);
       items = moveItem(activeItem, items, getComputedCols, detail.clone);
-
+      console.log("updateMatrix", detail);
       if (detail.onUpdate) detail.onUpdate();
 
       dispatch("change", {

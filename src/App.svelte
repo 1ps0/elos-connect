@@ -1,5 +1,6 @@
 <script>
-import { onMount } from 'svelte';
+import { onMount, setContext, getContext, hasContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
 
 import LayoutGrid from "./LayoutGrid.svelte";
 import layoutGridHelp from "./lib/layout_grid/helper.js";
@@ -15,8 +16,17 @@ import Frame from "./Frame.svelte";
 import DataGrid from "./DataGrid.svelte";
 import EntryForm from "./EntryForm.svelte";
 
-// import PkgIndex from "./PkgIndex.svelte";
-// import PkgCreate from "./PkgCreate.svelte";
+import PkgIndex from "./PkgIndex.svelte";
+import PkgCreate from "./PkgCreate.svelte";
+
+const filetypeContext = setContext("filetypes", writable("md")); // TODO replace md with state load
+// console.log("App filetypecontext", getContext("filetypes"));
+
+let items = [];
+let objects = {};
+
+let selectedFile = "", selectedFileData = null;
+$: selectedFileData = `/api/load?filepath=${selectedFile}`;
 
 const gen_id = () => "_" + Math.random().toString(36).substr(2, 9);
 const randomNumberInRange = (min, max) => Math.random() * (max - min) + min;
@@ -27,8 +37,7 @@ let rowHeight = 100;
 let adjustAfterRemove = false;
 
 let mul = 3;
-let types = ["menu-item-metrics","menu-item-fileset","menu-item-filetypes","menu-item-frame","menu-item-editor","menu-item-session","menu-item-entryform"];
-// "menu-item-create","menu-item-pkgindex",
+let types = [{name: "menu-item-metrics", value: false},{name: "menu-item-fileset", value: false},{name: "menu-item-filetypes", value: false},{name: "menu-item-frame", value: false},{name: "menu-item-editor", value: false},{name: "menu-item-create", value: false},{name: "menu-item-pkgindex", value: false},{name: "menu-item-session", value: false},{name: "menu-item-entryform", value: false}];
 
 /*
 Item Interface:
@@ -39,164 +48,156 @@ props: { prop1: value1, ...},
 name: eg label, display name
 target: eg id, target value for types
 */
-let itemTypes = {
-  "menu-item-mainmenu": {
-  target: "menu-item-mainmenu",
-  name: "mainmenu",
-  w: mul*3,
-  component: SelectList,
-  event: { name: 'menuToggle', callback: togglePanel },
-  // bind: { name: '' },
-  props: {
-    eventName: "menuToggle",
-    items: types
-  }
-  },
-  "menu-item-fileset": {
-  target: "menu-item-fileset",
-  name: "fileset",
-  w: mul*8,
-  component: Fileset,
-  event: { name: 'openFile', callback: openFile }
-  },
-  "menu-item-filetypes": {
+
+let menuItemFiletypes = {
+  visible: true,
   target: "menu-item-filetypes",
   name: "filetypes",
   w: mul*3,
   component: SelectList,
-  event: { name: 'filterType', callback: togglePanel },
-  props: { eventName: "filterType" }
-  },
-  "menu-item-metrics": {
-  target: "menu-item-metrics",
-  name: "metrics",
-  w: mul*4,
-  component: DataGrid,
-  },
-  "menu-item-frame": {
-  target: "menu-item-frame",
-  name: "frame",
-  w: mul*5,
-  component: Frame,
-  },
-  "menu-item-editor": {
-  target: "menu-item-editor",
-  name: "editor",
-  w: mul*3,
-  component: Editor,
-  },
-  "menu-item-session": {
-  target: "menu-item-session",
-  name: "session",
-  w: mul*3,
-  component: Session,
-  },
-  "menu-item-entryform": {
-  target: "menu-item-entryform",
-  name: "entryform",
-  w: mul*5,
-  component: EntryForm,
-  // event: { },
-  // props:
-  },
-  // "menu-item-pkgindex": {
-  //   target: "menu-item-pkgindex",
-  //   name: "pkgindex",
-  //   w: mul*8,
-  //   component: PkgIndex,
-  // },
-  // "menu-item-create": {
-  //   target: "menu-item-create",
-  //   name: "create",
-  //   w: mul*5,
-//   component: PkgCreate,
-  // },
+  event: { name: 'filterType', callback: (e) => {
+    console.log("updating for filetype", e.detail.name);
+    objects["menu-item-filetypes"].selectedExtension = e.detail.name;
+  } },
+  props: {
+    eventName: "filterType",
+    source: "/api/file/types",
+    transform: (e) => { return `${e.name} (${e.value})` }
+  }
 };
 
-let visibleItems = ['menu-item-mainmenu'];//, 'menu-item-metrics', 'menu-item-session', 'menu-item-editor'];
+let itemTypes = {
+  "menu-item-mainmenu": {
+    visible: true,
+    target: "menu-item-mainmenu",
+    name: "mainmenu",
+    w: mul*3,
+    component: SelectList,
+    event: { name: 'menuToggle', callback: togglePanel },
+    // bind: { name: '' },
+    props: {
+      eventName: "menuToggle",
+      items: types
+    }
+  },
+  "menu-item-fileset": {
+    visible: true,
+    target: "menu-item-fileset",
+    name: "fileset",
+    w: mul*5,
+    component: Fileset,
+    event: { name: 'openFile', callback: openFile },
+    dependents: [ menuItemFiletypes]
+  },
+  "menu-item-filetypes": menuItemFiletypes,
+  "menu-item-metrics": {
+    visible: true,
+    target: "menu-item-metrics",
+    name: "metrics",
+    w: mul*4,
+    component: DataGrid,
+  },
+  "menu-item-frame": {
+    visible: false,
+    target: "menu-item-frame",
+    name: "frame",
+    w: mul*5,
+    component: Frame,
+  },
+  "menu-item-editor": {
+    visible: true,
+    target: "menu-item-editor",
+    name: "editor",
+    w: mul*5,
+    component: Editor,
+  },
+  "menu-item-session": {
+    visible: true,
+    target: "menu-item-session",
+    name: "session",
+    w: mul*3,
+    component: Session,
+  },
+  "menu-item-entryform": {
+    visible: true,
+    target: "menu-item-entryform",
+    name: "entryform",
+    w: mul*5,
+    component: EntryForm,
+  },
+  "menu-item-pkgindex": {
+    visible: false,
+    target: "menu-item-pkgindex",
+    name: "pkgindex",
+    w: mul*8,
+    component: PkgIndex,
+  },
+  "menu-item-create": {
+    visible: false,
+    target: "menu-item-create",
+    name: "create",
+    w: mul*5,
+    component: PkgCreate,
+  },
+};
 
-let items = [];
-let objects = {};
-$: console.log('updating items', items);
+function _newItem(options={}) {
+  return layoutGridHelp.item({
+    h: 6,
+    id: gen_id(),
+    ...options,
+  });
+}
 
-let selectedFile = "", selectedFileData = null;
-$: selectedFileData = `/api/load?filepath=${selectedFile}`;
-
-function openFile(e) {
-  console.log('open file', e);
-  let data = e.detail.data;
-  let target = null;
-
-  if (data["file.ext"] === "md") {
-    target = "menu-item-editor";
-  }
-  else if (data["file.ext"] === "pdf") {
-    target = "menu-item-frame";
-  }
-
-  if (target != null) {
-    add(target, {
-      ...itemTypes[target],
-      target_name: target,
-      props: {
-        selectedFileData
-      }
-    });
-  }
+function positionItem(item) {
+  let findOutPosition = layoutGridHelp.findSpace(item, items, cols);
+  return { ...item, ...findOutPosition };
 }
 
 function add(itemType, options={}) {
-  let newItem = layoutGridHelp.item({
-  h: 6,
-  id: gen_id(),
-  ...options,
-  });
-  if (itemType in objects){
-  // objects[itemType].$set({target: document.querySelector('#'+itemType) });
+  options = {...itemTypes[itemType], ...options};
+  let rootItem = _newItem(options);
+  items = [...items, positionItem(rootItem)];
+
+  for (let x = 0; x < (options.dependents || []).length; x++) {
+    let newItem = _newItem(options.dependents[x]);
+    items = [...items, positionItem(newItem)];
   }
 
-  let findOutPosition = layoutGridHelp.findSpace(newItem, items, cols);
-  console.log('adding ---', itemType, options, newItem);
-  items = [...items, ...[{ ...newItem, ...findOutPosition }]];
+  // if (itemType in objects) {
+    // objects[itemType].$set({target: document.querySelector('#'+itemType) });
+  // };
+
+  console.log('adding ---', itemType, options, items);
+};
+
+const onAdd = (val) => {
+  console.log("did onAdd", val);
+  let item = val.detail;
+
+  if (item.props) {
+    console.log("setting props", item.target, item.props);
+    objects[item.id].$set(item.props);
+  }
+
+  if (item.event) {
+    objects[item.id].$on(item.event.name, item.event.callback);
+  }
 };
 
 const remove = (item) => {
   // FIXME move object to stasis BEFORE deleting it
   items = items.filter((value) => value.target !== item);
   if (adjustAfterRemove) {
-  delete objects[item];
-  items = layoutGridHelp.adjust(items, cols);
+    delete objects[item];
+    items = layoutGridHelp.adjust(items, cols);
   }
   console.log('removing ---',item, items);
 };
 
-const onChange = () => {
-  // localStorage.setItem("layout", JSON.stringify(items));
-  items.map((item) => {
-    if (document.querySelector('#'+item.target) === null) {
-      console.log("target doesnt exist yet", item.target);
-      return;
-    }
-    console.log(objects, items);
-    if (item.target in objects) {
-      console.log("found", item.target);
-      return;
-    }
-
-    objects[item.target] = new itemTypes[item.target].component({
-      target: document.querySelector('#'+item.target),
-      props: item.props
-    });
-    console.log("for item", item.target, item.props, document.querySelector('#'+item.target), objects[item.target]);
-
-    if (item.event) {
-      console.log('item event', item);
-      objects[item.target].$on(item.event.name, item.event.callback);
-    }
-  });
-
-  // var serial = serializeLayout(items);
-  // localStorage.setItem(serial.key, serial);
+const onChange = (val) => {
+  console.log("onchange", val.detail.unsafeItem, objects);
+  // let item = val.detail.unsafeItem;
 };
 
 const reset = () => {
@@ -207,10 +208,11 @@ const reset = () => {
 onMount(async () => {
   console.log('App mounted');
 
-  for (let item in visibleItems) {
-    let itemName = visibleItems[item];
-    add(itemName, itemTypes[itemName]);
-  }
+  // for (let item in visibleItems) {
+  //   let itemName = visibleItems[item];
+  //   add(itemName);
+  // }
+  add("menu-item-mainmenu");
 
   // if (typeof window !== "undefined") {
   //   if (!localStorage.getItem("layout")) {
@@ -243,16 +245,38 @@ function searchFilter(e) {
 }
 
 function togglePanel(e) {
-  let itemName = e.detail;
+  let itemName = e.detail.name;
 
   let _layout = items.filter((value) => value.target === itemName);
-  console.log('toggled panel', e, _layout);
+  // console.log('toggled panel', e, _layout);
   adjustAfterRemove = true;
   if (_layout.length > 0)
     remove(itemName);
   else
-    add(itemName, itemTypes[itemName]);
+    add(itemName);
 };
+
+function openFile(e) {
+  console.log('open file', e);
+  let data = e.detail.data;
+  let target = null;
+
+  if (data["file.ext"] === "md") {
+    target = "menu-item-editor";
+  }
+  else if (data["file.ext"] === "pdf") {
+    target = "menu-item-frame";
+  }
+
+  if (target !== null) {
+    add(target, {
+      target_name: target,
+      props: {
+        selectedFileData
+      }
+    });
+  }
+}
 
 </script>
 
@@ -265,21 +289,25 @@ function togglePanel(e) {
     <input type="text" id="search" on:submit|preventDefault={searchFilter} placeholder="...">
 
     <LayoutGrid
-    cols={cols}
-    gap={10}
-    rowHeight={rowHeight}
-    on:change={onChange}
-    bind:items={items}
-    let:item
-    let:index>
+      cols={cols}
+      gap={10}
+      rowHeight={rowHeight}
+      on:change={onChange}
+      bind:items={items}
+      let:item
+      let:index
+    >
 
-    <div id={item.target} class="tablecontent"></div>
-    <!-- <svelte:component
+    <!-- <div id={item.target} class="tablecontent"></div> -->
+    <svelte:component
       id={item.target}
       this={item.component}
       props={item.props}
-      bind:this={objects[item.target]}
-    /> -->
+      bind:this={objects[item.id]}
+      on:didMount={onAdd}
+      {item}
+      {index}
+    />
     </LayoutGrid>
   </section>
 
