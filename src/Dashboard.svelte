@@ -1,11 +1,17 @@
 <script>
 
+import { onMount, setContext, getContext, hasContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
+import { commandLine } from "./lib/commandLine.js";
+import { profileEdit } from "./lib/profileEdit.js";
+
 // import Overview from "./Overview.svelte";
-import { onMount } from 'svelte';
 
 let dayNow, timeNow;
 $: dayNow = (new Date()).toLocaleDateString();
 $: timeNow = (new Date()).toLocaleTimeString();
+
+const dashboardContext = getContext("dashboard");
 
 onMount(async () => {
     console.log('Dashboard mounted');
@@ -15,14 +21,14 @@ onMount(async () => {
 
 <div id="main">
     <p class="title">
+        <input use:commandLine type="text" name="input" id="search" />
         <span class="header">
             eLOS Dashboard
+            <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
+            <span class="datetime">{dayNow} | {timeNow}</span>
         </span>
-        <span class="datetime">{dayNow} | {timeNow}</span>
-        <img src="img/img_avatar.png" alt="Avatar" class="avatar">
     </p>
     <!-- <Overview /> -->
-    <hr/>
 </div>
 
 
@@ -36,6 +42,14 @@ onMount(async () => {
     width: 96%;
     border: none;
     outline: none;
+}
+
+ /* Style the search box */
+#search {
+  width: 100%;
+  font-size: 18px;
+  padding: 11px;
+  border: 1px solid #ddd;
 }
 
 .header {

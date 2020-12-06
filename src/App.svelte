@@ -8,9 +8,10 @@ import layoutGridHelp from "./lib/layout_grid/helper.js";
 
 import Dashboard from "./Dashboard.svelte";
 
+import ListQueue from "./ListQueue.svelte";
 import SelectList from "./SelectList.svelte";
 import Editor from "./Editor.svelte";
-import Fileset from "./Fileset.svelte";
+import Files from "./Files.svelte";
 import Session from "./Session.svelte";
 import Frame from "./Frame.svelte";
 import DataGrid from "./DataGrid.svelte";
@@ -18,9 +19,6 @@ import EntryForm from "./EntryForm.svelte";
 
 import PkgIndex from "./PkgIndex.svelte";
 import PkgCreate from "./PkgCreate.svelte";
-
-const filetypeContext = setContext("filetypes", writable("md")); // TODO replace md with state load
-// console.log("App filetypecontext", getContext("filetypes"));
 
 let items = [];
 let objects = {};
@@ -37,7 +35,7 @@ let rowHeight = 100;
 let adjustAfterRemove = false;
 
 let mul = 3;
-let types = [{name: "menu-item-metrics", value: false},{name: "menu-item-fileset", value: false},{name: "menu-item-filetypes", value: false},{name: "menu-item-frame", value: false},{name: "menu-item-editor", value: false},{name: "menu-item-create", value: false},{name: "menu-item-pkgindex", value: false},{name: "menu-item-session", value: false},{name: "menu-item-entryform", value: false}];
+let types = [{name: "menu-item-metrics", value: false},{name: "menu-item-files", value: false},{name: "menu-item-filetypes", value: false},{name: "menu-item-frame", value: false},{name: "menu-item-editor", value: false},{name: "menu-item-create", value: false},{name: "menu-item-pkgindex", value: false},{name: "menu-item-session", value: false},{name: "menu-item-entryform", value: false}];
 
 /*
 Item Interface:
@@ -49,7 +47,7 @@ name: eg label, display name
 target: eg id, target value for types
 */
 
-let menuItemFiletypes = {
+let panelFiletypes = {
   visible: true,
   target: "menu-item-filetypes",
   name: "filetypes",
@@ -66,7 +64,7 @@ let menuItemFiletypes = {
   }
 };
 
-let itemTypes = {
+let panelTypes = {
   "menu-item-mainmenu": {
     visible: true,
     target: "menu-item-mainmenu",
@@ -80,16 +78,23 @@ let itemTypes = {
       items: types
     }
   },
-  "menu-item-fileset": {
+  "menu-item-files": {
     visible: true,
-    target: "menu-item-fileset",
-    name: "fileset",
+    target: "menu-item-files",
+    name: "files",
     w: mul*5,
-    component: Fileset,
+    component: Files,
     event: { name: 'openFile', callback: openFile },
-    dependents: [ menuItemFiletypes]
+    dependents: [ panelFiletypes]
   },
-  "menu-item-filetypes": menuItemFiletypes,
+  // "menu-item-filetypes": panelFiletypes,
+  "menu-item-panelhistory": {
+    visible: true,
+    target: "menu-item-panelhistory",
+    name: "history",
+    w: mul*3,
+    component: ListQueue
+  },
   "menu-item-metrics": {
     visible: true,
     target: "menu-item-metrics",
@@ -141,6 +146,16 @@ let itemTypes = {
   },
 };
 
+let dashboardConfig = {
+
+};
+let workspaceConfig = {
+
+};
+const dashboardContext = setContext("dashboard", writable(dashboardConfig));
+const workspaceContext = setContext("workspace", writable(workspaceConfig));
+
+
 function _newItem(options={}) {
   return layoutGridHelp.item({
     h: 6,
@@ -154,8 +169,8 @@ function positionItem(item) {
   return { ...item, ...findOutPosition };
 }
 
-function add(itemType, options={}) {
-  options = {...itemTypes[itemType], ...options};
+function add(panelTarget, options={}) {
+  options = {...panelTypes[panelTarget], ...options};
   let rootItem = _newItem(options);
   items = [...items, positionItem(rootItem)];
 
@@ -164,19 +179,13 @@ function add(itemType, options={}) {
     items = [...items, positionItem(newItem)];
   }
 
-  // if (itemType in objects) {
-    // objects[itemType].$set({target: document.querySelector('#'+itemType) });
-  // };
-
-  console.log('adding ---', itemType, options, items);
+  // console.log('adding ---', panelTarget, options, items);
 };
 
 const onAdd = (val) => {
-  console.log("did onAdd", val);
+  // console.log("did onAdd", val);
   let item = val.detail;
-
   if (item.props) {
-    console.log("setting props", item.target, item.props);
     objects[item.id].$set(item.props);
   }
 
@@ -195,33 +204,11 @@ const remove = (item) => {
   console.log('removing ---',item, items);
 };
 
-const onChange = (val) => {
-  console.log("onchange", val.detail.unsafeItem, objects);
-  // let item = val.detail.unsafeItem;
-};
 
-const reset = () => {
-  // items = layoutGridHelp.normalize(items, cols);
-  // items = layoutOriginal;
-  // localStorage.setItem("layout", JSON.stringify(layoutOriginal));
-};
 onMount(async () => {
   console.log('App mounted');
 
-  // for (let item in visibleItems) {
-  //   let itemName = visibleItems[item];
-  //   add(itemName);
-  // }
   add("menu-item-mainmenu");
-
-  // if (typeof window !== "undefined") {
-  //   if (!localStorage.getItem("layout")) {
-  //     var serial = serializeLayout(items);
-  //     localStorage.setItem(serial.key, serial);
-  //   } else {
-  //     items = JSON.parse(localStorage.getItem(serial));
-  //   }
-  // }
 });
 
 function searchFilter(e) {
@@ -246,9 +233,12 @@ function searchFilter(e) {
 
 function togglePanel(e) {
   let itemName = e.detail.name;
+  _togglePanel(itemName);
+}
 
+function _togglePanel(itemName) {
   let _layout = items.filter((value) => value.target === itemName);
-  // console.log('toggled panel', e, _layout);
+  console.log('toggled panel', itemName, _layout);
   adjustAfterRemove = true;
   if (_layout.length > 0)
     remove(itemName);
@@ -261,14 +251,24 @@ function openFile(e) {
   let data = e.detail.data;
   let target = null;
 
-  if (data["file.ext"] === "md") {
+  if (data.name === "md") {
     target = "menu-item-editor";
   }
-  else if (data["file.ext"] === "pdf") {
+  else if (data.name === "pdf") {
     target = "menu-item-frame";
   }
+  else if (["jpg", "gif", "png"].indexOf(data.name) != -1) {
+    target = "menu-item-gallery";
+  }
+  // else if (data.name === "") {
+
+  // }
+  // else if (data.name === "") {
+
+  // }
 
   if (target !== null) {
+    historyWritable.update(n => n + [data]);
     add(target, {
       target_name: target,
       props: {
@@ -278,21 +278,42 @@ function openFile(e) {
   }
 }
 
+// move this to .js?
+const registeredActions = writable({});
+registeredActions.subscribe((val) => {
+  console.log("update for registeredActions", val);
+  // TODO add to history queue
+
+});
+registeredActions.update((n) => {
+  n.toggle = (itemName) => { _togglePanel(itemName); };
+  return n;
+});
+setContext("registeredActions", registeredActions);
+
+const filetypeContext = setContext("filetypes", writable("md")); // TODO replace md with state load
+
+const historyWritable = writable([]);
+historyWritable.subscribe((val) => {
+  console.log("update for historyWritable", val);
+  // TODO add to history queue
+
+});
+setContext("eventHistory", historyWritable);
+
 </script>
 
 <main>
   <header id="menu-item-dashboard">
-    <Dashboard />
+    <Dashboard/>
   </header>
 
   <section>
-    <input type="text" id="search" on:submit|preventDefault={searchFilter} placeholder="...">
 
     <LayoutGrid
       cols={cols}
       gap={10}
       rowHeight={rowHeight}
-      on:change={onChange}
       bind:items={items}
       let:item
       let:index
@@ -334,14 +355,6 @@ section > div {
   min-height: 100%;
   min-width: 100%;
   transform: translate(-50%, -50%);
-}
-
- /* Style the search box */
-#search {
-  width: 100%;
-  font-size: 18px;
-  padding: 11px;
-  border: 1px solid #ddd;
 }
 
 
