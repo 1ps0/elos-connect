@@ -4,12 +4,9 @@ import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 import { commandLine } from "./lib/commandLine.js";
 import { profileEdit } from "./lib/profileEdit.js";
+import { clockTimer, clockStore } from "./lib/clock.js";
 
 // import Overview from "./Overview.svelte";
-
-let dayNow, timeNow;
-$: dayNow = (new Date()).toLocaleDateString();
-$: timeNow = (new Date()).toLocaleTimeString();
 
 const dashboardContext = getContext("dashboard");
 
@@ -25,7 +22,7 @@ onMount(async () => {
         <span class="header">
             eLOS Dashboard
             <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
-            <span class="datetime">{dayNow} | {timeNow}</span>
+            <span use:clockTimer class="datetime"></span>
         </span>
     </p>
     <!-- <Overview /> -->
