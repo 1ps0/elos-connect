@@ -104,11 +104,12 @@ onMount(async () => {
 
 
 
-function markAsDone(item) {
-  console.log('------>', e);
+function markAsDone(e) {
+  let item = e.item;
+  console.log('------>', item);
   // TODO remove from this queue and pass to callback/update to next queue
   item.checked = true;
-  dispatch('dequeue', item);
+  dispatch('markedDone', item);
 }
 
 </script>
@@ -123,7 +124,14 @@ function markAsDone(item) {
         </div>
       </li>
       {#each queue as item}
-        <li use:usable={queue} on:click={() => markAsDone(item)} class="{ item.checked ? 'checked' : ''}">{item.text}</li>
+        <li
+          {item}
+          use:usable={queue}
+          on:click={item.eventClick}
+          class:complete={item.checked}
+        >
+          {item.text}
+        </li>
       {/each}
     </ul>
 </section>

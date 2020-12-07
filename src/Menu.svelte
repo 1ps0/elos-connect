@@ -21,7 +21,7 @@ function sayHello() {
   <!-- <Overview on:message={handleMessage}/> -->
   <!-- <Session on:message={handleMessage}/> -->
   <!-- <Dashboard on:message={handleMessage}/> -->
-  <!-- <Fileset on:message={handleMessage}/> -->
+  <!-- <Files on:message={handleMessage}/> -->
   <!-- <Document on:message={handleMessage}/> -->
 </div>
 <div class="header-right">...</div>

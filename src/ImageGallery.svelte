@@ -1,39 +1,29 @@
 <script>
 
+import { onMount, setContext, getContext, hasContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
+
 export let images = [];
 
 // Get the elements with class="column"
 let elements = document.getElementsByClassName("column");
 
-// Declare a "loop" variable
-var i;
-
 // Full-width images
-function one() {
-  for (i = 0; i < elements.length; i++) {
-    elements[i].style.flex = "100%";
+function scale(percent=25) {
+  for (let i = 0; i < elements.length; i++) {
+    elements[i].style.flex = `${percent}%`;
   }
 }
 
-// Two images side by side
-function two() {
-  for (i = 0; i < elements.length; i++) {
-    elements[i].style.flex = "50%";
-  }
-}
-
-// Four images side by side
-function four() {
-  for (i = 0; i < elements.length; i++) {
-    elements[i].style.flex = "25%";
-  }
-}
 </script>
 
 <section>
 
 <div class="row">
     <div class="column">
+      {#each images as image}
+        <img src="{image}"/>
+      {/each}
     </div>
 </div>
 

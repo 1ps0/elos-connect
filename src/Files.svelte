@@ -1,69 +1,38 @@
 <script>
 
-import { onMount, setContext, getContext, hasContext, createEventDispatcher } from 'svelte';
+import { onMount, createEventDispatcher, setContext, getContext, hasContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
 import { linker } from "./lib/linker.js";
 
 const dispatch = createEventDispatcher();
 const filetypeContext = getContext("filetypes");
+const registeredActions = getContext("registeredActions");
 
 // { "filetype": "pdf", "files": [], 'pageNum': 1, 'pageSize': 20}
 export let files = [];
-export let pageOffset = 0;
-export let pageNum = 1;
-export let pageSize = 10;
-export let keywords = '';
-export let selectedExtension = 'md';
-export let selectedFiles = [];
-
-$: pageOffset = (pageNum - 1) * pageSize;
-$: keywords;
-$: files;
-
-async function fetch_(uri, cb) {
-  const ret = await fetch(uri);
-  cb(await ret.json());
+export let metadata = {
+  pageSize: 10,
+  pageNum: 1,
+  filetype: 'md',
+  keywords: ''
 };
+export let pageOffset = 0;
 
-async function fetchFileList({filetype, page, size, kwords}) {
-  const url = new URL("/api/file/search", "http://localhost:8080");
+$: pageOffset = (metadata.pageNum - 1) * metadata.pageSize;
+$: files, metadata;
 
-  if (size) {
-    url.searchParams.append("page_size", size);
-  }
-  if (page) {
-    url.searchParams.append("page_num", page);
-  }
-  if (keywords.length > 0) {
-    url.searchParams.append("keywords", keywords);
-  }
-  if (filetype.length > 0) {
-    url.searchParams.append("filetype", filetype);
-  }
-
-  console.log("setting url params", filetype, page, size, kwords, url.searchParams, url);
-  await fetch_(url.href, (ret) => {
-    // console.log('--result', ret);
-    selectedExtension = ret.filetype;
-    if (ret.files) {
-      files = ret.files;
-    }
-    if (ret.pageNum) {
-      pageNum = ret.pageNum;
-    }
-    if (ret.pageSize) {
-      pageSize = ret.pageSize;
-    }
-    if (ret.pageOffset) {
-      pageOffset = ret.pageOffset;
-    }
-    if (ret.keywords) {
-      keywords = ret.keywords;
-    }
-  });
+async function fetchFileList(params) {
+  let actions = await get(registeredActions);
+  let data = await actions.fetch("/api/file/search", params);
+  metadata = (({ files, ...rest }) => rest)(data);
+  files = data.files;
+  console.log("processed metadata", data, files, metadata);
 }
 
-function add_to_package(e, file) {
-  console.log('add_to_package', e);
+export let selectedFiles = [];
+
+function addToPackage(e, file) {
+  console.log('addToPackage', e);
   e.target.parentElement.parentElement.parentElement.hidden = true;
 
   selectedFiles.push(file)
@@ -71,10 +40,10 @@ function add_to_package(e, file) {
 }
 
 onMount(() => {
-  console.log('Fileset mounted');
+  console.log('Files mounted');
   filetypeContext.subscribe( (val) => {
-    console.log("sub:fileset:filetypes", val);
-    fetchFileList({ filetype: val });
+    console.log("sub:fileset:filetypes", val, metadata);
+    fetchFileList({ ...metadata, filetype: val });
   });
 });
 
@@ -85,23 +54,22 @@ onMount(() => {
     <tr>
       <td>
         <div class="filename">
-          <span>{selectedExtension}</span>
-          <span>{pageOffset} - {pageOffset + pageSize} ({files.length})</span>
+          <span>{metadata.filetype}</span>
+          <span>{pageOffset} - {pageOffset + metadata.pageSize} ({files.length})</span>
         </div>
       </td>
       <td>
         <form on:submit|preventDefault={
           (e) => {
-              pageNum = 1;
-              fetchFileList(pageNum, selectedExtension, keywords);
+              fetchFileList({...metadata, pageNum: 1});
             }
           }>
-          <input name="keywords" bind:value={keywords} />
-          <label id="keyword-value">{keywords}</label>
+          <input name="keywords" bind:value={metadata.keywords} />
+          <label id="keyword-value">{metadata.keywords}</label>
         </form>
       </td>
       <td>
-        <button class="next-button" on:click|preventDefault={() => pageNum += 1}>
+        <button class="next-button" on:click|preventDefault={() => metadata.pageNum += 1}>
           Next Page
         </button>
       </td>
@@ -122,7 +90,7 @@ onMount(() => {
       </td>
       <!-- <td name="file-options" class="file-options">
         <div>
-          <button on:click|preventDefault="{(e) => add_to_package(e, file)}">add to package</button>
+          <button on:click|preventDefault="{(e) => addToPackage(e, file)}">add to package</button>
         </div>
       </td> -->
     </tr>

@@ -1,35 +1,34 @@
 <script>
 
-import { onMount } from 'svelte';
+import { onMount, setContext, getContext, hasContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
+
 import * as monaco from 'monaco-editor';
 
-export let fileset_selected;
-$: fileset_selected;
-
+export let sourceContent = {};
 export let theme = 'vs-light';
 export let language = 'markdown';
+export let features = ["wordWrap", ];
 
-let defaults = {
-    source: '',
+export let data = {};
+
+$: data = {
+    source: sourceContent,
     language: language,
     theme: theme,
-    features: ["wordWrap", ]
+    features: features
 };
 
 export let controls = {
     save: (target, data) => { console.log("saved", target, data) },
 };
 
-export let source_content = {};
-export let data = defaults;
-
-$: data.source = source_content;
 $: {
     if (editor) {
-        editor.setValue(JSON.stringify(source_content, null, 4));
+        editor.setValue(JSON.stringify(sourceContent, null, 4));
         editor.layout();
     }
-    console.log("updating data...", source_content);
+    console.log("updating data...", sourceContent);
 }
 let rootEl;
 export let editor;
@@ -49,14 +48,8 @@ onMount(async () => {
   });
   // rootEl.onresize = () => editor.layout();
   editor.getModel().onDidChangeContent( (e) => {
-    var x, updatedValues;
-    for (x = 0; x < onChange.length; x++) {
+    for (let x = 0; x < onChange.length; x++) {
         onChange[x](e);
-    }
-    updatedValues = editor.getValue();
-    if (updatedValues["dependencies"] != undefined &&
-        updatedValues["dependencies"]["local"] != undefined) {
-        fileset_selected = updatedValues["dependencies"]["local"];
     }
   });
 });

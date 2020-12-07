@@ -16,6 +16,7 @@ import Session from "./Session.svelte";
 import Frame from "./Frame.svelte";
 import DataGrid from "./DataGrid.svelte";
 import EntryForm from "./EntryForm.svelte";
+import ImageGallery from "./ImageGallery.svelte";
 
 import PkgIndex from "./PkgIndex.svelte";
 import PkgCreate from "./PkgCreate.svelte";
@@ -55,7 +56,7 @@ let panelFiletypes = {
   component: SelectList,
   event: { name: 'filterType', callback: (e) => {
     console.log("updating for filetype", e.detail.name);
-    objects["menu-item-filetypes"].selectedExtension = e.detail.name;
+    objects["menu-item-filetypes"].metadata.filetype = e.detail.name;
   } },
   props: {
     eventName: "filterType",
@@ -209,27 +210,15 @@ onMount(async () => {
   console.log('App mounted');
 
   add("menu-item-mainmenu");
+
+  // filetypeContext.subscribe( (val) => {
+  //   console.log("sub:fileset:filetypes", val);
+  //   if (["jpg", "gif", "png"].indexOf(data.name) != -1) {
+  //     add("menu-item-gallery", {props: { images: val}});
+  //   }
+  // });
+
 });
-
-function searchFilter(e) {
-  console.log("submitted!", e);
-  // Declare variables
-  var input, filter, ul, li, a, i;
-  input = document.getElementById("search");
-  filter = input.value.toUpperCase();
-  ul = document.getElementById("menu");
-  li = ul.getElementsByTagName("li");
-
-  // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < li.length; i++) {
-    a = li[i].getElementsByTagName("a")[0];
-    if (a.innerHTML.toUpperCase().indexOf(filter) > -1) {
-      li[i].style.display = "";
-    } else {
-      li[i].style.display = "none";
-    }
-  }
-}
 
 function togglePanel(e) {
   let itemName = e.detail.name;
@@ -268,7 +257,7 @@ function openFile(e) {
   // }
 
   if (target !== null) {
-    historyWritable.update(n => n + [data]);
+    historyWritable.update(n => [...n, data]);
     add(target, {
       target_name: target,
       props: {
@@ -277,6 +266,15 @@ function openFile(e) {
     });
   }
 }
+
+// need a 'view' window of current open stuff to maintain the place
+// of the user within each data set
+// a kind of cursor which is different or can be synced across
+// different data types and representations, eg pdf viewed vs file list vs image gallery
+
+// can we chain readable/writable?
+// so readable(value) internally updates
+// then writable calls readable's values for those datasets
 
 // move this to .js?
 const registeredActions = writable({});
@@ -287,6 +285,18 @@ registeredActions.subscribe((val) => {
 });
 registeredActions.update((n) => {
   n.toggle = (itemName) => { _togglePanel(itemName); };
+  n.gallery = (itemName) => {};
+  n.fetch = async (url, params) => {
+    // TODO replace base url with env var or other
+    let baseUrl = "http://localhost:8080";
+    let _url = new URL(url, baseUrl);
+    for (let arg in params) {
+      _url.searchParams.append(arg, params[arg]);
+    }
+    let result = await fetch(_url);
+    return result.json();
+  };
+
   return n;
 });
 setContext("registeredActions", registeredActions);

@@ -1,7 +1,7 @@
 <script>
 
 import Wizard from "./Wizard.svelte";
-import Fileset from "./Fileset.svelte";
+import Files from "./Files.svelte";
 import Editor from "./Editor.svelte";
 import ListQueue from "./ListQueue.svelte";
 

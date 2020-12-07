@@ -41,17 +41,21 @@ action = (node: HTMLEelement, parameters: any) => {
 */
 
 import { createEventDispatcher } from 'svelte';
+import { onMount, setContext, getContext, hasContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
+
 
 export function linker(node, file) {
 
   const dispatch = createEventDispatcher();
+  const historyWritable = getContext("eventHistory");
   // const _handler = (e) => { console.log("linker handled", e); };
+
+  // const updateEditorSource = (source) => {
+  //   historyWritable.update(n => n.editor.sourceContent = source);
+  // }
   const openFileHandler = (e) => {
     e.preventDefault();
-    console.log("linker-openfilehandler", {
-      source: "fileset",
-      data: file
-    });
     dispatch('openFile', {
       source: "fileset",
       data: file

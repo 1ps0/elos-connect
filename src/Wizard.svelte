@@ -3,7 +3,7 @@
 import { onMount } from 'svelte';
 import Editor from "./Editor.svelte";
 import ListQueue from "./ListQueue.svelte";
-import Fileset from "./Fileset.svelte"
+import Files from "./Files.svelte"
 
 export let selected_files = [];
 $: selected_files;
@@ -118,7 +118,7 @@ templates/processing actions:
   </div>
 
   <div class="tab">
-    <Fileset bind:selected_files={selected_files} />
+    <Files bind:selected_files={selected_files} />
   </div>
 
   <div class="tab">
