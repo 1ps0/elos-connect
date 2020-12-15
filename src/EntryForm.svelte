@@ -1,6 +1,19 @@
 <script>
 // https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_contact_form
 
+import { onMount, createEventDispatcher, getContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
+
+const dispatch = createEventDispatcher();
+
+onMount(async () => {
+  console.log('SelectList mounted', item);
+  // console.log('selectlist', items, eventName, visibleItems);
+
+  dispatch("didMount", item);
+});
+
+
 export let action = "/api/";
 export let fields = [
     {
@@ -32,21 +45,11 @@ export let fields = [
 ];
 export let data = {};
 
-$: data = new FormData(document.querySelector('entryform')).entries;
+$: data = new FormData(document.querySelector('#entryform'));
 $: fields;
 
 function sendData() {
   console.log(data);
-  // axios.post(action, {
-  //   params: data
-  // })
-  // .then((response) => {
-  //   // let result = response.data;
-  //   // hideTextarea();
-  // })
-  // .catch((error) => {
-  //     console.log("PROMPT: got error on fetch", error);
-  // });
   return 200;
 }
 

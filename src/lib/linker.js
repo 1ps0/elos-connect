@@ -72,13 +72,13 @@ export function linker(node, file) {
 
   return {
     update(newFile) {
-      console.log("linker got update", newFile);
-      file = newFile;
+      // console.log("linker got update", newFile);
+      // file = newFile;
     },
     destroy() {
       console.log("linker is destroyed");
       // node.removeEventListener('openFile', _handler);
-      node.removeListener('click', openFileHandler);
+      // node.removeListener('click', openFileHandler);
     }
   };
 }

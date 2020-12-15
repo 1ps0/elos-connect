@@ -1,6 +1,15 @@
 
 import { readable } from 'svelte/store';
 
+export const clockFormatter = new Intl.DateTimeFormat('en', {
+  hour12: true,
+  hour: 'numeric',
+  minute: '2-digit',
+  second: '2-digit'
+});
+
+export const dateStringFromDate = (date) => date.toLocaleDateString();
+
 export const clockStore = readable(new Date(), function start(set) {
     const interval = setInterval(() => {
         set(new Date());
@@ -12,15 +21,9 @@ export const clockStore = readable(new Date(), function start(set) {
 });
 
 export const clockTimer = (node, args) => {
-  const formatter = new Intl.DateTimeFormat('en', {
-    hour12: true,
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit'
-  });
 
   clockStore.subscribe((val) => {
-    node.innerHTML = `${val.toLocaleDateString()} | ${formatter.format(val)}`;
+    node.innerHTML = `${dateStringFromDate(val)} | ${clockFormatter.format(val)}`;
   });
 
   return {

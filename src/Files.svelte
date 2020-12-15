@@ -30,7 +30,16 @@ async function fetchFileList(params) {
 }
 
 export let selectedFiles = [];
+export const fileSelect = (node, params) => {
+  return {
+    update(val) {
 
+    },
+    destroy() {
+
+    }
+  };
+};
 function addToPackage(e, file) {
   console.log('addToPackage', e);
   e.target.parentElement.parentElement.parentElement.hidden = true;
@@ -88,11 +97,9 @@ onMount(() => {
       <td name="file-open" class="file-open">
         <button use:linker={file}>open</button>
       </td>
-      <!-- <td name="file-options" class="file-options">
-        <div>
-          <button on:click|preventDefault="{(e) => addToPackage(e, file)}">add to package</button>
-        </div>
-      </td> -->
+      <td name="file-options" class="file-options">
+        <button use:fileSelect={selectedFiles}>add</button>
+      </td>
     </tr>
   {/each}
   <ul>

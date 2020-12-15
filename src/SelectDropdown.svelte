@@ -1,5 +1,20 @@
 <script>
 
+
+import { onMount, createEventDispatcher, getContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
+
+const dispatch = createEventDispatcher();
+
+onMount(async () => {
+  console.log('SelectList mounted', item);
+  // console.log('selectlist', items, eventName, visibleItems);
+
+  dispatch("didMount", item);
+});
+
+
+
 // code for custom select...
 var x, i, j, l, ll, selElmnt, a, b, c;
 /* Look for any elements with the class "custom-select": */

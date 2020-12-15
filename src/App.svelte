@@ -35,8 +35,101 @@ let cols = 40;
 let rowHeight = 100;
 let adjustAfterRemove = false;
 
+let icons = ["๛", "ຜ", "ᚙ", "ᚖ", "ᛞ", "ᛝ", "ᛥ", "ᜊ", "ᝎ", "ᝪ", "៙", "៩", "៨", "៧", "៦", "៥", "៤", "៣", "២", "១", "០", "ᬉ", "ᬊ", "☰", "ⵚ", "ⵛ", "〠", "ꇪ"];
+
 let mul = 3;
-let types = [{name: "menu-item-metrics", value: false},{name: "menu-item-files", value: false},{name: "menu-item-filetypes", value: false},{name: "menu-item-frame", value: false},{name: "menu-item-editor", value: false},{name: "menu-item-create", value: false},{name: "menu-item-pkgindex", value: false},{name: "menu-item-session", value: false},{name: "menu-item-entryform", value: false}];
+let types = [
+  {name: "menu-item-metrics", value: { icon: "๛", highlight: "Metrics"}},
+  {name: "menu-item-files", value: { icon: "☷", highlight: "File List"}},
+  {name: "menu-item-filetypes", value: { icon: "ⵚ", highlight: "Filetype List (with counts)"}},
+  {name: "menu-item-frame", value: { icon: "ᛞ", highlight: "iFrame for PDF"}},
+  {name: "menu-item-editor", value: { icon: "ᚖ", highlight: "Code or MD Editor"}},
+  {name: "menu-item-create", value: { icon: "ᚙ", highlight: "Package Creation Wizard"}},
+  {name: "menu-item-pkgindex", value: { icon: "៙", highlight: "Package List"}},
+  {name: "menu-item-session", value: { icon: "ᛥ", highlight: "New Session/Workspace"}},
+  {name: "menu-item-entryform", value: { icon: "ᜊ", highlight: "Add Data"}},
+  {name: "menu-item-eventhistory", value: { icon: "ᝎ", highlight: "Event History"}},
+];
+
+
+const fetchFromLocalStorage = (item) => {
+    return JSON.parse(localStorage.getItem(item));
+};
+
+const saveToLocalStorage = (item, value) => {
+    localStorage.setItem(item, JSON.stringify(value));
+};
+
+
+let dashboardConfig = {};
+let dashboardWritable = writable(dashboardConfig);
+dashboardWritable.subscribe((val) => {
+  console.log("[App] dashboardWritable update", val);
+  localStorage.setItem('dashboard', JSON.stringify(val));
+});
+
+let workspaceConfig = {};
+let workspaceWritable = writable(workspaceConfig);
+workspaceWritable.subscribe((val) => {
+  console.log("[App] workspaceWritable update", val);
+  localStorage.setItem('workspace', JSON.stringify(val));
+  //JSON.parse(localStorage.getItem(item));
+});
+
+const dashboardContext = setContext("dashboard", dashboardWritable);
+const workspaceContext = setContext("workspace", workspaceWritable);
+
+
+let persistent = {
+  cache: {},
+  profile: {},
+  state: { data: items }
+};
+
+
+// need a 'view' window of current open stuff to maintain the place
+// of the user within each data set
+// a kind of cursor which is different or can be synced across
+// different data types and representations, eg pdf viewed vs file list vs image gallery
+
+// can we chain readable/writable?
+// so readable(value) internally updates
+// then writable calls readable's values for those datasets
+
+// move this to .js?
+const registeredActions = writable({});
+registeredActions.subscribe((val) => {
+  console.log("update for registeredActions", val);
+  // TODO add to history queue
+
+});
+registeredActions.update((n) => {
+  n.toggle = (itemName) => { _togglePanel(itemName); };
+  n.gallery = (itemName) => {};
+  n.fetch = async (url, params) => {
+    // TODO replace base url with env var or other
+    let baseUrl = "http://localhost:8080";
+    let _url = new URL(url, baseUrl);
+    for (let arg in params) {
+      _url.searchParams.append(arg, params[arg]);
+    }
+    let result = await fetch(_url);
+    return result.json();
+  };
+
+  return n;
+});
+setContext("registeredActions", registeredActions);
+
+const filetypeContext = setContext("filetypes", writable("md")); // TODO replace md with state load
+
+const historyWritable = writable([]);
+historyWritable.subscribe((val) => {
+  console.log("update for historyWritable", val);
+  // TODO add to history queue
+
+});
+setContext("eventHistory", historyWritable);
 
 /*
 Item Interface:
@@ -55,8 +148,8 @@ let panelFiletypes = {
   w: mul*3,
   component: SelectList,
   event: { name: 'filterType', callback: (e) => {
-    console.log("updating for filetype", e.detail.name);
-    objects["menu-item-filetypes"].metadata.filetype = e.detail.name;
+    let obj = objects["menu-item-files"];
+    if (obj) obj.metadata.filetype = e.detail.name;
   } },
   props: {
     eventName: "filterType",
@@ -65,18 +158,39 @@ let panelFiletypes = {
   }
 };
 
+let panelEventHistory = {
+  visible: false,
+  target: "menu-item-eventhistory",
+  name: "eventhistory",
+  w: mul*2,
+  component: ListQueue,
+  props: {
+    readonly: true,
+    dataStore: historyWritable
+  }
+};
+
 let panelTypes = {
+  "menu-item-dashboard": {
+    visible: true,
+    target: "main-item-dashboard",
+    name: "dashboard",
+    w: cols,
+    h: 1,
+    component: Dashboard
+  },
   "menu-item-mainmenu": {
     visible: true,
     target: "menu-item-mainmenu",
     name: "mainmenu",
-    w: mul*3,
+    w: mul*1,
     component: SelectList,
     event: { name: 'menuToggle', callback: togglePanel },
     // bind: { name: '' },
     props: {
       eventName: "menuToggle",
-      items: types
+      items: types,
+      transform: (e) => { return e.value.icon }
     }
   },
   "menu-item-files": {
@@ -88,7 +202,7 @@ let panelTypes = {
     event: { name: 'openFile', callback: openFile },
     dependents: [ panelFiletypes]
   },
-  // "menu-item-filetypes": panelFiletypes,
+  "menu-item-filetypes": panelFiletypes,
   "menu-item-panelhistory": {
     visible: true,
     target: "menu-item-panelhistory",
@@ -121,8 +235,9 @@ let panelTypes = {
     visible: true,
     target: "menu-item-session",
     name: "session",
-    w: mul*3,
+    w: mul*5,
     component: Session,
+    dependents: [ panelEventHistory]
   },
   "menu-item-entryform": {
     visible: true,
@@ -145,17 +260,8 @@ let panelTypes = {
     w: mul*5,
     component: PkgCreate,
   },
+  "menu-item-eventhistory": panelEventHistory,
 };
-
-let dashboardConfig = {
-
-};
-let workspaceConfig = {
-
-};
-const dashboardContext = setContext("dashboard", writable(dashboardConfig));
-const workspaceContext = setContext("workspace", writable(workspaceConfig));
-
 
 function _newItem(options={}) {
   return layoutGridHelp.item({
@@ -180,7 +286,7 @@ function add(panelTarget, options={}) {
     items = [...items, positionItem(newItem)];
   }
 
-  // console.log('adding ---', panelTarget, options, items);
+  console.log('adding ---', panelTarget, options, items);
 };
 
 const onAdd = (val) => {
@@ -209,7 +315,15 @@ const remove = (item) => {
 onMount(async () => {
   console.log('App mounted');
 
+  // let workspace = JSON.parse(localStorage.getItem('workspace'));
+  // let dashboard = JSON.parse(localStorage.getItem('dashboard'));
+
+  // workspaceWritable = writable(workspace);
+  // dashboardWritable = writable(dashboard);
+
+  // add("menu-item-dashboard");
   add("menu-item-mainmenu");
+  add("menu-item-session");
 
   // filetypeContext.subscribe( (val) => {
   //   console.log("sub:fileset:filetypes", val);
@@ -266,57 +380,12 @@ function openFile(e) {
     });
   }
 }
-
-// need a 'view' window of current open stuff to maintain the place
-// of the user within each data set
-// a kind of cursor which is different or can be synced across
-// different data types and representations, eg pdf viewed vs file list vs image gallery
-
-// can we chain readable/writable?
-// so readable(value) internally updates
-// then writable calls readable's values for those datasets
-
-// move this to .js?
-const registeredActions = writable({});
-registeredActions.subscribe((val) => {
-  console.log("update for registeredActions", val);
-  // TODO add to history queue
-
-});
-registeredActions.update((n) => {
-  n.toggle = (itemName) => { _togglePanel(itemName); };
-  n.gallery = (itemName) => {};
-  n.fetch = async (url, params) => {
-    // TODO replace base url with env var or other
-    let baseUrl = "http://localhost:8080";
-    let _url = new URL(url, baseUrl);
-    for (let arg in params) {
-      _url.searchParams.append(arg, params[arg]);
-    }
-    let result = await fetch(_url);
-    return result.json();
-  };
-
-  return n;
-});
-setContext("registeredActions", registeredActions);
-
-const filetypeContext = setContext("filetypes", writable("md")); // TODO replace md with state load
-
-const historyWritable = writable([]);
-historyWritable.subscribe((val) => {
-  console.log("update for historyWritable", val);
-  // TODO add to history queue
-
-});
-setContext("eventHistory", historyWritable);
-
 </script>
 
 <main>
-  <header id="menu-item-dashboard">
+  <!-- <header id="menu-item-dashboard">
     <Dashboard/>
-  </header>
+  </header> -->
 
   <section>
 
@@ -333,10 +402,9 @@ setContext("eventHistory", historyWritable);
     <svelte:component
       id={item.target}
       this={item.component}
-      props={item.props}
       bind:this={objects[item.id]}
       on:didMount={onAdd}
-      {item}
+      {...item.props}
       {index}
     />
     </LayoutGrid>

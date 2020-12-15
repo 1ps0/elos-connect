@@ -1,6 +1,10 @@
 <script>
 
+import { createEventDispatcher, onMount, setContext, getContext, hasContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
+
 import { eventHistory } from "./lib/event_history.js";
+import { clockFormatter, dateStringFromDate } from "./lib/clock.js";
 
 // import PkgEdit from "./PkgEdit.svelte";
 // import Schedule from "./Schedule.svelte";
@@ -8,7 +12,9 @@ import Timer from "./Timer.svelte";
 import AnnotationLog from "./AnnotationLog.svelte";
 import ListQueue from "./ListQueue.svelte";
 
-let polls = [
+let historyWritable = getContext('eventHistory');
+
+let pollsWritable = writable([
   {
     title: "Current Stress",
     name: "stress",
@@ -57,61 +63,72 @@ let polls = [
     value_type: "text",
     value_control: false
   },
-];
+]);
 
-let todoQueue = [
+let todoWritable = writable([
   {
     checked: false,
-    text: "Coffee"
+    data: {
+      name: "Coffee"
+    },
   },
   {
     checked: false,
-    text: "Walk"
+    data: {
+      name: "Walk"
+    },
   },
   {
     checked: false,
-    text: "Ring Fit"
+    data: {
+      name: "Ring Fit"
+    },
   },
   {
     checked: false,
-    text: "monk"
+    data: {
+      name: "Monk"
+    },
   },
   {
     checked: false,
-    text: "elos"
+    data: {
+      name: "elos"
+    },
   },
   {
-    checked:false,
-    text: "social native"
+    checked: false,
+    data: {
+      name: "social native"
+    },
   }
-];
-let eventList = [
-  {
-    is_me: false,
-    profile: "",
-    text: "Pay Insurance this month"
-  }
-];
+]);
+
+function updateHistory(e) {
+  let val = e.detail;
+  let event = {
+    // warning: this could get bloated
+    data:{
+      ...val,
+      timer: timer,
+      at: (dateStringFromDate(new Date()), clockFormatter.format(new Date()))
+    }
+  };
+  console.log("update history with", e.detail, event);
+  historyWritable.update((n) => [
+    ...n,
+    ...[event]
+  ]);
+}
+
+let timer;
 
 </script>
 
 <section>
-<!--
-  <table id="prompt-table">
-    {#each prompts as prompt}
-      <tr>
-        <td>
-          <Prompt data={prompt} />
-        </td>
-      </tr>
-    {/each}
-  </table>
--->
-  <!-- <Schedule /> -->
+  <Timer bind:timer />
   <!-- <AnnotationLog messages={notesLog} /> -->
-  <ListQueue bind:queue={todoQueue} on:dequeue />
-  <Timer />
-  <!-- <ListQueue bind:queue={doneQueue} on:dequeue /> -->
+  <ListQueue dataStore={todoWritable} on:didClick={updateHistory} />
 </section>
 
 <style>

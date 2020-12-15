@@ -11,60 +11,59 @@ import { clockTimer, clockStore } from "./lib/clock.js";
 const dashboardContext = getContext("dashboard");
 
 onMount(async () => {
-    console.log('Dashboard mounted');
+  console.log('Dashboard mounted');
 });
 
 </script>
 
-<div id="main">
-    <p class="title">
-        <input use:commandLine type="text" name="input" id="search" />
-        <span class="header">
-            eLOS Dashboard
-            <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
-            <span use:clockTimer class="datetime"></span>
-        </span>
-    </p>
+<section class="title">
+  <input use:commandLine type="text" name="input" id="search" />
+  <span class="header">
+    <span>eLOS Dashboard</span>
+    <span use:clockTimer class="datetime"></span>
+  </span>
+  <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
     <!-- <Overview /> -->
-</div>
+</section>
 
 
 <style>
 
 .title {
-    background-color: #ccc;
-    color: #444;
-    cursor: pointer;
-    padding: 18px;
-    width: 96%;
-    border: none;
-    outline: none;
+  background-color: #ccc;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  outline: none;
 }
 
  /* Style the search box */
 #search {
-  width: 100%;
+  width: 50%;
   font-size: 18px;
   padding: 11px;
   border: 1px solid #ddd;
+  float: left;
 }
 
 .header {
-    text-align: left;
-    border: 1px solid black;
-    padding: 10px 20px 10px 20px;
+  text-align: left;
+  border: 1px solid black;
+  padding: 5px 20px 10px 10px;
 }
 
 .datetime {
-    font-size: 20px;
-    padding: 10px;
+  font-size: 20px;
+  padding: 10px;
 }
 
 .avatar {
   vertical-align: middle;
   width: 30px;
   height: 30px;
-  float: right;
+  /*float: right;*/
   border-radius: 50%;
 }
 </style>

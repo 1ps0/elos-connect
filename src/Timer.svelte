@@ -1,5 +1,6 @@
 <script>
 
+import { writable, readable, derived, get } from "svelte/store";
 import { eventHistory } from "./lib/event_history.js";
 
 /* --- */
@@ -17,6 +18,11 @@ function formatTime(timeInSeconds) {
     const minutes = secondsToMinutes(timeInSeconds);
     const remainingSeconds = timeInSeconds % 60;
     return `${padWithZeroes(minutes)}:${padWithZeroes(remainingSeconds)}`;
+}
+
+export const readableStore = readable(new Date, () => {});
+export const readableTimer = (node, param) => {
+
 }
 
 const POMODORO_SHORT = minutesToSeconds(25);

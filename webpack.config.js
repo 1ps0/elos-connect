@@ -31,8 +31,8 @@ module.exports = {
 					options: {
 						emitCss: true,
 						hotReload: true,
-						accessors: true,
-						hydratable: true
+						// accessors: true,
+						// hydratable: true
 					}
 				}
 			},
@@ -43,8 +43,8 @@ module.exports = {
 					options: {
 						emitCss: true,
 						hotReload: true,
-						accessors: true,
-						hydratable: true
+						// accessors: true,
+						// hydratable: true
 					}
 				}
 			},

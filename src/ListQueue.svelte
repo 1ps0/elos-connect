@@ -1,15 +1,16 @@
 <script>
-import { onMount } from 'svelte';
-
-import { createEventDispatcher } from 'svelte';
+import { createEventDispatcher, onMount, setContext, getContext, hasContext } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
 
 const dispatch = createEventDispatcher();
 
-export let queue = [];
-$: queue;
+export let dataStore;
+export let readonly = false;
+
+let queue = [];
 $: console.log('queue -->', queue);
 
-function usable() {
+export const interactive = (node, params) => {
   return {
     update(e) {
 
@@ -18,8 +19,9 @@ function usable() {
 
     }
   };
-}
+};
 
+// TODO save local storage to file, in json if possible
 const fetchFromLocalStorage = (item) => {
     return JSON.parse(localStorage.getItem(item));
 };
@@ -36,73 +38,40 @@ const saveEntry = (e) => {
 
 function addEntry(e) {
   console.log('adding entry to listqueue:', e);
-  queue.push({ text: e })
-  queue = queue;
+  let name = document.getElementById('task-input').value;
+  dataStore.update( n => [...n, {
+    data: {
+      name: name
+    },
+    checked: false,
+    eventClick: (e) => {}
+  }]);
+}
+
+// when we click a list item
+function didClick(e) {
+  console.log('did click', e);
+  dispatch("didClick", { name: e.target.firstChild.wholeText,  } );
 }
 
 // below code borrowed from https://www.w3schools.com/howto/howto_js_todolist.asp
 
-// Create a new list item when clicking on the "Add" button
-function newElement() {
-  var li = document.createElement("li");
-  var inputValue = document.getElementById("task-input").value;
-  var t = document.createTextNode(inputValue);
-  li.appendChild(t);
-  if (inputValue === '') {
-    alert("You must write something!");
-  } else {
-    document.getElementById("task-list").appendChild(li);
+onMount(() => {
+  console.log('ListQueue mounted', $$props, $$restProps);
+
+  if (dataStore) {
+    console.log("dataStore mounted in listview");
+    dataStore.subscribe((val) => {
+      console.log("listqueue update", val);
+      queue = val;
+    });
   }
-  document.getElementById("task-input").value = "";
-
-  var span = document.createElement("SPAN");
-  var txt = document.createTextNode("\u00D7");
-  span.className = "close";
-  span.appendChild(txt);
-  li.appendChild(span);
-
-  for (i = 0; i < close.length; i++) {
-    close[i].onclick = function() {
-      var div = this.parentElement;
-      div.style.display = "none";
-    }
-  }
-}
-
-onMount(async () => {
-  console.log('ListQueue mounted');
-
-  // Create a "close" button and append it to each list item
-  var myNodelist = document.getElementsByTagName("li");
-  var i;
-  for (i = 0; i < myNodelist.length; i++) {
-    var span = document.createElement("span");
-    var txt = document.createTextNode("\u00D7");
-    span.className = "close";
-    span.appendChild(txt);
-    myNodelist[i].appendChild(span);
-  }
-
-  // Click on a close button to hide the current list item
-  var close = document.getElementsByClassName("close");
-  var i;
-  for (i = 0; i < close.length; i++) {
-    close[i].onclick = function() {
-      var div = this.parentElement;
-      div.style.display = "none";
-    }
-  }
-
-  // Add a "checked" symbol when clicking on a list item
-  var list = document.querySelector('ul');
-  list.addEventListener('click', function(ev) {
-    if (ev.target.tagName === 'li') {
-      ev.target.classList.toggle('checked');
-    }
-  }, false);
 });
 
-
+function close(e) {
+  var div = e.target.parentElement;
+  div.style.display = "none";
+}
 
 function markAsDone(e) {
   let item = e.item;
@@ -117,20 +86,28 @@ function markAsDone(e) {
 
 <section class="log-body">
     <ul id="task-list">
-      <li>
-        <div id="add-btn">
-          <input type="text" id="task-input" placeholder="">
-          <span on:click={newElement}>Add</span>
-        </div>
-      </li>
+      {#if !readonly}
+        <li>
+          <div id="add-btn">
+            <input type="text" id="task-input" placeholder="">
+            <span on:click={addEntry}>Add</span>
+          </div>
+        </li>
+      {/if}
       {#each queue as item}
         <li
-          {item}
-          use:usable={queue}
-          on:click={item.eventClick}
-          class:complete={item.checked}
+          use:interactive={queue}
+          on:click={didClick}
+          class:checked={item.checked}
+          class="item"
         >
-          {item.text}
+          {#each Object.entries(item.data || {}) as entry}
+            <div class="entry">
+              <span class="key">{entry[0]}</span>:
+              <span class="value">{entry[1]}</span>
+            </div>
+          {/each}
+          <span class="close" on:click={close}>{"\u00D7"}</span>
         </li>
       {/each}
     </ul>
@@ -141,7 +118,7 @@ function markAsDone(e) {
 .type-study span {
   float:left;
   background-color: green;
-  width: 80px;
+  width: 100%;
 }
 
 .type-label span {
@@ -152,10 +129,11 @@ function markAsDone(e) {
   padding: 15px;
 }
 
-.log-body {
+/*.log-body {
   margin: 10px;
   min-width: 250px;
-}
+  width: 100%;
+}*/
 
 /* Include the padding and border in an element's total width and height */
 * {
@@ -172,11 +150,12 @@ ul {
 ul li {
   cursor: pointer;
   position: relative;
-  padding: 12px 8px 12px 40px;
+  padding: 12px;
   list-style-type: none;
   background: #eee;
-  font-size: 18px;
+  font-size: 16px;
   transition: 0.2s;
+  width: 100%;
 
   /* make the list items unselectable */
   -webkit-user-select: none;
@@ -219,6 +198,7 @@ ul li.checked::before {
 /* Style the close button */
 .close {
   position: relative;
+  float: right;
   right: 0;
   top: 0;
   padding: 12px 16px 12px 16px;
