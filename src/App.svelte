@@ -8,7 +8,7 @@ import layoutGridHelp from "./lib/layout_grid/helper.js";
 
 import Dashboard from "./Dashboard.svelte";
 
-import ListQueue from "./ListQueue.svelte";
+import ItemList from "./ItemList.svelte";
 import SelectList from "./SelectList.svelte";
 import Editor from "./Editor.svelte";
 import Files from "./Files.svelte";
@@ -163,7 +163,7 @@ let panelEventHistory = {
   target: "menu-item-eventhistory",
   name: "eventhistory",
   w: mul*2,
-  component: ListQueue,
+  component: ItemList,
   props: {
     readonly: true,
     dataStore: historyWritable
@@ -208,7 +208,7 @@ let panelTypes = {
     target: "menu-item-panelhistory",
     name: "history",
     w: mul*3,
-    component: ListQueue
+    component: ItemList
   },
   "menu-item-metrics": {
     visible: true,

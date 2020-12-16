@@ -10,7 +10,7 @@ import { clockFormatter, dateStringFromDate } from "./lib/clock.js";
 // import Schedule from "./Schedule.svelte";
 import Timer from "./Timer.svelte";
 import AnnotationLog from "./AnnotationLog.svelte";
-import ListQueue from "./ListQueue.svelte";
+import ItemList from "./ItemList.svelte";
 
 let historyWritable = getContext('eventHistory');
 
@@ -128,7 +128,7 @@ let timer;
 <section>
   <Timer bind:timer />
   <!-- <AnnotationLog messages={notesLog} /> -->
-  <ListQueue dataStore={todoWritable} on:didClick={updateHistory} />
+  <ItemList dataStore={todoWritable} on:didClick={updateHistory} />
 </section>
 
 <style>
