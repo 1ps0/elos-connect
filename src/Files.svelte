@@ -1,12 +1,16 @@
 <script>
 
-import { onMount, createEventDispatcher, setContext, getContext, hasContext } from 'svelte';
-import { writable, readable, derived, get } from "svelte/store";
+import { onMount, createEventDispatcher } from 'svelte';
+import { writable, get } from "svelte/store";
+
+import ItemList from "./ItemList.svelte";
+
+import { filesWritable } from "./lib/stores.js";
+import { fileSelect, fileList } from "./lib/apis.js";
+
 import { linker } from "./lib/linker.js";
 
 const dispatch = createEventDispatcher();
-const filetypeContext = getContext("filetypes");
-const registeredActions = getContext("registeredActions");
 
 // { "filetype": "pdf", "files": [], 'pageNum': 1, 'pageSize': 20}
 export let files = [];
@@ -21,38 +25,38 @@ export let pageOffset = 0;
 $: pageOffset = (metadata.pageNum - 1) * metadata.pageSize;
 $: files, metadata;
 
-async function fetchFileList(params) {
-  let actions = await get(registeredActions);
-  let data = await actions.fetch("/api/file/search", params);
-  metadata = (({ files, ...rest }) => rest)(data);
-  files = data.files;
-  console.log("processed metadata", data, files, metadata);
+function submitUpdates(e) {
+  console.log("Files submitUpdates", e);
+  // filesWritable.update((n) => n.keywords = );
+  fileList(...metadata);
 }
 
-export let selectedFiles = [];
-export const fileSelect = (node, params) => {
-  return {
-    update(val) {
+function incrementPage(e) {
+  console.log("Files incrementPage", e);
+  filesWritable.update((n) => ({
+    ...n,
+    pageNum: (n.pageNum + 1),
+    dirty: true
+  }));
+}
 
-    },
-    destroy() {
-
-    }
-  };
-};
 function addToPackage(e, file) {
   console.log('addToPackage', e);
   e.target.parentElement.parentElement.parentElement.hidden = true;
 
-  selectedFiles.push(file)
-  selectedFiles = selectedFiles;
+  // selectedFiles.push(file)
+  // selectedFiles = selectedFiles;
 }
 
 onMount(() => {
   console.log('Files mounted');
-  filetypeContext.subscribe( (val) => {
-    console.log("sub:fileset:filetypes", val, metadata);
-    fetchFileList({ ...metadata, filetype: val });
+
+  filesWritable.subscribe((val) => {
+    console.log("Files subscription got update", val);
+    if (val !== undefined && !val.dirty) {
+      files = val.files;
+      metadata = (({ files, ...rest }) => rest)(val);
+    }
   });
 });
 
@@ -64,21 +68,17 @@ onMount(() => {
       <td>
         <div class="filename">
           <span>{metadata.filetype}</span>
-          <span>{pageOffset} - {pageOffset + metadata.pageSize} ({files.length})</span>
+          <span>{pageOffset} - {pageOffset + metadata.pageSize} ({(files || []).length})</span>
         </div>
       </td>
       <td>
-        <form on:submit|preventDefault={
-          (e) => {
-              fetchFileList({...metadata, pageNum: 1});
-            }
-          }>
-          <input name="keywords" bind:value={metadata.keywords} />
+        <form on:submit|preventDefault={submitUpdates}>
+          <input name="keywords" bind:value={metadata.keywords}/>
           <label id="keyword-value">{metadata.keywords}</label>
         </form>
       </td>
       <td>
-        <button class="next-button" on:click|preventDefault={() => metadata.pageNum += 1}>
+        <button class="next-button" on:click|preventDefault={incrementPage}>
           Next Page
         </button>
       </td>
@@ -87,18 +87,16 @@ onMount(() => {
   <table id="container-files">
     <tr>
       <th class="file-name">name</th>
-      <!-- <th class="file-mime">mime | ext</th> -->
-      <th class="file-open">open</th>
-      <!-- <th class="file-options">options</th> -->
+      <th class="file-open">action</th>
     </tr>
   {#each files as file}
     <tr>
       <td name="file-name" class="file-name">{file['file.title']}</td>
       <td name="file-open" class="file-open">
-        <button use:linker={file}>open</button>
+
       </td>
       <td name="file-options" class="file-options">
-        <button use:fileSelect={selectedFiles}>add</button>
+        <!-- <button use:fileSelect={selectedFiles}>add</button> -->
       </td>
     </tr>
   {/each}
@@ -178,11 +176,6 @@ tr {
 td {
   max-width: 200px;
 }
-
-/* -------------
-   Sticky Header
-*/
-
 
 </style>
 

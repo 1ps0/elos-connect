@@ -1,10 +1,11 @@
 <script>
-import { onMount, createEventDispatcher, getContext } from 'svelte';
+import { onMount, createEventDispatcher } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
-const axios = require('axios');
+
+import { _fetch, _send } from "./apis.js";
+
 const dispatch = createEventDispatcher();
-const filetypeContext = getContext("filetypes");
 
 /*
 basically make it a selectable todo with add entry at the top.

@@ -3,7 +3,7 @@
 import Wizard from "./Wizard.svelte";
 import Files from "./Files.svelte";
 import Editor from "./Editor.svelte";
-import ListQueue from "./ListQueue.svelte";
+import ItemList from "./ItemList.svelte";
 
 import { onMount } from 'svelte';
 

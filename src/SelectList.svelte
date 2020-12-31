@@ -2,25 +2,28 @@
 import { onMount, createEventDispatcher, getContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
-const axios = require('axios');
+import { icons } from "./lib/icons.js";
+import { _fetch } from "./lib/apis.js";
+import { filesWritable } from "./lib/stores.js"
+
 const dispatch = createEventDispatcher();
-const filetypeContext = getContext("filetypes");
 
 export let eventName = "menuToggle";
-export let source;
-export let transform = (e) => { return e.name.slice(10).toUpperCase() };
+export let source = null;
+export let transform = (e) => {
+  return e.name.slice(10).toUpperCase()
+};
 
-export let item = {};
+export let data = {};
 export let items = [];
 
-$: {
-  if (source) {
-    getData(source, (response) => {
-      console.log('getting data from', source, response);
-      items = response.data.data;
-    });
-  }
+const updateSource = async (source) => {
+  let response = await _fetch(source);
+  console.log('getting data from', source, response);
+  items = response.data;
 };
+$: source !== null ? updateSource(source) : null;
+
 
 let visibleItems = [];
 $: visibleItems = items.map((item, idx) => {
@@ -44,28 +47,24 @@ function toggleActive(e) {
 }
 
 function sendEvent(e) {
-  // console.log('clicked sendEvent --', eventName, e.target, e);
+  console.log('clicked sendEvent --', eventName, e.target, e);
   toggleActive(e);
   if (eventName === "filterType") {
-    filetypeContext.update((_) => e.target.name);
+    filesWritable.update((n) => ({
+      ...n,
+      filetype: e.target.name,
+      dirty: true
+    }));
   } else {
-    dispatch(eventName, e.target);
+    dispatch(eventName, e);
   }
 }
 
-const getData = (uri, callback) => {
-  axios.get(uri)
-    .then(callback)
-    .catch((error) => {
-      console.log("got error on fetch", error);
-    });
-}
-
 onMount(async () => {
-  console.log('SelectList mounted', item);
+  console.log('SelectList mounted', data);
   // console.log('selectlist', items, eventName, visibleItems);
 
-  dispatch("didMount", item);
+  dispatch("didMount", data);
 });
 
 
@@ -74,15 +73,22 @@ onMount(async () => {
 
 <section>
 
-  <div class="pill-nav">
-    {#each visibleItems as item}
+  <div
+    class="pill-nav"
+    on:click|capture|preventDefault={sendEvent}
+  >
+    {#each visibleItems as item, index}
       <a
+        {index}
         name={item.name}
         href="#{item.name}"
-        on:click|preventDefault={sendEvent}
         class:active={item.active}
       >
-        {transform(item)}
+        {#if item.value.icon}
+          <svelte:component this={icons[item.value.icon]}/>
+        {:else}
+          {transform(item)}
+        {/if}
       </a>
     {/each}
   </div>

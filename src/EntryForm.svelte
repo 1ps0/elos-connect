@@ -7,7 +7,7 @@ import { writable, readable, derived, get } from "svelte/store";
 const dispatch = createEventDispatcher();
 
 onMount(async () => {
-  console.log('SelectList mounted', item);
+  console.log('EntryForm mounted', item);
   // console.log('selectlist', items, eventName, visibleItems);
 
   dispatch("didMount", item);
@@ -45,13 +45,27 @@ export let fields = [
 ];
 export let data = {};
 
-$: data = new FormData(document.querySelector('#entryform'));
+
+$: data;
 $: fields;
+
+function doSubmit(e) {
+
+  sendData();
+}
 
 function sendData() {
   console.log(data);
   return 200;
 }
+
+
+onMount(async () => {
+  console.log('EntryForm mounted');
+  let selector = document.querySelector('#entryform');
+  console.log("entryform selector", selector);
+  data = new FormData(selector);
+});
 
 </script>
 
@@ -76,7 +90,7 @@ function sendData() {
         <textarea id="{field.name}" name="{field.name}" placeholder="{field.placeholder}" style="height:200px"></textarea>
         {/if}
     {/each}
-    <input type="submit" value="Submit">
+    <input type="submit" value="Submit" on:submit|preventDefault={doSubmit}>
   </form>
 </div>
 

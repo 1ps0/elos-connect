@@ -2,7 +2,7 @@
 
 import { onMount } from 'svelte';
 import Editor from "./Editor.svelte";
-import ListQueue from "./ListQueue.svelte";
+import ItemList from "./ItemList.svelte";
 import Files from "./Files.svelte"
 
 export let selected_files = [];
@@ -103,7 +103,7 @@ templates/processing actions:
 -->
 
 <form id="regForm">
-  <ListQueue bind:queue={selected_files} on:dequeue />
+  <ItemList bind:queue={selected_files} on:dequeue />
   <div style="overflow:auto;">
     <div style="float:right;">
       <button type="button" id="prevBtn" on:click|preventDefault={() => nextPrev(-1)}>Previous</button>

@@ -1,6 +1,7 @@
 <script>
 import { createEventDispatcher, onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
+import { linker } from "./lib/linker.js";
 
 const dispatch = createEventDispatcher();
 
@@ -10,32 +11,8 @@ export let readonly = false;
 let queue = [];
 $: console.log('queue -->', queue);
 
-export const interactive = (node, params) => {
-  return {
-    update(e) {
-
-    },
-    destroy() {
-
-    }
-  };
-};
-
-// TODO save local storage to file, in json if possible
-const fetchFromLocalStorage = (item) => {
-    return JSON.parse(localStorage.getItem(item));
-};
-
-const saveToLocalStorage = (item, value) => {
-    localStorage.setItem(item, JSON.stringify(value));
-};
-
-const removeEntry = (e) => e.target.parentElement.remove();
-const saveEntry = (e) => {
-    console.log(e);
-    // saveToLocalStorage("log-1", e);
-};
-
+// TODO make this part of the toolbar
+// TODO make 'add' trigger a writable
 function addEntry(e) {
   console.log('adding entry to listqueue:', e);
   let name = document.getElementById('task-input').value;
@@ -56,8 +33,8 @@ function didClick(e) {
 
 // below code borrowed from https://www.w3schools.com/howto/howto_js_todolist.asp
 
-onMount(() => {
-  console.log('ListQueue mounted', $$props, $$restProps);
+onMount(async () => {
+  console.log('ItemList mounted');
 
   if (dataStore) {
     console.log("dataStore mounted in listview");
@@ -69,8 +46,10 @@ onMount(() => {
 });
 
 function close(e) {
+  // TODO remove from queue
   var div = e.target.parentElement;
   div.style.display = "none";
+  dispatch('removed', item);
 }
 
 function markAsDone(e) {
@@ -96,8 +75,7 @@ function markAsDone(e) {
       {/if}
       {#each queue as item}
         <li
-          use:interactive={queue}
-          on:click={didClick}
+          use:linker={queue}
           class:checked={item.checked}
           class="item"
         >

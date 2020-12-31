@@ -4,6 +4,13 @@ import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
 export let images = [];
+export let imageLinks = [];
+export let dataStore;
+
+$: imageLinks = images.slice(0,9).map((img) => {
+  return `/api/load?filepath=${img.locations[0].split('/Volumes/ARCHIVE/')[1]}`;
+});
+$: console.log("images: ", imageLinks, images);
 
 // Get the elements with class="column"
 let elements = document.getElementsByClassName("column");
@@ -15,14 +22,32 @@ function scale(percent=25) {
   }
 }
 
+onMount(async () => {
+  console.log("ImageGallery mounted", $$props, $$restProps);
+  if (dataStore !== undefined) {
+    dataStore.subscribe((val) => {
+      if (val === undefined) {
+        console.log("ImageGallery dataStore had no value?", get(dataStore));
+        return;
+      }
+      console.log("ImageGallery dataStore got update", val);
+      if (val.files !== undefined && val.files.length > 0) {
+        images = val.files;
+      }
+    });
+  }
+});
+
 </script>
 
 <section>
 
 <div class="row">
     <div class="column">
-      {#each images as image}
+      {#each imageLinks as image}
         <img src="{image}"/>
+      {:else}
+        No Data
       {/each}
     </div>
 </div>
@@ -38,7 +63,7 @@ function scale(percent=25) {
 
 /* Create two equal columns that sits next to each other */
 .column {
-  flex: 50%;
+  flex: 100%;
   padding: 0 4px;
 }
 

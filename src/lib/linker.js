@@ -44,6 +44,10 @@ import { createEventDispatcher } from 'svelte';
 import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
+import { columnMultiplier } from "../config/layout.js";
+
+export function buildLinks() {}
+
 
 export function linker(node, file) {
 
@@ -54,10 +58,10 @@ export function linker(node, file) {
   // const updateEditorSource = (source) => {
   //   historyWritable.update(n => n.editor.sourceContent = source);
   // }
-  const openFileHandler = (e) => {
+  const clickHandler = (e) => {
     e.preventDefault();
-    dispatch('openFile', {
-      source: "fileset",
+    dispatch('didClick', {
+      source: node.name,
       data: file
     });
   }
@@ -66,7 +70,7 @@ export function linker(node, file) {
 
   // node.addEventListener('openFile', _handler);
   // on:click|preventDefault={() =>
-  node.addEventListener('click', openFileHandler);
+  node.addEventListener('click', clickHandler);
 
   // console.log("linker found", node, file);
 
@@ -77,8 +81,7 @@ export function linker(node, file) {
     },
     destroy() {
       console.log("linker is destroyed");
-      // node.removeEventListener('openFile', _handler);
-      // node.removeListener('click', openFileHandler);
+      node.removeListener('click', clickHandler);
     }
   };
 }

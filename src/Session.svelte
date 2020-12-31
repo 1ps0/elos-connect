@@ -1,18 +1,13 @@
 <script>
 
-import { createEventDispatcher, onMount, setContext, getContext, hasContext } from 'svelte';
-import { writable, readable, derived, get } from "svelte/store";
+import { onMount } from 'svelte';
+import { writable } from "svelte/store";
 
-import { eventHistory } from "./lib/event_history.js";
-import { clockFormatter, dateStringFromDate } from "./lib/clock.js";
+import { historyWritable, filesWritable, registeredActions } from "./lib/stores.js"
+import { updateHistory } from "./lib/apis.js";
 
-// import PkgEdit from "./PkgEdit.svelte";
-// import Schedule from "./Schedule.svelte";
 import Timer from "./Timer.svelte";
-import AnnotationLog from "./AnnotationLog.svelte";
 import ItemList from "./ItemList.svelte";
-
-let historyWritable = getContext('eventHistory');
 
 let pollsWritable = writable([
   {
@@ -104,30 +99,12 @@ let todoWritable = writable([
   }
 ]);
 
-function updateHistory(e) {
-  let val = e.detail;
-  let event = {
-    // warning: this could get bloated
-    data:{
-      ...val,
-      timer: timer,
-      at: (dateStringFromDate(new Date()), clockFormatter.format(new Date()))
-    }
-  };
-  console.log("update history with", e.detail, event);
-  historyWritable.update((n) => [
-    ...n,
-    ...[event]
-  ]);
-}
-
 let timer;
 
 </script>
 
 <section>
   <Timer bind:timer />
-  <!-- <AnnotationLog messages={notesLog} /> -->
   <ItemList dataStore={todoWritable} on:didClick={updateHistory} />
 </section>
 

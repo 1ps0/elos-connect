@@ -11,37 +11,16 @@ hits: Array(15) [ "grammar", "disk", "expert" ] // ...
 "metadata.version": "1"
 */
 import { onMount } from 'svelte';
-
-import jquery from './lib/jquery-1.11.1.js';
+import { writable, get } from "svelte/store";
+import { filesWritable, fileSelect, fileList } from "./lib/stores.js"
+import { linker } from "./lib/linker.js";
 
 export let file;
-export let viewer_file;
-
-let filenames = [];
-let file_uris = [];
-let topics = file.topics;
-// let neighbors = [];
-
-let data;
-
-async function fetch_file_data(hash) {
-  const ret = await fetch('/api/file/'+hash);
-  return await ret.json();
-}
 
 onMount(async () => {
-  let data = await fetch_file_data(file["hash.blake2b"]);
-  // console.log(data);
-  filenames = data.filenames;
-  file_uris = data.file_uris;
-  // neighbors = data.neighbors;
-  // topics = data.topics;
+
 });
 
-function updateViewer(uri, i) {
-  console.log(i, uri);
-  viewer_file = uri;
-}
 </script>
 
 <div class="container">
@@ -52,11 +31,12 @@ function updateViewer(uri, i) {
 
   <h2>{file['file.title']}</h2>
 
-  {#each file_uris as uri, i}
+  {#each file_uris as uri}
     <div class="file_open" id="file-{i}" on:click={() => updateViewer(uri, i)}>
-      <div id="file-{i}-viewer"></div>
-      Open
+      <button use:linker={file}>open</button>
+
     </div>
+
   {/each}
   <div class="topics">
     <p>

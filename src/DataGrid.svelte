@@ -2,22 +2,15 @@
 <script>
 
 import { onMount } from 'svelte';
+
 import DataGrid from 'svelte-data-grid';
 import TextboxCell from './cell/textbox-cell.svelte';
 import SelectCell from './cell/select-cell.svelte';
 import CheckboxCell from './cell/checkbox-cell.svelte';
 
-const axios = require('axios');
+import { _fetch, _send } from "./lib/apis.js";
 
-export let item = {
-  h: 2,
-  w: 2,
-  x: 2,
-  y: 0,
-  component: DataGrid,
-  target: "menu-item-metrics",
-  name: "Metrics"
-};
+export let dbName = "metrics";
 
 export let columns = [];
 export let rows = [];
@@ -30,26 +23,33 @@ let allowResizeFromTableHeaders = true;
 let allowColumnReordering = true;
 let rowHeight = 50;
 
-$: columns;
-$: rows;
+$: {
+  if (grid !== null) {
+    grid.$on('valueUpdated', (e) => {
+      console.log('grid value updated', e);
+    });
+  }
+}
+
 $: sortFn;
 $: filterFn;
-// $: {
-//  grid.rows
-// };
+
+const updateData = async () => {
+  let results = await _fetch(`/api/db/${dbName}`);
+  console.log("DataGrid Fetch", results);
+  columns = renderColumns(results['columns']);
+  rows = renderRows(results);
+}
+// $: updateData();
 
 
-async function fetch_(uri, cb) {
-  const ret = await fetch(uri);
-  cb(await ret.json());
-};
-
-function render_columns(columns) {
+function renderColumns(columns) {
   let grid_el = document.getElementsByClassName("grid-wrap");
   if (grid_el == undefined) {
     return;
   }
   return columns.map((val, i) => {
+    console.log(val);
     return {
       display: val,
       dataName: val,
@@ -61,46 +61,51 @@ function render_columns(columns) {
   });
 }
 
-function add_new_row() {
-  rows.push({
-    // metric_id: null,
-    // entity_id: "me",
-    // name: "stress",
-    // value_string: null,
+function rowDefaults() {
+  return {
+    metric_id: null,
+    entity_id: "me",
+    name: "stress",
+    value_string: null,
     timestamp: Date.now()
-  });
+  };
+}
+
+function addNewRow() {
+  // rows.push();
+  rows.push(rowDefaults());
   rows = rows;
 }
 
-function submit_changes() {
+function submitChanges() {
 
 }
 
 function zip(keys, vals) {
   return keys.reduce((m, key, index) => {
-  m[key] = vals[index];
-  return m;
+    m[key] = vals[index];
+    return m;
   }, {});
 }
 
-function render_rows(data) {
+function renderRows(data) {
   return data.rows.map((row, row_i) => {
     return zip(data.columns, row);
   });
 }
 
-function value_updated(e) {
+function valueUpdated(e) {
   console.log('value updated', e);
 }
 
-function push_values() {
-  console.log("grid data:",grid.data);
-  return;
+function pushValues() {
   const { columns } = grid.get();
 
-  axios.post("/api/db/metrics", {
-    columns: grid.get(),
-    rows: grid.data
+  _send("/api/db/metrics", params={
+    body: {
+      columns: grid.get(),
+      rows: grid.data
+    }
   })
   .then((response) => {
     console.log(response);
@@ -112,21 +117,9 @@ function push_values() {
 
 onMount(async () => {
   console.log("DataGrid mounted");
-  await fetch_("/api/db/metrics", (ret) => {
-    console.log(ret);
-    columns = render_columns(ret['columns']);
-    rows = render_rows(ret);
-    console.log(rows);
-  });
-  if (grid == null)
-    return;
 
-  grid.$on('valueUpdated', (e) => {
-    console.log('grid value updated', e);
-  });
-  console.log(rows);
-
-  // add_new_row();
+  await updateData();
+  // addNewRow();
 });
 
 
@@ -134,12 +127,13 @@ onMount(async () => {
 
 
 <section class="grid-wrap">
-  <button on:click={add_new_row}>Add</button>
+  <button on:click={addNewRow}>Add</button>
+  <button on:click={pushValues}>Save</button>
   <DataGrid
     bind:this={grid}
     bind:rows={rows}
     bind:columns={columns}
-    on:valueUpdated={value_updated}
+    on:valueUpdated={valueUpdated}
     bind:allowResizeFromTableCells={allowResizeFromTableCells}
     bind:allowResizeFromTableHeaders={allowResizeFromTableHeaders}
     bind:allowColumnReordering={allowColumnReordering}

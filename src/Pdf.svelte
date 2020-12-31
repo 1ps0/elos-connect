@@ -1,20 +1,24 @@
 <script>
 
 import { onMount } from 'svelte';
+// import PdfViewer from 'svelte-pdf';
 
 export let viewerFile = "about:blank"; //"docs/A teleosemantic approach to information in the brain.pdf"
 export let target = "#" // page=4, etc
 $: viewerFile = `/api/load?filepath=${viewerFile}${target}`;
 
+export let pageNum = 1;
+$: pageNum;
 
 onMount(() => {
-  console.log('Frame mounted');
+  console.log('Pdf mounted');
 });
 
 </script>
 
 <div id="container">
-    <iframe src={viewerFile}></iframe>
+    <!-- <PdfViewer url={viewerFile} bind:pageNum /> -->
+    <iframe src={viewerFile} />
 </div>
 
 <style>
