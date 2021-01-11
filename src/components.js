@@ -1,14 +1,18 @@
 
+// import Tagset from "./Tagset.svelte";
+import Options from "./Options.svelte";
 import Toolbar from "./Toolbar.svelte";
 import CommandBar from "./CommandBar.svelte";
 import Clock from "./Clock.svelte";
 import Profile from "./Profile.svelte";
+import Todo from "./Todo.svelte";
+import Poll from "./Poll.svelte";
 
 import ItemList from "./ItemList.svelte";
 import SelectList from "./SelectList.svelte";
 import Editor from "./Editor.svelte";
 import Files from "./Files.svelte";
-import Session from "./Session.svelte";
+// import Session from "./Session.svelte";
 import Pdf from "./Pdf.svelte";
 import DataGrid from "./DataGrid.svelte";
 import EntryForm from "./EntryForm.svelte";
@@ -18,15 +22,18 @@ import PkgIndex from "./PkgIndex.svelte";
 import PkgCreate from "./PkgCreate.svelte";
 
 export const components = {
+    "options": Options,
     "toolbar": Toolbar,
     "commandbar": CommandBar,
     "clock": Clock,
     "profile": Profile,
+    "todo": Todo,
+    "poll": Poll,
     "itemlist": ItemList,
     "selectlist": SelectList,
     "editor": Editor,
     "files": Files,
-    "session": Session,
+    // "session": Session,
     "pdf": Pdf,
     "datagrid": DataGrid,
     "entryform": EntryForm,

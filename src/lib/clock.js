@@ -1,6 +1,15 @@
 
 import { readable } from 'svelte/store';
 
+export const minutesToSeconds = (minutes) => minutes * 60;
+export const secondsToMinutes = (seconds) => Math.floor(seconds / 60);
+export const padWithZeroes = (number) => number.toString().padStart(2, '0');
+export const capitalize = (phrase) => {
+  return phrase.replace(/^\w/, (c) => {
+    return c.toUpperCase();
+  })
+};
+
 // render functions for content
 export const formatTime = (timeInSeconds) => {
   const minutes = secondsToMinutes(timeInSeconds);
@@ -51,8 +60,11 @@ export const timerAction = (node, args) => {
       case "lap":   button.addEventListener("click", args.lap); break;
     }
   }
-  clockStore.subscribe((val) => {
 
+  clockStore.subscribe((val) => {
+    for (let doc in document.querySelector(".timer p")) {
+      doc.innerHTML = formatTime(timer);
+    }
   });
 
   node.addEventListener("", (e) => {});

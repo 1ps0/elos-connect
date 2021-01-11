@@ -69,7 +69,7 @@
   class:transition={!active}
   class:active
   class:no-user={active}
-  style="width: {active ? cloneBound.width : width}px; height:{active ? cloneBound.height : height}px; transform: translate({active ? cloneBound.left : left}px, {active ? cloneBound.top : top}px);">
+  style="overflow: {(item.props && item.props.overflow) ? item.props.overflow : 'scroll'}; width: {active ? cloneBound.width : width}px; height:{active ? cloneBound.height : height}px; transform: translate({active ? cloneBound.left : left}px, {active ? cloneBound.top : top}px);">
   <slot />
   {#if resizable}
     <div class="svlt-grid-resizer" on:pointerdown={resizePointerDown} />

@@ -13,7 +13,7 @@ target: eg id, target value for types
 */
 
 export let panelTypes = {
-  "panel-sub-toolbar": {
+  "panel-layouts": {
     visible: true,
     target: "toolbar",
     name: "toolbar",
@@ -45,12 +45,23 @@ export let panelTypes = {
     componentName: "itemlist",
     props: {
       readonly: true,
-      dataStore: "historyWritable"
+      dataStore: "history"
+    }
+  },
+  "panel-actionhistory": {
+    visible: false,
+    target: "panel-actionhistory",
+    name: "actionhistory",
+    w: columnMultiplier*3,
+    componentName: "itemlist",
+    props: {
+      readonly: true,
+      dataStore: "log"
     }
   },
   "panel-clock": {
     visible: true,
-    target: "main-item-clock",
+    target: "panel-clock",
     name: "clock",
     w: columnMultiplier * 5,
     h: 1,
@@ -59,19 +70,47 @@ export let panelTypes = {
       timezone: "PST"
     }
   },
+  "panel-timer": {
+    visible: true,
+    target: "panel-timer",
+    name: "timer",
+    w: columnMultiplier * 5,
+    h: 4,
+    componentName: "timer",
+    props: {}
+  },
+  "panel-todo": {
+    visible: true,
+    target: "panel-todo",
+    name: "todo",
+    w: columnMultiplier*5,
+    componentName: "todo",
+    dependents: [ "panel-timer", "panel-eventhistory" ],
+    props: {}
+  },
+  "panel-polls": {
+    visible: true,
+    target: "panel-polls",
+    name: "polls",
+    w: columnMultiplier*5,
+    componentName: "poll",
+    props: {}
+  },
   "panel-commandbar": {
     visible: true,
-    target: "main-item-commandbar",
+    target: "panel-commandbar",
     name: "commandbar",
     w: columnMultiplier * 5,
     h: 1,
-    componentName: "commandbar"
+    componentName: "commandbar",
+    props: { overflow: 'visible' }
   },
   "panel-mainmenu": {
     visible: true,
     target: "panel-mainmenu",
     name: "mainmenu",
-    w: columnMultiplier*1,
+    w: columnMultiplier*11,
+    h: 1,
     componentName: "selectlist",
     event: { name: 'menuToggle', callback: "togglePanel" },
     props: {
@@ -84,7 +123,7 @@ export let panelTypes = {
     visible: true,
     target: "panel-files",
     name: "files",
-    w: columnMultiplier*5,
+    w: columnMultiplier*6,
     toolbar: {},
     componentName: "files",
     event: { name: 'openFile', callback: "openFile" },
@@ -125,16 +164,8 @@ export let panelTypes = {
     w: columnMultiplier*5,
     componentName: "imagegallery",
     props: {
-      dataStore: "filesWritable"
+      dataStore: "files"
     }
-  },
-  "panel-session": {
-    visible: true,
-    target: "panel-session",
-    name: "session",
-    w: columnMultiplier*5,
-    componentName: "session",
-    dependents: [ "panel-filetypes" ]
   },
   "panel-entryform": {
     visible: true,

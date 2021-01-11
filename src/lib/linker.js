@@ -3,7 +3,7 @@
 
 Gearbox
 
-This is the set of functions which manage file extension and component associations
+This is the set of functions which manage item/file extension and component associations
 Swap this gearbox for others to change how the application associates and launches data.
 
 Type 1: Naive.
@@ -49,8 +49,8 @@ import { columnMultiplier } from "../config/layout.js";
 export function buildLinks() {}
 
 
-export function linker(node, file) {
-
+export function linker(node, item) {
+  // handle and apply to node any "actions" in "item"
   const dispatch = createEventDispatcher();
   const historyWritable = getContext("eventHistory");
   // const _handler = (e) => { console.log("linker handled", e); };
@@ -62,26 +62,26 @@ export function linker(node, file) {
     e.preventDefault();
     dispatch('didClick', {
       source: node.name,
-      data: file
+      data: item
     });
   }
   // const cells = node.cells;
-  // const openCell = cells.namedItems("file-open");
+  // const openCell = cells.namedItems("item-open");
 
   // node.addEventListener('openFile', _handler);
   // on:click|preventDefault={() =>
   node.addEventListener('click', clickHandler);
 
-  // console.log("linker found", node, file);
+  // console.log("linker found", node, item);
 
   return {
     update(newFile) {
       // console.log("linker got update", newFile);
-      // file = newFile;
+      // item = newFile;
     },
     destroy() {
       console.log("linker is destroyed");
-      node.removeListener('click', clickHandler);
+      // node.removeListener('click', clickHandler);
     }
   };
 }

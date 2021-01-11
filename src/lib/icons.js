@@ -19,14 +19,17 @@ import AudioConsole16 from "carbon-icons-svelte/lib/AudioConsole16";
 import Awake16 from "carbon-icons-svelte/lib/Awake16";
 import Categories16 from "carbon-icons-svelte/lib/Categories16";
 import CheckmarkFilled16 from "carbon-icons-svelte/lib/CheckmarkFilled16";
+import CollapseCategories16 from "carbon-icons-svelte/lib/CollapseCategories16";
 import ClosedCaptionAlt16 from "carbon-icons-svelte/lib/ClosedCaptionAlt16";
 import CloseFilled16 from "carbon-icons-svelte/lib/CloseFilled16";
 import Code16 from "carbon-icons-svelte/lib/Code16";
+import CodeReference16 from "carbon-icons-svelte/lib/CodeReference16";
 import Compare16 from "carbon-icons-svelte/lib/Compare16";
 import Crossroads16 from "carbon-icons-svelte/lib/Crossroads16";
 import CrossTab16 from "carbon-icons-svelte/lib/CrossTab16";
 import Cut16 from "carbon-icons-svelte/lib/Cut16";
 import Delete16 from "carbon-icons-svelte/lib/Delete16";
+import DeployRules16 from "carbon-icons-svelte/lib/DeployRules16";
 import Download16 from "carbon-icons-svelte/lib/Download16";
 import Education16 from "carbon-icons-svelte/lib/Education16";
 import Exit16 from "carbon-icons-svelte/lib/Exit16";
@@ -64,7 +67,7 @@ export let icons = {
   "alarm": Alarm16,
   "cli": Terminal16,
   "code": Code16,
-  "list": Launch16,
+  "list": CollapseCategories16,
   "table": CrossTab16,
   "image": Image16,
   "files": Categories16,
@@ -73,6 +76,7 @@ export let icons = {
   "profile": UserAvatarFilled16,
   "settings": Settings16,
   "preferences": AudioConsole16,
+  "polls": DeployRules16,
 
   // toolbar
   "status-hidden": AccessibilityColor16,
@@ -87,6 +91,8 @@ export let icons = {
   "action-fullscreen": Maximize16,
   "action-login": Login16,
   "action-logout": Exit16,
+
+  "action-open-code": CodeReference16,
 
   "task-add": AlarmAdd16,
   "task-remove": AlarmSubtract16,

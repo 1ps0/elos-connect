@@ -1,7 +1,35 @@
 <script>
 import { onMount } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
+
+import { commandOptionsWritable} from "./lib/stores.js";
 import { commandLine } from "./lib/commandLine.js";
+
+import AutoComplete from './AutoComplete.svelte';
+
+import { boldSearchTerm, findMatches } from './lib/apis.js';
+
+const tagColors = ['#000', '#3298dc', '#f14668', '#48c774', '#3273dc']
+const searchModifiers = ['cmd', 'files', 'do', 'panel', 'profile', 'settings']
+
+export let options = [];
+export let selectedOptions = [];
+
+commandOptionsWritable.subscribe(val => {
+  console.log("history", val.history())
+});
+
+const _handleSubmit = (selectedValue, category) => {
+  if (options.indexOf(selectedValue) === -1) {
+    options = [...options, selectedValue]
+  }
+  if (selectedOptions.indexOf(selectedValue) === -1) {
+    selectedOptions = [...selectedOptions, selectedValue]
+  }
+}
+const handleSubmit = (e) => {
+  _handleSubmit(e.selected, searchModifiers);
+};
 
 onMount(async () => {
   console.log('CommandBar mounted');
@@ -10,36 +38,34 @@ onMount(async () => {
 </script>
 
 <section class="title">
-  <span class="header">
-    <input use:commandLine type="text" name="input" id="search" />
+  <span class="header" use:commandLine={commandOptionsWritable}>
+    <AutoComplete
+      {options}
+      {searchModifiers}
+      onSubmit={handleSubmit}
+      themeColor={tagColors[4]}
+    />
+
   </span>
 </section>
 
 <style>
 
 .header {
-  text-align: left;
-  border: 1px solid black;
-  padding: 5px 20px 10px 10px;
 }
 
 .title {
-  background-color: #ccc;
   color: #444;
-  cursor: pointer;
-  padding: 18px;
   width: 100%;
-  border: none;
-  outline: none;
+  padding: 4.5px;
 }
 
  /* Style the search box */
 #search {
-  width: 50%;
-  font-size: 18px;
-  padding: 11px;
-  border: 1px solid #ddd;
-  float: left;
+  /*width: 90%;*/
+  font-size: 16px;
+  text-align: left;
+  /*float: left;*/
 }
 
 

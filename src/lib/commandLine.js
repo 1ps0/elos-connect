@@ -28,8 +28,18 @@ action = (node: HTMLEelement, parameters: any) => {
 */
 
 import { createEventDispatcher } from 'svelte';
-import { onMount, setContext, getContext, hasContext } from 'svelte';
+// import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
+
+import { historyWritable, filesWritable, registeredActions, workspaceWritable, profileWritable } from "./stores.js";
+
+const stores = {
+  history: historyWritable,
+  files: filesWritable,
+  actions: registeredActions,
+  workspace: workspaceWritable,
+  profile: profileWritable
+};
 
 const splitInputs = (val) => { return val.split(":") };
 
@@ -40,16 +50,20 @@ const splitInputs = (val) => { return val.split(":") };
 //   session: (val) => { val },
 // };
 
-export function commandLine(node, params) {
+export function commandLine(node, store) {
+  console.log("[init][action] commandLine", node, store);
+  console.log("[->action]", get(store).actions());
   const dispatch = createEventDispatcher();
-  const dashboardWritable = getContext("dashboard");
-  const historyWritable = getContext("eventHistory");
-  const registeredActions = getContext("registeredActions");
+  store.subscribe(val => {
+    console.log("[action] commandLine got update", val);
+  });
+  // const dashboardWritable = getContext("dashboard");
+  // const historyWritable = getContext("eventHistory");
+  // const registeredActions = getContext("registeredActions");
 
   const enterKeyPressed = (event) => { return event.keyCode === 13 };
 
-  let form = new FormData();
-  console.log("commandline formdata", node, params);
+  // let form = new FormData();
 
   const inputTypes = {
     cmd: (args) => {}, // command

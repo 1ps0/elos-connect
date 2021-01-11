@@ -14,10 +14,10 @@ $: selectedFilePath = `/api/load?filepath=${selectedFile}`;
 
 export const handleResponse = async (response) => {
   if (response.ok) { // if HTTP-status is 200-299
-    let json = await response.json();
-    return json;
+    let data = await response.json();
+    return data;
   } else {
-    console.log("HTTP-Error: ", _url, response.status);
+    console.log("HTTP-Error: ", response.status);
     return null;
   }
 }
@@ -63,6 +63,56 @@ export const fileList = async (params) => {
   console.log("updated filelist", data, params);
 };
 
+// -- filters
+
+export const findMatches = (options, searchTerm) =>
+  options.filter(option => {
+    const foundIndex = option.toLowerCase().indexOf(
+      searchTerm.toLowerCase()
+    )
+
+    return foundIndex > -1
+  })
+
+export const spanWrapSearchTerm = (option, foundIndex, searchTermLength) => {
+  const searchTerm = option.slice(foundIndex, foundIndex + searchTermLength)
+
+  return `<span>${searchTerm}</span>`
+}
+
+export const boldSearchTerm = (option, searchTerm) => {
+  const lowercaseOption = option.toLowerCase()
+  const lowercaseSearchTerm = searchTerm.toLowerCase()
+  let foundIndex = lowercaseOption.indexOf(lowercaseSearchTerm)
+  let html = ''
+
+  if (!searchTerm) return option
+
+  while (foundIndex !== -1) {
+    const previousIndex = foundIndex
+    const searchTermLength = searchTerm.length
+
+    if (!html) {
+      html = option.slice(0, foundIndex)
+    }
+
+    html += spanWrapSearchTerm(option, foundIndex, searchTermLength)
+
+    // check for another match
+    foundIndex = lowercaseOption.indexOf(lowercaseSearchTerm, foundIndex + 1)
+
+    if (foundIndex !== -1) {
+      // second match: add raw string before next section of html
+      html += option.slice(previousIndex + searchTermLength, foundIndex)
+    } else {
+      // single match, finish the string
+      html += option.slice(previousIndex + searchTermLength)
+    }
+  }
+
+  return html || option
+}
+
 // -- event callbacks
 
 export function updateHistory(e) {
@@ -71,19 +121,14 @@ export function updateHistory(e) {
 }
 
 export function _updateHistory(val) {
+  const date = dateStringFromDate(new Date());
+  const fmtDate = clockFormatter.format(new Date());
   let event = {
     // warning: this could get bloated
-    data:{
-      ...val,
-      timer: timer,
-      at: (dateStringFromDate(new Date()), clockFormatter.format(new Date()))
-    }
+    data: { ...val, timer: timer, at: [date, fmtDate] }
   };
   console.log("update history with", e.detail, event);
-  historyWritable.update((n) => [
-    ...n,
-    ...[event]
-  ]);
+  historyWritable.update((n) => [...n, event]);
 }
 
 export function updateFiletype(e) {
@@ -92,13 +137,10 @@ export function updateFiletype(e) {
 };
 
 export function _updateFiletype(typeName) {
-  filesWritable.update((obj) => ({
-    ...obj,
-    metadata: {
-      ...obj.metadata,
-      filetype: typeName
-    }
-  }));
+  filesWritable.update((obj) => {
+    obj.filetype = typeName;
+    return obj;
+  });
 };
 
 // -- subscriptions
@@ -110,7 +152,7 @@ filesWritable.subscribe(val => {
   - cache and load different data for api calls and params
 
   */
-  if (val.dirty) {
+  if (val && val !== "undefined" && val.dirty) {
     // FIXME this could have a race condition buried
     fileList((({ files, dirty, ...rest }) => rest)(val));
     filesWritable.update(n => ({...n, dirty: false}));
@@ -119,7 +161,6 @@ filesWritable.subscribe(val => {
 
 workspaceWritable.subscribe((val) => {
   console.log("[init] workspaceWritable update", val);
-  localStorage.setItem('workspace', JSON.stringify(val));
   //JSON.parse(localStorage.getItem(item));
 });
 
@@ -135,7 +176,7 @@ historyWritable.subscribe((val) => {
 });
 
 profileWritable.subscribe((val) => {
-  console.log("update for profileWritable", val);
+  console.log("[init] profileWritable update", val);
   /*
   OPTIONS:
   - sync with remote.
@@ -144,7 +185,7 @@ profileWritable.subscribe((val) => {
 });
 
 registeredActions.subscribe((val) => {
-  console.log("update for registeredActions", val);
+  console.log("[init] registeredActions update", val);
   /*
   OPTIONS:
   - build lists of subscribers for events/updates

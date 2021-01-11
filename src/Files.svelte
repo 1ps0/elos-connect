@@ -1,11 +1,11 @@
 <script>
 
 import { onMount, createEventDispatcher } from 'svelte';
-import { writable, get } from "svelte/store";
+import { writable, derived } from "svelte/store";
 
 import ItemList from "./ItemList.svelte";
 
-import { filesWritable } from "./lib/stores.js";
+import { filesWritable, historyWritable } from "./lib/stores.js";
 import { fileSelect, fileList } from "./lib/apis.js";
 
 import { linker } from "./lib/linker.js";
@@ -23,16 +23,16 @@ export let metadata = {
 export let pageOffset = 0;
 
 $: pageOffset = (metadata.pageNum - 1) * metadata.pageSize;
-$: files, metadata;
+$: files;
+$: metadata;
 
 function submitUpdates(e) {
   console.log("Files submitUpdates", e);
-  // filesWritable.update((n) => n.keywords = );
   fileList(...metadata);
 }
 
 function incrementPage(e) {
-  console.log("Files incrementPage", e);
+console.log("Files incrementPage", e);
   filesWritable.update((n) => ({
     ...n,
     pageNum: (n.pageNum + 1),
@@ -48,6 +48,35 @@ function addToPackage(e, file) {
   // selectedFiles = selectedFiles;
 }
 
+function openFile(e) {
+  console.log('open file', e);
+  let data = e.detail.data;
+  let target;
+
+  if (["md", "txt", "json"].indexOf(data.name) != -1) {
+    target = "panel-editor";
+  }
+  else if (data.name === "pdf") {
+    target = "panel-pdf";
+  }
+  else if (["jpg", "gif", "png"].indexOf(data.name) != -1) {
+    target = "panel-gallery";
+  }
+
+  if (target !== undefined) {
+    let options = {
+      target_name: target,
+      props: {
+        data: selectedFilePath
+      }
+    };
+    console.log("data for open file", options);
+
+    historyWritable.update(n => [...n, data]);
+
+    // add(target, options);
+  }
+}
 onMount(() => {
   console.log('Files mounted');
 
@@ -63,44 +92,15 @@ onMount(() => {
 </script>
 
 <div>
-  <table>
-    <tr>
-      <td>
-        <div class="filename">
-          <span>{metadata.filetype}</span>
-          <span>{pageOffset} - {pageOffset + metadata.pageSize} ({(files || []).length})</span>
-        </div>
-      </td>
-      <td>
-        <form on:submit|preventDefault={submitUpdates}>
-          <input name="keywords" bind:value={metadata.keywords}/>
-          <label id="keyword-value">{metadata.keywords}</label>
-        </form>
-      </td>
-      <td>
-        <button class="next-button" on:click|preventDefault={incrementPage}>
-          Next Page
-        </button>
-      </td>
-    </tr>
-  </table>
-  <table id="container-files">
-    <tr>
-      <th class="file-name">name</th>
-      <th class="file-open">action</th>
-    </tr>
-  {#each files as file}
-    <tr>
-      <td name="file-name" class="file-name">{file['file.title']}</td>
-      <td name="file-open" class="file-open">
-
-      </td>
-      <td name="file-options" class="file-options">
-        <!-- <button use:fileSelect={selectedFiles}>add</button> -->
-      </td>
-    </tr>
-  {/each}
-  <ul>
+  <div class="filename">
+    <span>{metadata.filetype}</span>
+    <span>{pageOffset} - {pageOffset + metadata.pageSize} ({(files || []).length})</span>
+  </div>
+  <ItemList
+    buttonName="Search"
+    dataStore={derived(filesWritable, $a => $a.files)}
+    inputEvent={(e) => submitUpdates(e)}
+  />
 </div>
 
 <style>

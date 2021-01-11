@@ -1,4 +1,4 @@
-// 2nd order
+// 2nd order, +complexity dependent @../config/parameters
 
 /*
 need a 'view' window of current open stuff to maintain the place
@@ -14,20 +14,60 @@ then writable calls readable's values for those datasets
 import { writable, get } from 'svelte/store';
 import { workspaceConfig } from "../config/parameters.js";
 
-export const profileWritable = writable({});
+export const cacheFor = (name, otherwise={}) => {
+  let ret = localStorage.getItem(`${name}_cache`);
+  return ret ? JSON.parse(ret) : otherwise;
+};
 
 export const workspaceWritable = writable(workspaceConfig);
-
+export const historyWritable = writable(cacheFor("history"));
+export const logWritable = writable(cacheFor("log"));
+export const filesWritable = writable(cacheFor("files"));
+export const profileWritable = writable(cacheFor("profile"));
+export const todoWritable = writable(cacheFor("todo", []));
+export const pollsWritable = writable(cacheFor("polls", []));
 export const registeredActions = writable({});
 
-export const historyWritable = writable([]);
+export const commandOptionsWritable = writable({
+  polls: () => cacheFor("polls"),
+  todo: () => cacheFor("todo"),
+  workspace: () => cacheFor("workspace"),
+  history: () => cacheFor("history"),
+  log: () => cacheFor("log"),
+  profile: () => cacheFor("profile"),
+  actions: () => registeredActions,
+  links: () => writable({}),
+  files: () => cacheFor("files", {
+    files: [],
+    filetype: "md",
+    keywords: "",
+    pageNum: 1,
+    pageSize: 10,
+    dirty: false
+  }),
+})
 
-export const filesWritable = writable({
-  files: [],
-  filetype: "md",
-  keywords: "",
-  pageNum: 1,
-  pageSize: 10,
-  dirty: false
-});
+export const stores = {
+  // tmp data
+  todo: todoWritable,
+  polls: pollsWritable,
+  history: historyWritable,
+  log: logWritable,
+  // config data
+  workspace: workspaceWritable,
+  // api data
+  files: filesWritable,
+  profile: profileWritable,
+  // local actions
+  actions: registeredActions,
+  commandOptions: commandOptionsWritable,
+};
+for (let name in stores) {
+  stores[name].subscribe((val) => {
+    if (val !== undefined && val !== "undefined") {
+      localStorage.setItem(`${name}_cache`, JSON.stringify(val));
+    }
+  });
+}
+
 

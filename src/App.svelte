@@ -1,14 +1,30 @@
 <script>
+/*
+TODO - desktop
+- set background color/image/video/panel
+- smiley face when no panels open
+- hover over smiley face shows "close" button below it
+- right-click capture needs to have an option to show browser right-click menu (probably via capture-event suppression)
+
+TODO - layout
+- panels with pin/close buttons, probably a desktop bar
+- panel with options to arrange panels
+- panel with native os functions, like open finder, run command, etc.
+- join panels, split panels
+- toolbar can be glommed on to all sides of a component frame
+
+*/
+
 import { onMount } from 'svelte';
 
-import { components } from "./components.js";
 import { rowHeight, panelGap, columnCount } from "./config/layout.js";
+import { icons } from "./lib/icons.js";
+import { components } from "./components.js";
 import { panelTypes } from "./config/panels.js";
 console.log("PANEL TYPES", panelTypes);
 
-import { icons } from "./lib/icons.js";
-import { _fetch, selectedFile, selectedFilePath, updateFiletype } from "./lib/apis.js";
-import { historyWritable, filesWritable, registeredActions } from "./lib/stores.js"
+import { _fetch, selectedFile, selectedFilePath, updateFiletype, } from "./lib/apis.js";
+import { stores } from "./lib/stores.js"
 
 import LayoutGrid from "./LayoutGrid.svelte";
 import layoutGridHelp from "./lib/layout_grid/helper.js";
@@ -33,55 +49,64 @@ let persistent = {
 };
 
 function hydrateParams(item) {
-  if (item.props !== undefined && item.props.dataStore !== undefined) {
-    switch(item.props.dataStore) {
-      case "filesWritable": item.props.dataStore = filesWritable; break;
-      case "historyWritable": item.props.dataStore = historyWritable; break;
-      case "workspaceWritable": item.props.dataStore = workspaceWritable; break;
+  if (item.props !== undefined && item.props.dataStore !== undefined && item.props.dataStore) {
+    item.props.dataStore = stores[item.props.dataStore];
+    if (item.target in objects) {
+      objects[item.target].$set("dataStore", item.props.dataStore);
     }
   }
   if (item.event !== undefined && item.event.callback !== undefined) {
     switch(item.event.callback) {
       case "updateFiletype": item.event.callback = updateFiletype; break;
       case "togglePanel": item.event.callback = togglePanel; break;
-      case "openFile": item.event.callback = openFile; break;
+      // case "openFile": item.event.callback = openFile; break;
+    }
+    if (item.target in objects) {
+      objects[item.target].$on(item.event.name, item.event.callback);
     }
   }
   return item;
 }
 
-function _newItem(options={}) {
-  return layoutGridHelp.item({
-    h: 7,
-    id: genId(),
-    ...hydrateParams(options),
-  });
-}
-
-function positionItem(item) {
+const positionItem = (item) => {
   let findOutPosition = layoutGridHelp.findSpace(item, items, columnCount);
-  console.log("UPDATED POSITION", item, findOutPosition, items);
+  // console.log("UPDATED POSITION", item, findOutPosition, items);
   return { ...item, ...findOutPosition };
+};
+
+function _newItem(options={}) {
+  return positionItem(
+    layoutGridHelp.item({
+      h: 7,
+      id: genId(),
+      ...hydrateParams(options),
+    })
+  );
 }
 
 function add(panelTarget, options={}) {
   // TODO render icons into menuItems
   // TODO render source/dataStore props into actual stores
   // TODO ...? i changed a lot
+  if (!components.hasOwnProperty(panelTarget)) {
+    console.log("MISSING COMPONENT", panelTarget);
+  }
+  if (!panelTypes.hasOwnProperty(panelTarget)) {
+    console.log("MISSING PANEL", panelTarget);
+  }
+
   options = {...panelTypes[panelTarget], ...options};
-  let rootItem = positionItem(_newItem(options));
+  let rootItem = _newItem(options);
   items = [...items, rootItem];
   console.log('ADDING', panelTarget, rootItem);
 
-  for (let x = 0; x < (options.dependents || []).length; x++) {
-    let dependent = panelTypes[options.dependents[x]];
-    let newItem = _newItem(dependent);
-    newItem = positionItem({
-      ...newItem,
+  for (let dep in (options.dependents || [])) {
+    let newItem = _newItem({
+      ...panelTypes[dep],
       border: "red",
       parent: rootItem
     });
-    console.log("ADDING DEPENDENT", newItem);
+    // console.log("ADDING DEPENDENT", newItem);
     items = [...items, newItem];
   }
 };
@@ -90,8 +115,8 @@ const onAdd = (val) => {
   console.log("did onAdd", val);
   let item = val.detail;
 
-  if (item.event) {
-    objects[item.id].$on(item.event.name, item.event.callback);
+  if (item.event && item.target in objects) {
+    objects[item.target].$on(item.event.name, item.event.callback);
   }
 };
 
@@ -107,66 +132,38 @@ const remove = (item) => {
 
 function togglePanel(e) {
   console.log("TOGGLE PANEL", e);
-  let itemName = e.detail.target.name;
-  // console.log('toggled panel', e);
-  _togglePanel(itemName);
+  let item = e.detail;
+  _togglePanel(item.name);
 }
 
 function _togglePanel(itemName) {
   let _layout = items.filter((value) => value.target === itemName);
-  console.log('_toggled panel', itemName, _layout);
   adjustAfterRemove = true;
+  console.log("_TOGGEL PANEL", itemName, _layout);
   if (_layout.length > 0)
     remove(itemName);
   else
     add(itemName);
 };
 
-function openFile(e) {
-  console.log('open file', e);
-  let data = e.detail.data;
-  let target;
-
-  if (["md", "txt", "json"].indexOf(data.name) != -1) {
-    target = "panel-editor";
-  }
-  else if (data.name === "pdf") {
-    target = "panel-pdf";
-  }
-  else if (["jpg", "gif", "png"].indexOf(data.name) != -1) {
-    target = "panel-gallery";
-  }
-
-  if (target !== undefined) {
-    let options = {
-      target_name: target,
-      props: {
-        data: selectedFilePath
-      }
-    };
-    console.log("data for open file", options);
-
-    historyWritable.update(n => [...n, data]);
-
-    add(target, options);
-  }
-}
 
 onMount(async () => {
   console.log('App mounted');
 
-  registeredActions.update((n) => {
-    n.gallery = (itemName) => {};
-    n.video = (itemName) => {};
-    n.audio = (itemName) => {};
-    n.toggle = (itemName) => { _togglePanel(itemName) };
-  });
+  // registeredActions.update((n) => {
+  //   n.gallery = (itemName) => {};
+  //   n.video = (itemName) => {};
+  //   n.audio = (itemName) => {};
+  //   n.toggle = (itemName) => { _togglePanel(itemName) };
+  // });
 
   add("panel-mainmenu");
+  add("panel-commandbar");
   // _togglePanel("panel-gallery");
   // _togglePanel("panel-files");
   // _togglePanel("panel-session");
   // _togglePanel("panel-dashboard");
+
 
 });
 
@@ -175,7 +172,6 @@ onMount(async () => {
 <main>
 
   <section>
-
     <LayoutGrid
       cols={columnCount}
       gap={panelGap}
@@ -187,7 +183,7 @@ onMount(async () => {
       <svelte:component
         id={item.target}
         this={components[item.componentName]}
-        bind:this={objects[item.id]}
+        bind:this={objects[item.target]}
         on:didMount={onAdd}
         data={item}
         {...item.props}

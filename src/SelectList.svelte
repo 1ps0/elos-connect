@@ -17,12 +17,14 @@ export let transform = (e) => {
 export let data = {};
 export let items = [];
 
-const updateSource = async (source) => {
-  let response = await _fetch(source);
-  console.log('getting data from', source, response);
-  items = response.data;
+const updateFromSource = async (source) => {
+  if (source !== null) {
+    let response = await _fetch(source);
+    console.log('getting data from', source, response);
+    items = response.data;
+  }
 };
-$: source !== null ? updateSource(source) : null;
+$: source !== null ? updateFromSource(source) : null;
 
 
 let visibleItems = [];
@@ -37,33 +39,35 @@ $: visibleItems = items.map((item, idx) => {
 
 // $: console.log('menu items', items, eventName, visibleItems);
 
-function toggleActive(e) {
-  let item = visibleItems.filter((value) => value.name === e.originalTarget.name);
-  if (item.length > 0)
-    item = item[0];
-
-  // console.log("toggleactive", visibleItems, e, item);
+function toggleActive(item) {
   item.active = !item.active;
 }
 
 function sendEvent(e) {
-  console.log('clicked sendEvent --', eventName, e.target, e);
-  toggleActive(e);
+
+}
+
+function _sendEvent(item) {
+  console.log('clicked sendEvent --', eventName, item);
   if (eventName === "filterType") {
     filesWritable.update((n) => ({
       ...n,
-      filetype: e.target.name,
+      filetype: item.name,
       dirty: true
     }));
   } else {
-    dispatch(eventName, e);
+    // let _data = { ...data, target: e.target.name};
+    // console.log("dispatching", eventName, _data);
+    dispatch(eventName, item);
   }
+  toggleActive(item);
 }
 
 onMount(async () => {
   console.log('SelectList mounted', data);
   // console.log('selectlist', items, eventName, visibleItems);
 
+  updateFromSource(source);
   dispatch("didMount", data);
 });
 
@@ -73,30 +77,41 @@ onMount(async () => {
 
 <section>
 
-  <div
+  <ul
     class="pill-nav"
-    on:click|capture|preventDefault={sendEvent}
   >
     {#each visibleItems as item, index}
-      <a
+      <li
         {index}
-        name={item.name}
-        href="#{item.name}"
+        {item}
         class:active={item.active}
+        on:click|stopPropagation|preventDefault={() => _sendEvent(item) }
       >
         {#if item.value.icon}
           <svelte:component this={icons[item.value.icon]}/>
         {:else}
           {transform(item)}
         {/if}
-      </a>
+      </li>
+    {:else}
+      <li>No Data</li>
     {/each}
-  </div>
+  </ul>
 </section>
 
 <style>
+
+ul {
+  list-style:none;
+  list-style-type:none;
+  padding:0px;
+  margin:0px;
+}
+
 /* Style the links inside the pill navigation menu */
-.pill-nav a {
+.pill-nav li {
+  background-repeat:no-repeat;
+  background-position:0px 5px;
   display: block;
   color: black;
   text-align: center;
@@ -104,16 +119,17 @@ onMount(async () => {
   text-decoration: none;
   /*font-size: 17px;*/
   border-radius: 5px;
+  float: left;
 }
 
 /* Change the color of links on mouse-over */
-.pill-nav a:hover {
+.pill-nav li:hover {
   background-color: #ddd;
   color: black;
 }
 
 /* Add a color to the active/current link */
-.pill-nav a.active {
+.pill-nav li.active {
   background-color: dodgerblue;
   color: white;
 }

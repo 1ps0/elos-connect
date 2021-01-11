@@ -1,6 +1,16 @@
 <script>
-import { createEventDispatcher, onMount, setContext, getContext, hasContext } from 'svelte';
-import { writable, readable, derived, get } from "svelte/store";
+/*
+TODO -
+1. action buttons
+2. badges
+3. dynamic customization (via in-page editor)
+4. sortable
+5. quick add
+6. mass select/actions
+7. filterable
+*/
+
+import { createEventDispatcher, onMount } from 'svelte';
 import { linker } from "./lib/linker.js";
 
 const dispatch = createEventDispatcher();
@@ -9,21 +19,15 @@ export let dataStore;
 export let readonly = false;
 
 let queue = [];
-$: console.log('queue -->', queue);
+$: console.log('queue -->', queue, dataStore);
 
 // TODO make this part of the toolbar
 // TODO make 'add' trigger a writable
-function addEntry(e) {
-  console.log('adding entry to listqueue:', e);
-  let name = document.getElementById('task-input').value;
-  dataStore.update( n => [...n, {
-    data: {
-      name: name
-    },
-    checked: false,
-    eventClick: (e) => {}
-  }]);
-}
+
+export let buttonName = null;
+export let inputEvent = null;
+$: readonly = !buttonName || !inputEvent;
+
 
 // when we click a list item
 function didClick(e) {
@@ -37,10 +41,12 @@ onMount(async () => {
   console.log('ItemList mounted');
 
   if (dataStore) {
-    console.log("dataStore mounted in listview");
+    console.log("dataStore mounted in ItemList");
     dataStore.subscribe((val) => {
-      console.log("listqueue update", val);
-      queue = val;
+      if (val) {
+        console.log("ItemList update", val);
+        queue = val;
+      }
     });
   }
 });
@@ -64,31 +70,30 @@ function markAsDone(e) {
 
 
 <section class="log-body">
-    <ul id="task-list">
-      {#if !readonly}
-        <li>
-          <div id="add-btn">
+  <ul id="task-list">
+    {#if !readonly}
+      <li>
+        <div id="add-btn">
+          <form on:submit|preventDefault={inputEvent}>
             <input type="text" id="task-input" placeholder="">
-            <span on:click={addEntry}>Add</span>
-          </div>
-        </li>
-      {/if}
-      {#each queue as item}
-        <li
-          use:linker={queue}
-          class:checked={item.checked}
-          class="item"
-        >
-          {#each Object.entries(item.data || {}) as entry}
-            <div class="entry">
-              <span class="key">{entry[0]}</span>:
-              <span class="value">{entry[1]}</span>
-            </div>
-          {/each}
-          <span class="close" on:click={close}>{"\u00D7"}</span>
-        </li>
-      {/each}
-    </ul>
+            <button type="submit">{buttonName}</button>
+          </form>
+        </div>
+      </li>
+    {/if}
+    {#each queue as item}
+      <li
+        use:linker={queue}
+        class:checked={item.checked}
+        class="item"
+      >
+        <span>{item['file.title']}</span>
+        <span class="close" on:click={close}>{"\u00D7"}</span>
+      </li>
+    {:else}
+      <li>No Data {queue}</li>
+    {/each}
+  </ul>
 </section>
 
 <style>
@@ -179,7 +184,7 @@ ul li.checked::before {
   float: right;
   right: 0;
   top: 0;
-  padding: 12px 16px 12px 16px;
+  /*padding: 12px 16px 12px 16px;*/
 }
 
 .close:hover {

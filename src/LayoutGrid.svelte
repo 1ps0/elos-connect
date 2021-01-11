@@ -85,6 +85,7 @@
     });
   }, debounceResize);
 
+
   onMount(() => {
     const sizeObserver = new ResizeObserver(entries => {
       let width = entries[0].contentRect.width;

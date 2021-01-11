@@ -2,18 +2,9 @@
 
 import { onMount } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
-import { timerAction } from "./lib/clock.js";
+import { timerAction, formatTime, minutesToSeconds } from "./lib/clock.js";
 
 /* --- */
-const minutesToSeconds = (minutes) => minutes * 60;
-const secondsToMinutes = (seconds) => Math.floor(seconds / 60);
-const padWithZeroes = (number) => number.toString().padStart(2, '0');
-const capitalize = (phrase) => {
-  return phrase.replace(/^\w/, (c) => {
-    return c.toUpperCase();
-  })
-};
-
 
 let timerDurations = {
   "pomodoro_short":  minutesToSeconds(25),
@@ -24,7 +15,7 @@ let timerDurations = {
 
 const timerTypes = ["break", "work", "study"];
 
-export let startTime = POMODORO_SHORT;
+export let startTime = timerDurations.pomodoro_short;
 
 let activeType = 0;
 $: activeType = activeType % timerTypes.length;
@@ -48,15 +39,6 @@ const completeTimer = () => {
   clearInterval(timerInterval);
 };
 
-const startTimer = () => {
-  timerInterval = setInterval(() => {
-    timer -= 1;
-    if (timer === 0) {
-      completeTimer();
-    }
-  }, 1000);
-};
-
 const resetTimer = () => {
   clearInterval(timerInterval);
   if (activeType === 0) {
@@ -70,18 +52,14 @@ const pauseTimer = () => {
   clearInterval(timerInterval);
 };
 
-const lapTimer = () => {
-  completeTimer();
-  startTimer();
-}
-
 let timerArgs = {
   interval: startTime,
   complete: completeTimer,
-  start: startTimer,
+  // start: startTimer,
   reset: resetTimer,
   pause: pauseTimer,
-  lap: lapTimer
+  // lap: lapTimer,
+  data: {}
 };
 
 onMount(async () => {
@@ -92,7 +70,7 @@ onMount(async () => {
 </script>
 
 <section class="timer-container" use:timerAction={timerArgs}>
-  <p class="timer">{formatTime(timer)}</p>
+  <p class="timer"></p>
   <div class="control">
     <button name="start">Start</button>
     <button name="reset">Reset</button>

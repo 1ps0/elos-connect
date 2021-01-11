@@ -22,7 +22,6 @@ import { writable, readable, derived, get } from "svelte/store";
 export function profileEdit(node, params) {
 
   const dispatch = createEventDispatcher();
-  const dashboardWritable = getContext("dashboard");
 
   const openProfile = (e) => {
     e.preventDefault();
