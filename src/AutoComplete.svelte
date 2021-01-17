@@ -14,13 +14,13 @@
     return acc
   }, {})
 
-  let results = [...options, ...searchModifiers]
-  let searchModifier = ''
-  let modifierLabelWidth
-  let inputRef
-  let showAutocompleteResults = false
-  let highlightIndex = 0
-  let selectedValue = ''
+  let results = [...options, ...searchModifiers];
+  let searchModifier = '';
+  let modifierLabelWidth;
+  let inputRef;
+  let showAutocompleteResults = false;
+  let highlightIndex = 0;
+  let selectedValue = '';
 
   const showResults = () => {
     highlightIndex = 0

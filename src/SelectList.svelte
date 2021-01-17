@@ -77,15 +77,14 @@ onMount(async () => {
 
 <section>
 
-  <ul
-    class="pill-nav"
-  >
-    {#each visibleItems as item, index}
+  <ul class="pill-nav">
+    {#each visibleItems as item, index (item.name) }
       <li
         {index}
         {item}
         class:active={item.active}
         on:click|stopPropagation|preventDefault={() => _sendEvent(item) }
+        title={item.value.highlight}
       >
         {#if item.value.icon}
           <svelte:component this={icons[item.value.icon]}/>

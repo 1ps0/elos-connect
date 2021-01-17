@@ -16,10 +16,11 @@ let timerDurations = {
 const timerTypes = ["break", "work", "study"];
 
 export let startTime = timerDurations.pomodoro_short;
+$: console.log("TIMER START TIME", startTime);
 
 let activeType = 0;
 $: activeType = activeType % timerTypes.length;
-$: console.log('activeType -->', activeType);
+// $: console.log('activeType -->', activeType);
 
 const addInterval = (time) => {
   timerQueue.push({
@@ -30,11 +31,11 @@ const addInterval = (time) => {
 
 const completeTimer = () => {
   if (++activeType == 0) {
-    addInterval(BREAK_SHORT);
-    timer = POMODORO_SHORT;
+    addInterval(timerDurations.break_short);
+    timer = timerDurations.pomodoro_short;
   } else {
-    addInterval(POMODORO_SHORT);
-    timer = BREAK_SHORT;
+    addInterval(timerDurations.pomodoro_short);
+    timer = timerDurations.break_short;
   }
   clearInterval(timerInterval);
 };
@@ -42,9 +43,9 @@ const completeTimer = () => {
 const resetTimer = () => {
   clearInterval(timerInterval);
   if (activeType === 0) {
-    timer = POMODORO_SHORT;
+    timer = timerDurations.pomodoro_short;
   } else {
-    timer = BREAK_SHORT;
+    timer = timerDurations.break_short;
   }
 };
 

@@ -53,6 +53,7 @@ export const timerAction = (node, args) => {
   let timer = args.interval;
   let buttons = document.querySelector("button");
   for (let button in buttons) {
+    console.log("TIMERACTION INIT", timer, button, args);
     switch(button.name) {
       case "start": button.addEventListener("click", args.start); break;
       case "reset": button.addEventListener("click", args.reset); break;
@@ -67,7 +68,7 @@ export const timerAction = (node, args) => {
     }
   });
 
-  node.addEventListener("", (e) => {});
+  // node.addEventListener("", (e) => {});
 
   return {
     update(val) {},

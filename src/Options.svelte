@@ -1,52 +1,57 @@
 <script>
+
+import { createEventDispatcher, onMount } from 'svelte';
+import { icons } from "./lib/icons.js";
+
+const dispatch = createEventDispatcher();
+
+export let item = null;
+export let target = null;
+
+export let panelOpts = null;
+$: panelOpts = item ? item.props.panelOpts : panelOpts;
+// $: debug ? console.log("OPTIONS", panelOpts) : null;
+
+onMount(async () => {
+  console.log('Options mounted');
+});
+
 </script>
 
-<div id="mySidenav" class="sidenav">
-  <a href="#" id="about">About</a>
-  <a href="#" id="blog">Blog</a>
-  <a href="#" id="projects">Projects</a>
-  <a href="#" id="contact">Contact</a>
-</div>
-
-<div style="margin-left:80px;">
-  <h2>Hoverable Sidenav Buttons</h2>
-  <p>Hover over the buttons in the left side navigation to open them.</p>
+<div id="nav" class="sidenav">
+  {#each panelOpts as opt}
+    <a href="#" class="tag">
+      {console.log("OPT", opt, _)}
+      {#if opt.icon}
+        <svelte:component this={icons[opt.icon]} />
+      {:else}
+        {opt.title}
+      {/if}
+    </a>
+  {/each}
 </div>
 
 <style>
-#mySidenav a {
+
+#nav a {
   position: absolute;
-  left: -80px;
+  /*left: -80px;*/
   transition: 0.3s;
-  padding: 15px;
-  width: 100px;
+  padding: 5px;
+  width: 20px;
   text-decoration: none;
-  font-size: 20px;
+  font-size: 14px;
   color: white;
   border-radius: 0 5px 5px 0;
 }
 
-#mySidenav a:hover {
+#nav a:hover {
   left: 0;
 }
 
-#about {
+.tag {
   top: 20px;
   background-color: #4CAF50;
 }
 
-#blog {
-  top: 80px;
-  background-color: #2196F3;
-}
-
-#projects {
-  top: 140px;
-  background-color: #f44336;
-}
-
-#contact {
-  top: 200px;
-  background-color: #555
-}
 </style>

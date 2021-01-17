@@ -20,11 +20,11 @@ import { onMount } from 'svelte';
 import { rowHeight, panelGap, columnCount } from "./config/layout.js";
 import { icons } from "./lib/icons.js";
 import { components } from "./components.js";
-import { panelTypes } from "./config/panels.js";
+import { panelTypes, optionTypes } from "./config/panels.js";
 console.log("PANEL TYPES", panelTypes);
 
-import { _fetch, selectedFile, selectedFilePath, updateFiletype, } from "./lib/apis.js";
-import { stores } from "./lib/stores.js"
+import { _fetch, updateFiletype, } from "./lib/apis.js";
+import { stores, layoutItemsWritable } from "./lib/stores.js"
 
 import LayoutGrid from "./LayoutGrid.svelte";
 import layoutGridHelp from "./lib/layout_grid/helper.js";
@@ -34,10 +34,20 @@ const randomNumberInRange = (min, max) => Math.random() * (max - min) + min;
 const serializeLayout = (val) => { return JSON.stringify({...val, key: 'layout'}) };
 
 
+
 let items = [];
 let objects = {};
 $: items;
 $: console.log("ITEMS", items);
+
+let layoutItems = layoutItemsWritable;
+layoutItems.subscribe(val => {
+  items = val.items;
+  for (let pendingItem in val.add) {
+    add(pendingItem[0], pendingItem[1]);
+  }
+  // layoutItems.update( n => ({...n.items, add: []} ));
+});
 
 let adjustAfterRemove = false;
 
@@ -49,19 +59,45 @@ let persistent = {
 };
 
 function hydrateParams(item) {
-  if (item.props !== undefined && item.props.dataStore !== undefined && item.props.dataStore) {
+
+  if (!components.hasOwnProperty(item.componentName)) {
+    console.log("MISSING COMPONENT", item.componentName);
+  }
+
+  if (item.props !== undefined
+      && item.props.panelOpts === undefined) {
+    item.props.panelOpts = Object.assign({}, optionTypes);
+    for (let opt in item.props.panelOpts) {
+      let val = item.props.panelOpts[opt];
+      switch(val.title) {
+        case 'close': val.onClick = () => { remove(item) }; break;
+        case 'pin': val.onClick = () => {}; break;
+      }
+    }
+  }
+
+  // hydrate datastores
+  if (item.props !== undefined
+      && item.props.dataStore !== undefined
+      && item.props.dataStore) {
+
     item.props.dataStore = stores[item.props.dataStore];
+
     if (item.target in objects) {
       objects[item.target].$set("dataStore", item.props.dataStore);
     }
   }
-  if (item.event !== undefined && item.event.callback !== undefined) {
+
+  // hydrate events
+  if (item.event !== undefined
+      && item.event.callback !== undefined) {
+
     switch(item.event.callback) {
       case "updateFiletype": item.event.callback = updateFiletype; break;
       case "togglePanel": item.event.callback = togglePanel; break;
       // case "openFile": item.event.callback = openFile; break;
     }
-    if (item.target in objects) {
+    if (item && item.target && item.target in objects) {
       objects[item.target].$on(item.event.name, item.event.callback);
     }
   }
@@ -88,9 +124,6 @@ function add(panelTarget, options={}) {
   // TODO render icons into menuItems
   // TODO render source/dataStore props into actual stores
   // TODO ...? i changed a lot
-  if (!components.hasOwnProperty(panelTarget)) {
-    console.log("MISSING COMPONENT", panelTarget);
-  }
   if (!panelTypes.hasOwnProperty(panelTarget)) {
     console.log("MISSING PANEL", panelTarget);
   }
@@ -115,7 +148,7 @@ const onAdd = (val) => {
   console.log("did onAdd", val);
   let item = val.detail;
 
-  if (item.event && item.target in objects) {
+  if (item && item.event && item.target in objects) {
     objects[item.target].$on(item.event.name, item.event.callback);
   }
 };
@@ -124,8 +157,9 @@ const remove = (item) => {
   // FIXME move object to stasis BEFORE deleting it
   items = items.filter((value) => value.target !== item);
   if (adjustAfterRemove) {
+    // items = layoutGridHelp.adjust(items, columnCount);
     delete objects[item];
-    items = layoutGridHelp.adjust(items, columnCount);
+    // adjustAfterRemove =
   }
   console.log('removing ---',item, items);
 };
@@ -189,6 +223,14 @@ onMount(async () => {
         {...item.props}
         {index}
       />
+      {#if item.props && item.props.panelOpts}
+        <svelte:component
+          id={item.id}
+          this={components.options}
+          bind:target={objects[item.target]}
+          {item}
+        />
+      {/if}
     </LayoutGrid>
   </section>
 

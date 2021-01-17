@@ -1,5 +1,6 @@
 
 // import Tagset from "./Tagset.svelte";
+import Timer from "./Timer.svelte";
 import Options from "./Options.svelte";
 import Toolbar from "./Toolbar.svelte";
 import CommandBar from "./CommandBar.svelte";
@@ -25,6 +26,7 @@ export const components = {
     "options": Options,
     "toolbar": Toolbar,
     "commandbar": CommandBar,
+    "timer": Timer,
     "clock": Clock,
     "profile": Profile,
     "todo": Todo,

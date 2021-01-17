@@ -98,7 +98,7 @@ export function commandLine(node, store) {
       let _cmdResult = _cmdFunc(_cmdArgs);
       console.log("cmd result was", _cmdWord, _cmdArgs, _cmdResult);
 
-      historyWritable.update(n => [...n, [_cmdWord, _cmdArgs, _cmdResult]]);
+      historyWritable.update(n => [...(n || []), [_cmdWord, _cmdArgs, _cmdResult]]);
     }
 
     // dispatch('openFile', {
@@ -116,7 +116,7 @@ export function commandLine(node, store) {
     },
     destroy() {
       console.log("commandline is destroyed");
-      node.removeListener('keypress', submitCommand);
+      // node.removeListener('keypress', submitCommand);
     }
   };
 }

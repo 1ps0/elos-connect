@@ -5,7 +5,7 @@ import { writable, derived } from "svelte/store";
 
 import ItemList from "./ItemList.svelte";
 
-import { filesWritable, historyWritable } from "./lib/stores.js";
+import { filesWritable, historyWritable, layoutItemsWritable } from "./lib/stores.js";
 import { fileSelect, fileList } from "./lib/apis.js";
 
 import { linker } from "./lib/linker.js";
@@ -32,7 +32,7 @@ function submitUpdates(e) {
 }
 
 function incrementPage(e) {
-console.log("Files incrementPage", e);
+  console.log("Files incrementPage", e);
   filesWritable.update((n) => ({
     ...n,
     pageNum: (n.pageNum + 1),
@@ -40,26 +40,21 @@ console.log("Files incrementPage", e);
   }));
 }
 
-function addToPackage(e, file) {
-  console.log('addToPackage', e);
-  e.target.parentElement.parentElement.parentElement.hidden = true;
-
-  // selectedFiles.push(file)
-  // selectedFiles = selectedFiles;
-}
+const selectedFile = (item) => item ? item['locations'][0].split('/Volumes/ARCHIVE/')[1] : "";
+const selectedFilePath = (item) => `/api/load?filepath=${selectedFile(item)}`;
 
 function openFile(e) {
   console.log('open file', e);
-  let data = e.detail.data;
+  let data = e.detail;
   let target;
 
-  if (["md", "txt", "json"].indexOf(data.name) != -1) {
+  if (["md", "txt", "json"].indexOf(data['file.ext']) != -1) {
     target = "panel-editor";
   }
-  else if (data.name === "pdf") {
+  else if (data['file.ext'] === "pdf") {
     target = "panel-pdf";
   }
-  else if (["jpg", "gif", "png"].indexOf(data.name) != -1) {
+  else if (["jpg", "gif", "png"].indexOf(data['file.ext']) != -1) {
     target = "panel-gallery";
   }
 
@@ -67,14 +62,18 @@ function openFile(e) {
     let options = {
       target_name: target,
       props: {
-        data: selectedFilePath
+        data: selectedFilePath(data)
       }
     };
     console.log("data for open file", options);
 
-    historyWritable.update(n => [...n, data]);
+    // historyWritable.update(n => [...(n || []), data]);
 
-    // add(target, options);
+    layoutItemsWritable.update( n => ({
+        ...n,
+        add: [...n.add, [target, options]]
+      })
+    );
   }
 }
 onMount(() => {
@@ -98,6 +97,8 @@ onMount(() => {
   </div>
   <ItemList
     buttonName="Search"
+    titleKey="file.title"
+    on:didClick={openFile}
     dataStore={derived(filesWritable, $a => $a.files)}
     inputEvent={(e) => submitUpdates(e)}
   />

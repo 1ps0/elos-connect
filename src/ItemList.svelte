@@ -19,23 +19,33 @@ export let dataStore;
 export let readonly = false;
 
 let queue = [];
-$: console.log('queue -->', queue, dataStore);
+// $: console.log('queue -->', queue, dataStore);
 
 // TODO make this part of the toolbar
 // TODO make 'add' trigger a writable
 
 export let buttonName = null;
 export let inputEvent = null;
+export let titleKey = "";
 $: readonly = !buttonName || !inputEvent;
+$: titleKey;
 
 
 // when we click a list item
 function didClick(e) {
   console.log('did click', e);
-  dispatch("didClick", { name: e.target.firstChild.wholeText,  } );
+  dispatch("didClick", e );
 }
 
 // below code borrowed from https://www.w3schools.com/howto/howto_js_todolist.asp
+
+
+function close(e) {
+  // TODO remove from queue
+  var div = e.target.parentElement;
+  div.style.display = "none";
+  dispatch('removed', e);
+}
 
 onMount(async () => {
   console.log('ItemList mounted');
@@ -50,21 +60,6 @@ onMount(async () => {
     });
   }
 });
-
-function close(e) {
-  // TODO remove from queue
-  var div = e.target.parentElement;
-  div.style.display = "none";
-  dispatch('removed', item);
-}
-
-function markAsDone(e) {
-  let item = e.item;
-  console.log('------>', item);
-  // TODO remove from this queue and pass to callback/update to next queue
-  item.checked = true;
-  dispatch('markedDone', item);
-}
 
 </script>
 
@@ -81,17 +76,18 @@ function markAsDone(e) {
         </div>
       </li>
     {/if}
-    {#each queue as item}
+    {#each queue as _item (_item.name)}
       <li
         use:linker={queue}
-        class:checked={item.checked}
+        class:checked={_item.checked}
         class="item"
+        on:click={() => didClick(_item)}
       >
-        <span>{item['file.title']}</span>
-        <span class="close" on:click={close}>{"\u00D7"}</span>
+        <span>{_item[titleKey]}</span>
+        <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
       </li>
     {:else}
-      <li>No Data {queue}</li>
+      <li>No Data</li>
     {/each}
   </ul>
 </section>

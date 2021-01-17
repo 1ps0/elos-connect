@@ -8,57 +8,72 @@ import { updateHistory } from "./lib/apis.js";
 
 import ItemList from "./ItemList.svelte";
 
+export let dataStore = todoWritable;
+
 let todoItems = [
   {
+    type: "action",
+    category: "drink",
+    name: "Coffee",
+    value: "count",
     checked: false,
-    data: {
-      name: "Coffee"
-    },
   },
   {
+    type: "action",
+    category: "exercise",
+    name: "Walk",
+    value: "duration",
     checked: false,
-    data: {
-      name: "Walk"
-    },
   },
   {
+    type: "action",
+    category: "exercise",
+    name: "Ring Fit",
+    value: "duration",
     checked: false,
-    data: {
-      name: "Ring Fit"
-    },
   },
   {
+    type: "action",
+    category: "project",
+    name: "Monk",
+    value: "duration",
     checked: false,
-    data: {
-      name: "Monk"
-    },
   },
   {
+    type: "action",
+    category: "project",
+    name: "ELOS*",
+    value: "duration",
     checked: false,
-    data: {
-      name: "elos"
-    },
   },
   {
+    type: "action",
+    category: "work",
+    name: "Work",
+    value: "duration",
     checked: false,
-    data: {
-      name: "social native"
-    },
   }
 ];
 
-todoWritable.update(n => [...(n || []), ...todoItems]);
+todoWritable.update(n => [...(n.length > 0 ? n : todoItems)]);
 
 function addEntry(e) {
   console.log('adding entry to listqueue:', e);
   let name = document.getElementById('task-input').value;
-  dataStore.update( n => [...n, {
-    data: {
-      name: name
-    },
-    checked: false,
-    eventClick: (e) => {}
-  }]);
+  if (dataStore) {
+    // dataStore.update( n => [...n, {
+    //   name: name,
+    //   checked: false,
+    //   eventClick: (e) => {}
+    // }]);
+  } else {
+
+  }
+}
+
+function removeEntry(e) {
+  console.log("removing entry from listqueue:", e);
+  // TODO mark todo as removed
 }
 
 </script>
@@ -68,7 +83,9 @@ function addEntry(e) {
     dataStore={todoWritable}
     on:didClick={updateHistory}
     buttonName="Add"
+    titleKey="name"
     inputEvent={addEntry}
+    on:removed={removeEntry}
   />
 </section>
 

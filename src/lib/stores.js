@@ -20,12 +20,18 @@ export const cacheFor = (name, otherwise={}) => {
 };
 
 export const workspaceWritable = writable(workspaceConfig);
+
 export const historyWritable = writable(cacheFor("history"));
+
 export const logWritable = writable(cacheFor("log"));
+
 export const filesWritable = writable(cacheFor("files"));
+export const layoutItemsWritable = writable(cacheFor("layoutItems", { items: [], add: [] }));
+
 export const profileWritable = writable(cacheFor("profile"));
 export const todoWritable = writable(cacheFor("todo", []));
 export const pollsWritable = writable(cacheFor("polls", []));
+
 export const registeredActions = writable({});
 
 export const commandOptionsWritable = writable({
@@ -34,6 +40,7 @@ export const commandOptionsWritable = writable({
   workspace: () => cacheFor("workspace"),
   history: () => cacheFor("history"),
   log: () => cacheFor("log"),
+  layoutItems: () => cacheFor("layoutItems"),
   profile: () => cacheFor("profile"),
   actions: () => registeredActions,
   links: () => writable({}),
@@ -53,6 +60,7 @@ export const stores = {
   polls: pollsWritable,
   history: historyWritable,
   log: logWritable,
+  layoutItems: layoutItemsWritable,
   // config data
   workspace: workspaceWritable,
   // api data

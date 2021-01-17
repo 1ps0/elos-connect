@@ -44,6 +44,7 @@ import Maximize16 from "carbon-icons-svelte/lib/Maximize16";
 import Menu16 from "carbon-icons-svelte/lib/Menu16";
 import ModelAlt16 from "carbon-icons-svelte/lib/ModelAlt16";
 import Pdf16 from "carbon-icons-svelte/lib/Pdf16";
+import Pin16 from "carbon-icons-svelte/lib/Pin16";
 import Settings16 from "carbon-icons-svelte/lib/Settings16";
 import Switcher16 from "carbon-icons-svelte/lib/Switcher16";
 import Sql16 from "carbon-icons-svelte/lib/Sql16";
@@ -85,6 +86,7 @@ export let icons = {
   "status-closemark": CloseFilled16,
   "status-online": Wifi16,
   "status-offline": WifiOff16,
+  "status-pin": Pin16,
 
   "action-add": AddFilled16,
   "action-popout": Launch16,

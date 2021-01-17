@@ -24,7 +24,7 @@ let allowColumnReordering = true;
 let rowHeight = 50;
 
 $: {
-  if (grid !== null) {
+  if (grid) {
     grid.$on('valueUpdated', (e) => {
       console.log('grid value updated', e);
     });

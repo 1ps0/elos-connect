@@ -5,10 +5,6 @@ import { historyWritable, filesWritable, registeredActions, workspaceWritable, p
 
 // -- reactive globals
 
-export let selectedFile = "";
-export let selectedFilePath = null;
-$: selectedFilePath = `/api/load?filepath=${selectedFile}`;
-
 
 // -- primitive functions
 
@@ -115,27 +111,27 @@ export const boldSearchTerm = (option, searchTerm) => {
 
 // -- event callbacks
 
+
+export function _updateHistory(val) {
+  console.log("_UPDATE HISTORY", val);
+  const date = dateStringFromDate(new Date());
+  const fmtDate = clockFormatter.format(new Date());
+  // warning: this could get bloated
+  let event = { ...val, at: [date, fmtDate] };
+  // console.log("update history with", e.detail, event);
+  historyWritable.update((n) => [...(n || []), event]);
+}
 export function updateHistory(e) {
+  console.log("UPDATE HISTORY", e);
   let val = e.detail;
   _updateHistory(val);
 }
 
-export function _updateHistory(val) {
-  const date = dateStringFromDate(new Date());
-  const fmtDate = clockFormatter.format(new Date());
-  let event = {
-    // warning: this could get bloated
-    data: { ...val, timer: timer, at: [date, fmtDate] }
-  };
-  console.log("update history with", e.detail, event);
-  historyWritable.update((n) => [...n, event]);
-}
 
 export function updateFiletype(e) {
   let typeName = e.detail.name;
   _updateFiletype(typeName);
 };
-
 export function _updateFiletype(typeName) {
   filesWritable.update((obj) => {
     obj.filetype = typeName;
@@ -146,7 +142,7 @@ export function _updateFiletype(typeName) {
 // -- subscriptions
 
 filesWritable.subscribe(val => {
-  console.log("[init] filesWritable update", val);
+  console.log("[update] filesWritable update", val);
   /*
   OPTIONS:
   - cache and load different data for api calls and params
@@ -155,18 +151,18 @@ filesWritable.subscribe(val => {
   if (val && val !== "undefined" && val.dirty) {
     // FIXME this could have a race condition buried
     fileList((({ files, dirty, ...rest }) => rest)(val));
-    filesWritable.update(n => ({...n, dirty: false}));
+    filesWritable.update(n => ({...(n || {}), dirty: false}));
   }
 });
 
 workspaceWritable.subscribe((val) => {
-  console.log("[init] workspaceWritable update", val);
+  console.log("[update] workspaceWritable update", val);
   //JSON.parse(localStorage.getItem(item));
 });
 
 
 historyWritable.subscribe((val) => {
-  console.log("[init] historyWritable update", val);
+  console.log("[update] historyWritable update", val);
   /*
   OPTIONS:
   - store to json
@@ -176,7 +172,7 @@ historyWritable.subscribe((val) => {
 });
 
 profileWritable.subscribe((val) => {
-  console.log("[init] profileWritable update", val);
+  console.log("[update] profileWritable update", val);
   /*
   OPTIONS:
   - sync with remote.
@@ -185,7 +181,7 @@ profileWritable.subscribe((val) => {
 });
 
 registeredActions.subscribe((val) => {
-  console.log("[init] registeredActions update", val);
+  console.log("[update] registeredActions update", val);
   /*
   OPTIONS:
   - build lists of subscribers for events/updates

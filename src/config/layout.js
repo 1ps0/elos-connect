@@ -14,6 +14,16 @@ export let rowHeight = 65;
 // GRID MENU PANEL
 export const menuItems = [
   {
+    name: "panel-timer",
+    value: { icon: "task-add", highlight: "Timer"},
+    group: "1"
+  },
+  {
+    name: "panel-entryform",
+    value: { icon: "action-add", highlight: "Add Data"},
+    group: "1"
+  },
+  {
     name: "panel-todo",
     value: { icon: "list", highlight: "TODO List"},
     group: "1"
@@ -24,18 +34,8 @@ export const menuItems = [
     group: "1"
   },
   {
-    name: "panel-timer",
-    value: { icon: "task-add", highlight: "Timer"},
-    group: "1"
-  },
-  {
     name: "panel-metrics",
     value: { icon: "table", highlight: "Metrics"},
-    group: "1"
-  },
-  {
-    name: "panel-entryform",
-    value: { icon: "action-add", highlight: "Add Data"},
     group: "1"
   },
   {
@@ -89,3 +89,25 @@ export const menuItems = [
     group: "4"
   },
 ];
+
+/*
+"panel-layouts": { visible: true,
+"panel-filetypes": { visible: true,
+"panel-eventhistory": { visible: false,
+"panel-actionhistory": { visible: false,
+"panel-clock": { visible: true,
+"panel-timer": { visible: true,
+"panel-todo": { visible: true,
+"panel-polls": { visible: true,
+"panel-commandbar": { visible: true,
+"panel-mainmenu": { visible: true,
+"panel-files": { visible: true,
+"panel-panelhistory": { visible: true,
+"panel-metrics": { visible: true,
+"panel-pdf": { visible: false,
+"panel-editor": { visible: true,
+"panel-gallery": { visible: true,
+"panel-entryform": { visible: true,
+"panel-pkgindex": { visible: false,
+"panel-create": { visible: false,
+*/
