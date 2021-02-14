@@ -7,6 +7,7 @@ TODO
 3.
 */
 
+import Select from "./Select.svelte";
 
 import { onMount, createEventDispatcher, getContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
@@ -14,205 +15,212 @@ import { writable, readable, derived, get } from "svelte/store";
 const dispatch = createEventDispatcher();
 
 
-
-
-export let item;
-export let action = "/api/";
-export let fields = [
-    {
-        id:  "fname",
-        name: "firstname",
-        label: "First Name",
-        placeholder: "Your name...",
-        type: "input:text"
-    },
-    {
-        id:  "country",
-        name: "country",
-        label: "Country",
-        options: [
-            {
-                name: "Australia",
-                value: "australia"
-            },
-        ],
-        type: "select"
-    },
-    {
-        id:  "subject",
-        name: "subject",
-        label: "Subject",
-        placeholder: "Write something...",
-        type: "textarea"
-    }
-];
-export let formData = {};
-export let pinned = {};
-export let selectedForm = {};
-export let dataStore = null;
-polls = [
-  {
-    title: "Current Stress",
-    name: "stress",
-    context: "current_time",
-    category: "personal_metric",
-    value_type: "float",
-    value_control: false
-  },
+let pollTypes = [
   {
     title: "Calorie Intake",
     name: "calories",
     context: "food",
     category: "personal_metric",
-    value_type: "integer",
-    value_control: false
+    fields: [{
+      name: "",
+      type: "number"
+    }]
   },
   {
     title: "Current Stress",
     name: "stress",
     context: "current_time",
     category: "personal_metric",
-    value_type: "float",
-    value_control: false
+    fields: [{
+      name: "",
+      type: "range"
+    }]
   },
   {
     title: "Brain Clearing",
+    name: "clearing",
     message: "Write at least 100 words. Any words.",
     affinity: "morning",
     category: "session_prompt",
-    value_type: "text",
-    value_control: false
+    fields: [{
+      name: "",
+      type: "entry"
+    }]
   },
   {
     title: "Day Start",
+    name: "start",
     message: "What is your main focus today?",
     affinity: "morning",
     category: "session_prompt",
-    value_type: "text",
-    value_control: false
+    fields: [{
+      name: "",
+      type: "entry"
+    }]
   },
   {
     title: "Day Evening",
+    name: "interlude",
     message: "What are you most proud of today?",
     affinity: "evening",
     category: "session_prompt",
-    value_type: "text",
-    value_control: false
+    fields: [{
+      name: "",
+      type: "entry"
+    }]
   },
   {
     title: "Day Check-in",
+    name: "check_in",
     message: "What's on your mind?",
     affinity: "checkin",
     category: "session_prompt",
-    value_type: "text",
-    value_control: false
+    fields: [{
+      name: "",
+      type: "entry",
+    }]
   },
 ];
 
-let fieldTypes = ["select", "slider", "text", "textarea"]; //.map((t) => `input:${t}`);
+// let fieldTypes = ["select", "slider", "text", "textarea"];
 
-let formTypes = {
-  singleType: {
-    formType: "singleValue",
-    name: "",
-    title: "",
-    fields: [
-      {
-        name: "",
-        type: "",
-        valueType: "",
-        options: []
-      },
-    ]
+let fieldTypes = {
+  "entry_type": {
+    label: "Choose an Entry Type",
+    type: "select",
+    options: pollTypes
   },
-  promptType: {
-    formType: "promptType",
-    name: "Journal",
-    fields: [
-      {
-        name: "",
-        type: "",
-        valueType: "keyword",
-        analyzer: "captureTime",
-        options: [],
-      }
-    ]
+  "range": {
+    label: "Feeling 0-10",
+    type: "slider",
+    min: 0,
+    max: 10
+  },
+  "entry": {
+    label: "",
+    type: "textarea",
+    rows: 4,
+    cols: 50
+  },
+  "number": {
+    label: "",
+    type: "input",
+    format: "integer"
   }
 };
 
+// externally filled or not at all
+export let item;
+export let dataStore = null;
+export let dataKey = null;
+
+// internal
+export let selectedForm = null;
 $: selectedForm;
-$: formData; // = new FormData();
-$: pinned = {...pinned, data};
 
 function doSubmit(e) {
   let selector = document.querySelector('#entryform');
-  data = new FormData(selector);
+  let data = new FormData(selector);
 
   if (dataStore) {
     console.log("EntryForm got data", data);
-    dataStore.update(n => [...n, {
-      ...form,
-      values: data.values
-
-    }]);
+    dataStore.update(n => {
+      console.log("datastore got data", n);
+      n[dataKey] = [
+        ...(n[dataKey] || []),
+        {
+          formType: selectedForm.formType,
+          name: selectedForm.name,
+          title: selectedForm.title,
+          data: selectedForm.fields
+        }
+      ];
+      return n;
+    });
   }
 }
 
+let formWatcher = writable({
+  ...fieldTypes.entry_type,
+  value: null
+});
 
 onMount(async () => {
   console.log('EntryForm mounted');
-
+  if (formWatcher) {
+    formWatcher.subscribe((val) => {
+      console.log("selectedForm updated", val);
+      selectedForm = val.value;
+    });
+  }
 });
 
 </script>
 
 <section>
-
-<div class="container">
-  <form id="entryform" on:submit|preventDefault={sendData}>
-    {#if pinned.length > 0}
-      <select id="{pinned.name}" name="{pin.name}">
-        {#each pinned.items as pin}
-          <option value="{pin.value}">{pin.name}</option>
-        {/each}
-      </select>
-    {/if}
-    {#if formTypes.length > 1}
-      <select id="{pinned.name}" name="{pin.name}">
-        {#each formTypes as fType}
-          <option on>{fType}</option>
-        {/each}
-      </select>
-    {/if}
-    {#key selectedForm.formType}
+<!-- using stopprop works, but stops all dragging -->
+<div class="container" on:pointerdown|stopPropagation>
+  <Select bind:watcher={formWatcher}/>
+  <form id="entryform" on:submit|stopPropagation|preventDefault={doSubmit}>
+    {#if selectedForm}
       <label for="{selectedForm.name}">{selectedForm.title}</label>
-      {#each selectedForm.fields as field (field.name)}
-        <label for="{field.name}">{field.label}</label>
+      {#each selectedForm.fields as field}
+        <label for="{field.name}">
+          {field.label}
+          {#if field.message}
+            <span>{field.message}</span>
+          {/if}
+          {#if field.value}
+            <span>{field.value}</span>
+          {/if}
+        </label>
 
-        {#if field.type === "input:text"}
+        {#if field.type === "number"}
           <input
-            type="text" id="{field.name}"
-            name="{field.name}" placeholder="{field.placeholder}">
+            id="{field.name}"
+            type="number"
+            name="{field.name}"
+            placeholder="{field.placeholder}"
+            bind:value={field.value}
+          >
 
         {:else if field.type === "select"}
-          <select id="{field.name}" name="{field.name}">
-          {#each field.options as item}
-              <option value="{item.value}">{item.name}</option>
+          <select
+            id="{field.name}"
+            name="{field.name}"
+            bind:value={field.value}
+          >
+          {#each field.options as _item}
+              <option value="{_item.value}" on:change>
+                {_item.title}
+              </option>
           {/each}
           </select>
 
-        {:else if field.type === "textarea"}
+        {:else if field.type === "entry"}
           <textarea
             id="{field.name}"
             name="{field.name}"
             placeholder="{field.placeholder}"
-            style="height:200px">
+            bind:value={field.value}
+            style="height:200px"
+            rows={field.rows || 2}
+            cols={field.cols || 20}
+          />
 
-          </textarea>
+        {:else if field.type === "slider"}
+          <input
+            id={field.name}
+            name={field.name}
+            class="slider"
+            type="range"
+            min="{field.min}"
+            max="{field.max}"
+            bind:value={field.value}>
         {/if}
       {/each}
       <input type="submit" value="Submit" on:submit|preventDefault={doSubmit}>
-    {/key}
+    {/if}
   </form>
 </div>
 
@@ -251,4 +259,37 @@ input[type=submit]:hover {
   background-color: #f2f2f2;
   padding: 20px;
 }
+
+/* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_rangeslider */
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
 </style>

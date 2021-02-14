@@ -6,7 +6,7 @@ low order item for configuring the layoutgrid(s). no deeper dependencies that po
 */
 
 // LAYOUT GRID
-export let panelGap = 10;
+export let panelGap = 5;
 export let columnMultiplier = 6;
 export let columnCount = 100;
 export let rowHeight = 65;
@@ -29,13 +29,8 @@ export const menuItems = [
     group: "1"
   },
   {
-    name: "panel-polls",
-    value: { icon: "polls", highlight: "Polls"},
-    group: "1"
-  },
-  {
-    name: "panel-metrics",
-    value: { icon: "table", highlight: "Metrics"},
+    name: "panel-journal",
+    value: { icon: "polls", highlight: "Journal"},
     group: "1"
   },
   {
@@ -47,6 +42,11 @@ export const menuItems = [
     name: "panel-actionhistory",
     value: { icon: "view-mode-2", highlight: "action History"},
     group: "2"
+  },
+  {
+    name: "panel-metrics",
+    value: { icon: "table", highlight: "Metrics"},
+    group: "1"
   },
   {
     name: "panel-layouts",

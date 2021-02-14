@@ -71,19 +71,9 @@ onMount(async () => {
 
 
 <section class="log-body">
-  <ul id="task-list">
-    {#if !readonly}
-      <li>
-        <div id="add-btn">
-          <form on:submit|preventDefault={inputEvent}>
-            <input type="text" id="task-input" placeholder="">
-            <button type="submit">{buttonName}</button>
-          </form>
-        </div>
-      </li>
-    {/if}
+  <div id="task-list">
     {#each queue as _item (_item.name)}
-      <li
+      <p
         use:linker={queue}
         class:checked={_item.checked}
         class="item"
@@ -91,15 +81,18 @@ onMount(async () => {
       >
         {#if titleKey}
           <span>{_item[titleKey]}</span>
-        {:else if transform}
-          <span>{transform(_item)}</span>
+        {/if}
+        {#if transform}
+          {#each transform(_item) as _i}
+            <label>{_i.name}: {_i.value || ""}</label>
+          {/each}
         {/if}
         <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
-      </li>
+      </p>
     {:else}
-      <li>No Data</li>
+      <p>No Data</p>
     {/each}
-  </ul>
+  </div>
 </section>
 
 <style>
@@ -130,16 +123,18 @@ onMount(async () => {
 }
 
 /* Remove margins and padding from the list */
-ul {
-  margin: 0;
-  padding: 0;
+div {
+  margin: 2px;
+  padding: 2px;
 }
 
 /* Style the list items */
-ul li {
+div p {
   cursor: pointer;
   position: relative;
   padding: 12px;
+  border: 1px solid black;
+  border-radius: 5px;
   list-style-type: none;
   background: #eee;
   font-size: 16px;
@@ -154,24 +149,24 @@ ul li {
 }
 
 /* Set all odd list items to a different color (zebra-stripes) */
-ul li:nth-child(odd) {
+div p:nth-child(odd) {
   background: #f9f9f9;
 }
 
 /* Darker background-color on hover */
-ul li:hover {
+div p:hover {
   background: #ddd;
 }
 
 /* When clicked on, add a background color and strike out text */
-ul li.checked {
+div p.checked {
   background: #888;
   color: #fff;
   text-decoration: line-through;
 }
 
 /* Add a "checked" mark when clicked on */
-ul li.checked::before {
+div p.checked::before {
   content: '';
   position: relative;
   border-color: #fff;
@@ -198,20 +193,36 @@ ul li.checked::before {
   color: white;
 }
 
+/* Style the header */
+.header {
+  background-color: gray;
+  padding: 20px 30px;
+  color: white;
+  text-align: center;
+}
+
+/* Clear floats after the header */
+.header:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
 /* Style the input */
 #task-input input {
   margin: 0;
   border: none;
   border-radius: 0;
-  padding: 5px;
+  width: 75%;
+  padding: 10px;
   float: left;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 /* Style the "Add" button */
 #add-btn span {
-  padding: 5px;
-  width: 90%;
+  padding: 10px;
+  width: 50px;
   background: #d9d9d9;
   color: #555;
   text-align: center;

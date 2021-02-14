@@ -1,7 +1,7 @@
 // 2nd order
 
 import { clockFormatter, dateStringFromDate } from "./clock.js";
-import { historyWritable, filesWritable, registeredActions, workspaceWritable, profileWritable } from "./stores.js";
+import { stores } from "./stores.js";
 
 // -- reactive globals
 
@@ -54,7 +54,7 @@ export const _send = async (url, params={}) => {
 
 export const fileList = async (params) => {
   let data = await _fetch("/api/file/search", params);
-  filesWritable.update(n => ({...n, ...data, dirty: false }));
+  stores.files.update(n => ({...n, ...data, dirty: false }));
 
   console.log("updated filelist", data, params);
 };
@@ -111,6 +111,46 @@ export const boldSearchTerm = (option, searchTerm) => {
 
 // -- event callbacks
 
+export const selectedFile = (item) => item ? item['locations'][0].split('/Volumes/ARCHIVE/')[1] : "";
+export const selectedFilePath = (item) => `/api/load?filepath=${selectedFile(item)}`;
+
+export function openFile(e) {
+  console.log('open file', e);
+  let data = e.detail;
+  return _openFile(data);
+};
+
+export function _openFile(data) {
+  let target;
+
+  if (["md", "txt", "json"].indexOf(data['file.ext']) != -1) {
+    target = "panel-editor";
+  }
+  else if (data['file.ext'] === "pdf") {
+    target = "panel-pdf";
+  }
+  else if (["jpg", "gif", "png"].indexOf(data['file.ext']) != -1) {
+    target = "panel-gallery";
+  }
+
+  if (target !== undefined) {
+    let options = {
+      target_name: target,
+      props: {
+        data: selectedFilePath(data)
+      }
+    };
+    console.log("data for open file", options);
+
+    // stores.history.update(n => [...(n || []), data]);
+
+    stores.layoutItems.update( n => ({
+        ...n,
+        add: [...n.add, [target, options]]
+      })
+    );
+  }
+}
 
 export function _updateHistory(val) {
   console.log("_UPDATE HISTORY", val);
@@ -119,7 +159,7 @@ export function _updateHistory(val) {
   // warning: this could get bloated
   let event = { ...val, at: [date, fmtDate] };
   // console.log("update history with", e.detail, event);
-  historyWritable.update((n) => [...(n || []), event]);
+  stores.history.update((n) => [...(n || []), event]);
 }
 export function updateHistory(e) {
   console.log("UPDATE HISTORY", e);
@@ -133,7 +173,7 @@ export function updateFiletype(e) {
   _updateFiletype(typeName);
 };
 export function _updateFiletype(typeName) {
-  filesWritable.update((obj) => {
+  stores.files.update((obj) => {
     obj.filetype = typeName;
     return obj;
   });
@@ -141,8 +181,8 @@ export function _updateFiletype(typeName) {
 
 // -- subscriptions
 
-filesWritable.subscribe(val => {
-  console.log("[update] filesWritable update", val);
+stores.files.subscribe(val => {
+  console.log("[update] stores.files update", val);
   /*
   OPTIONS:
   - cache and load different data for api calls and params
@@ -151,18 +191,18 @@ filesWritable.subscribe(val => {
   if (val && val !== "undefined" && val.dirty) {
     // FIXME this could have a race condition buried
     fileList((({ files, dirty, ...rest }) => rest)(val));
-    filesWritable.update(n => ({...(n || {}), dirty: false}));
+    stores.files.update(n => ({...(n || {}), dirty: false}));
   }
 });
 
-workspaceWritable.subscribe((val) => {
-  console.log("[update] workspaceWritable update", val);
+stores.workspace.subscribe((val) => {
+  console.log("[update] stores.workspace update", val);
   //JSON.parse(localStorage.getItem(item));
 });
 
 
-historyWritable.subscribe((val) => {
-  console.log("[update] historyWritable update", val);
+stores.history.subscribe((val) => {
+  console.log("[update] stores.history update", val);
   /*
   OPTIONS:
   - store to json
@@ -171,8 +211,8 @@ historyWritable.subscribe((val) => {
   */
 });
 
-profileWritable.subscribe((val) => {
-  console.log("[update] profileWritable update", val);
+stores.profile.subscribe((val) => {
+  console.log("[update] stores.profile update", val);
   /*
   OPTIONS:
   - sync with remote.
@@ -180,7 +220,7 @@ profileWritable.subscribe((val) => {
   */
 });
 
-registeredActions.subscribe((val) => {
+stores.actions.subscribe((val) => {
   console.log("[update] registeredActions update", val);
   /*
   OPTIONS:

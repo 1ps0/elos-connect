@@ -31,24 +31,16 @@ import { createEventDispatcher } from 'svelte';
 // import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
-import { historyWritable, filesWritable, registeredActions, workspaceWritable, profileWritable } from "./stores.js";
-
-const stores = {
-  history: historyWritable,
-  files: filesWritable,
-  actions: registeredActions,
-  workspace: workspaceWritable,
-  profile: profileWritable
-};
+import { stores } from "./stores.js";
 
 const splitInputs = (val) => { return val.split(":") };
 
-// const inputSplits = {
-//   command: (val) => { val },
-//   preferences: (val) => { val },
-//   workspace: (val) => { val },
-//   session: (val) => { val },
-// };
+const inputSplits = {
+  command: (val) => { val },
+  preferences: (val) => { val },
+  workspace: (val) => { val },
+  session: (val) => { val },
+};
 
 export function commandLine(node, store) {
   console.log("[init][action] commandLine", node, store);

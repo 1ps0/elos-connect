@@ -51,11 +51,12 @@ export const clockAction = (node, args) => {
 
 export const timerAction = (node, args) => {
   let timer = args.interval;
+  let timerP = document.querySelector("p.timer");
   let buttons = document.querySelector("button");
+  // console.log("TIMERACTION INIT", timer, timerP, buttons, args);
   for (let button in buttons) {
-    console.log("TIMERACTION INIT", timer, button, args);
     switch(button.name) {
-      case "start": button.addEventListener("click", args.start); break;
+      case "start": button.addEventListener("click", () => {}); break; // args.start
       case "reset": button.addEventListener("click", args.reset); break;
       case "pause": button.addEventListener("click", args.pause); break;
       case "lap":   button.addEventListener("click", args.lap); break;
@@ -63,7 +64,9 @@ export const timerAction = (node, args) => {
   }
 
   clockStore.subscribe((val) => {
-    for (let doc in document.querySelector(".timer p")) {
+    let doc = document.querySelector("p.timer");
+    if (doc) {
+      console.log("p.timer", timer, formatTime(timer), doc.innerHTML);
       doc.innerHTML = formatTime(timer);
     }
   });

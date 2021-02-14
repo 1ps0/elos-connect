@@ -7,8 +7,8 @@ import CommandBar from "./CommandBar.svelte";
 import Clock from "./Clock.svelte";
 import Profile from "./Profile.svelte";
 import Todo from "./Todo.svelte";
-import Poll from "./Poll.svelte";
 
+import ExpandList from "./ExpandList.svelte";
 import ItemList from "./ItemList.svelte";
 import SelectList from "./SelectList.svelte";
 import Editor from "./Editor.svelte";
@@ -30,7 +30,7 @@ export const components = {
     "clock": Clock,
     "profile": Profile,
     "todo": Todo,
-    "poll": Poll,
+    "expandlist": ExpandList,
     "itemlist": ItemList,
     "selectlist": SelectList,
     "editor": Editor,

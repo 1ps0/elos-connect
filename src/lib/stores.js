@@ -21,9 +21,9 @@ export const cacheFor = (name, otherwise={}) => {
 
 export const workspaceWritable = writable(workspaceConfig);
 
-export const historyWritable = writable(cacheFor("history"));
+export const historyWritable = writable(cacheFor("history", []));
 
-export const logWritable = writable(cacheFor("log"));
+export const logWritable = writable(cacheFor("log", []));
 
 export const filesWritable = writable(cacheFor("files"));
 export const layoutItemsWritable = writable(cacheFor("layoutItems", { items: [], add: [] }));

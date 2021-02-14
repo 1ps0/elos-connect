@@ -5,8 +5,9 @@ import { writable, derived } from "svelte/store";
 
 import ItemList from "./ItemList.svelte";
 
-import { filesWritable, historyWritable, layoutItemsWritable } from "./lib/stores.js";
-import { fileSelect, fileList } from "./lib/apis.js";
+// stores.files, stores.history, stores.layoutItems
+import { stores } from "./lib/stores.js";
+import { fileSelect, fileList, openFile } from "./lib/apis.js";
 
 import { linker } from "./lib/linker.js";
 
@@ -33,53 +34,17 @@ function submitUpdates(e) {
 
 function incrementPage(e) {
   console.log("Files incrementPage", e);
-  filesWritable.update((n) => ({
+  stores.files.update((n) => ({
     ...n,
     pageNum: (n.pageNum + 1),
     dirty: true
   }));
 }
 
-const selectedFile = (item) => item ? item['locations'][0].split('/Volumes/ARCHIVE/')[1] : "";
-const selectedFilePath = (item) => `/api/load?filepath=${selectedFile(item)}`;
-
-function openFile(e) {
-  console.log('open file', e);
-  let data = e.detail;
-  let target;
-
-  if (["md", "txt", "json"].indexOf(data['file.ext']) != -1) {
-    target = "panel-editor";
-  }
-  else if (data['file.ext'] === "pdf") {
-    target = "panel-pdf";
-  }
-  else if (["jpg", "gif", "png"].indexOf(data['file.ext']) != -1) {
-    target = "panel-gallery";
-  }
-
-  if (target !== undefined) {
-    let options = {
-      target_name: target,
-      props: {
-        data: selectedFilePath(data)
-      }
-    };
-    console.log("data for open file", options);
-
-    // historyWritable.update(n => [...(n || []), data]);
-
-    layoutItemsWritable.update( n => ({
-        ...n,
-        add: [...n.add, [target, options]]
-      })
-    );
-  }
-}
 onMount(() => {
   console.log('Files mounted');
 
-  filesWritable.subscribe((val) => {
+  stores.files.subscribe((val) => {
     console.log("Files subscription got update", val);
     if (val !== undefined && !val.dirty) {
       files = val.files;
@@ -99,7 +64,7 @@ onMount(() => {
     buttonName="Search"
     titleKey="file.title"
     on:didClick={openFile}
-    dataStore={derived(filesWritable, $a => $a.files)}
+    dataStore={derived(stores.files, $a => $a.files)}
     inputEvent={(e) => submitUpdates(e)}
   />
 </div>

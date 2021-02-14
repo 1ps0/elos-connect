@@ -37,12 +37,89 @@ export let panelTypes = {
       transform: (e) => { return e.value.icon }
     }
   },
+  "panel-commandbar": {
+    target: "panel-commandbar",
+    name: "commandbar",
+    w: columnMultiplier * 5,
+    h: 1,
+    componentName: "commandbar",
+    props: { overflow: 'visible' }
+  },
   "panel-layouts": {
     target: "toolbar",
     name: "toolbar",
     w: columnMultiplier*4,
     h: 1,
     componentName: "toolbar"
+  },
+  "panel-clock": {
+    target: "panel-clock",
+    name: "clock",
+    w: columnMultiplier * 5,
+    h: 1,
+    componentName: "clock",
+    props: {
+      timezone: "PST"
+    }
+  },
+  "panel-timer": {
+    target: "panel-timer",
+    name: "timer",
+    w: columnMultiplier * 2,
+    h: 6,
+    componentName: "timer",
+  },
+  "panel-todo": {
+    target: "panel-todo",
+    name: "todo",
+    w: columnMultiplier*3,
+    componentName: "todo",
+    dependents: [ "panel-timer", "panel-eventhistory" ],
+    props: {}
+  },
+  "panel-entryform": {
+    target: "panel-entryform",
+    name: "entryform",
+    w: columnMultiplier*6,
+    h: 8,
+    componentName: "entryform",
+    props: {
+      dataStore: "profile",
+      dataKey: "journal"
+    }
+  },
+  "panel-eventhistory": {
+    target: "panel-eventhistory",
+    name: "eventhistory",
+    w: columnMultiplier*2,
+    componentName: "itemlist",
+    props: {
+      readonly: true,
+      dataStore: "history",
+      transform: (x) => `${x.name} @ ${x.at[1]} `
+    }
+  },
+  "panel-actionhistory": {
+    target: "panel-actionhistory",
+    name: "actionhistory",
+    w: columnMultiplier*3,
+    componentName: "itemlist",
+    props: {
+      readonly: true,
+      dataStore: "log"
+    }
+  },
+  "panel-journal": {
+    target: "panel-journal",
+    name: "journal",
+    w: columnMultiplier*6,
+    componentName: "expandlist",
+    props: {
+      readonly: true,
+      dataStore: "profile",
+      dataKey: "journal",
+      transform: ((x) => x.data)
+    }
   },
   "panel-filetypes": {
     target: "panel-filetypes",
@@ -58,66 +135,6 @@ export let panelTypes = {
       source: "/api/file/types",
       transform: ((e) => { return `${e.name} (${e.value})` })
     }
-  },
-  "panel-eventhistory": {
-    target: "panel-eventhistory",
-    name: "eventhistory",
-    w: columnMultiplier*2,
-    componentName: "itemlist",
-    props: {
-      readonly: true,
-      dataStore: "history"
-    }
-  },
-  "panel-actionhistory": {
-    target: "panel-actionhistory",
-    name: "actionhistory",
-    w: columnMultiplier*3,
-    componentName: "itemlist",
-    props: {
-      readonly: true,
-      dataStore: "log"
-    }
-  },
-  "panel-clock": {
-    target: "panel-clock",
-    name: "clock",
-    w: columnMultiplier * 5,
-    h: 1,
-    componentName: "clock",
-    props: {
-      timezone: "PST"
-    }
-  },
-  "panel-timer": {
-    target: "panel-timer",
-    name: "timer",
-    w: columnMultiplier * 5,
-    h: 4,
-    componentName: "timer",
-  },
-  "panel-todo": {
-    target: "panel-todo",
-    name: "todo",
-    w: columnMultiplier*5,
-    componentName: "todo",
-    dependents: [ "panel-timer", "panel-eventhistory" ],
-    props: {}
-  },
-  "panel-polls": {
-    target: "panel-polls",
-    name: "polls",
-    w: columnMultiplier*5,
-    componentName: "poll",
-    props: {}
-  },
-  "panel-commandbar": {
-    target: "panel-commandbar",
-    name: "commandbar",
-    w: columnMultiplier * 5,
-    h: 1,
-    componentName: "commandbar",
-    props: { overflow: 'visible' }
   },
   "panel-files": {
     target: "panel-files",
@@ -159,15 +176,6 @@ export let panelTypes = {
     componentName: "imagegallery",
     props: {
       dataStore: "files"
-    }
-  },
-  "panel-entryform": {
-    target: "panel-entryform",
-    name: "entryform",
-    w: columnMultiplier*6,
-    componentName: "entryform",
-    props: {
-      formType: ""
     }
   },
   "panel-pkgindex": {

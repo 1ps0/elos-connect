@@ -23,7 +23,7 @@ import { components } from "./components.js";
 import { panelTypes, optionTypes } from "./config/panels.js";
 console.log("PANEL TYPES", panelTypes);
 
-import { _fetch, updateFiletype, } from "./lib/apis.js";
+import { _fetch, updateFiletype, openFile } from "./lib/apis.js";
 import { stores, layoutItemsWritable } from "./lib/stores.js"
 
 import LayoutGrid from "./LayoutGrid.svelte";
@@ -64,9 +64,9 @@ function hydrateParams(item) {
     console.log("MISSING COMPONENT", item.componentName);
   }
 
-  if (item.props !== undefined
-      && item.props.panelOpts === undefined) {
+  if (item.props !== undefined && item.props.panelOpts === undefined) {
     item.props.panelOpts = Object.assign({}, optionTypes);
+
     for (let opt in item.props.panelOpts) {
       let val = item.props.panelOpts[opt];
       switch(val.title) {
@@ -83,7 +83,7 @@ function hydrateParams(item) {
 
     item.props.dataStore = stores[item.props.dataStore];
 
-    if (item.target in objects) {
+    if (item.target in objects && objects[item.target]) {
       objects[item.target].$set("dataStore", item.props.dataStore);
     }
   }
@@ -95,7 +95,7 @@ function hydrateParams(item) {
     switch(item.event.callback) {
       case "updateFiletype": item.event.callback = updateFiletype; break;
       case "togglePanel": item.event.callback = togglePanel; break;
-      // case "openFile": item.event.callback = openFile; break;
+      case "openFile": item.event.callback = openFile; break;
     }
     if (item && item.target && item.target in objects) {
       objects[item.target].$on(item.event.name, item.event.callback);

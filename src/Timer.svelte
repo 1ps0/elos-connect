@@ -87,61 +87,23 @@ p.timer {
   font-size: 18px;
 }
 
-.type-label {
-  border: 1px solid black;
-  padding: 10px 30px 10px 30px;
-  margin: 5px;
-}
-
 .timer-container section {
   border: 1px solid black;
-  padding: 20px;/*
-  display: flex;*/
+  padding: 10px;
+  display: block;
+  float: left;
+  /*display: flex;*/
+}
+
+button {
+  width: 100%;
 }
 
 div.control {
   border-top: 1px solid black;
-  padding: 20px;
-}
-
-div.history {
-  padding: 10px;
-}
-
-div.interval {
-  border-top: 1px solid black;
-  border-radius: 2px;
-  background-color: #56CCF2;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  padding: 10px;
-  display: flex;
-  min-height: 20px;
-  margin: 0em 0em 0.25em 0em;
-}
-
-div.interval-text {
-  border-top: 1px solid black;
-  border-radius: 5px;
-  border-top-left-radius: 0%;
-  border-top-right-radius: 0%;
-  background-color: #2F80ED;
-  color: #C4C4C4;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   padding: 5px;
-  display: block;
-  float: left;
 }
 
-div.remove {
-  border-top: 1px solid black;
-  border-radius: 5px;
-  background-color: #707070;
-  color: #C4C4C4;
-  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-  padding: 5px;
-  display: block;
-  float: right;
-}
 
 
 </style>
