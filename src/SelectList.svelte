@@ -1,10 +1,20 @@
 <script>
+
+/*
+a selectable todo with add entry at the top.
+select to trigger an event
+config panel to edit event
+use entryform to edit event
+so we need to reduce entry form fields necessary into an event
+and send that event through config structure to the target component
+*/
+
 import { onMount, createEventDispatcher, getContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
 import { icons } from "./lib/icons.js";
 import { _fetch } from "./lib/apis.js";
-import { filesWritable } from "./lib/stores.js"
+import { stores } from "./lib/stores.js"
 
 const dispatch = createEventDispatcher();
 
@@ -50,7 +60,7 @@ function sendEvent(e) {
 function _sendEvent(item) {
   console.log('clicked sendEvent --', eventName, item);
   if (eventName === "filterType") {
-    filesWritable.update((n) => ({
+    stores.files.update((n) => ({
       ...n,
       filetype: item.name,
       dirty: true

@@ -142,7 +142,7 @@ export function _openFile(data) {
     };
     console.log("data for open file", options);
 
-    // stores.history.update(n => [...(n || []), data]);
+    stores.history.update(n => [...(n || []), data]);
 
     stores.layoutItems.update( n => ({
         ...n,

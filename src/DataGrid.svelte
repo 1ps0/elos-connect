@@ -2,20 +2,18 @@
 <script>
 
 import { onMount } from 'svelte';
+import { writable, readable, derived, get } from "svelte/store";
 
 import DataGrid from 'svelte-data-grid';
 import TextboxCell from './cell/textbox-cell.svelte';
 import SelectCell from './cell/select-cell.svelte';
 import CheckboxCell from './cell/checkbox-cell.svelte';
 
+import Select from "./Select.svelte";
+
 import { _fetch, _send } from "./lib/apis.js";
+import { stores } from "./lib/stores.js"
 
-export let dbName = "metrics";
-
-export let columns = [];
-export let rows = [];
-export let sortFn;
-export let filterFn;
 
 let grid;
 let allowResizeFromTableCells = true;
@@ -25,22 +23,21 @@ let rowHeight = 50;
 
 $: {
   if (grid) {
-    grid.$on('valueUpdated', (e) => {
+    grid.$on('[DataGrid] valueUpdated', (e) => {
       console.log('grid value updated', e);
     });
   }
 }
 
-$: sortFn;
-$: filterFn;
-
 const updateData = async () => {
   let results = await _fetch(`/api/db/${dbName}`);
-  console.log("DataGrid Fetch", results);
+  console.log("[DataGrid] Fetch", results);
   columns = renderColumns(results['columns']);
   rows = renderRows(results);
 }
 // $: updateData();
+
+
 
 
 function renderColumns(columns) {
@@ -94,9 +91,6 @@ function renderRows(data) {
   });
 }
 
-function valueUpdated(e) {
-  console.log('value updated', e);
-}
 
 function pushValues() {
   const { columns } = grid.get();
@@ -115,13 +109,84 @@ function pushValues() {
   });
 }
 
+// export let dbName = "metrics";
+// export let columns = [];
+// export let rows = [];
+// export let sortFn;
+// export let filterFn;
+// $: sortFn, filterFn;
+
+export let dataStore = null;
+export let dataKey = null;
+export let selectedTable = null;
+
+export let data = {
+  rows: [],
+  columns: [],
+  name: "",
+  storeName: "",
+  category: 'metrics'
+};
+
+let tableTypes = {
+  stress: {
+    storeName: 'profile',
+    name: 'stress',
+    fields: [ "name", "value", "range", "at" ]
+  },
+  calories: {
+    storeName: 'profile',
+    name: 'calories',
+    fields: [ "name", "count", "from", "at" ]
+  },
+};
+
+
+
+let selectWatcher = writable({ // Select value interface
+  label: 'Data Types',
+  options: Object.values(tableTypes),
+  value: selectedTable || Object.values(tableTypes)[0]
+});
+
 onMount(async () => {
   console.log("DataGrid mounted");
 
-  await updateData();
+  // await updateData();
   // addNewRow();
+
+  if (dataStore) {
+    dataStore.subscribe((val) => {
+      console.log("[DataGrid] profile updated", val);
+    });
+  }
+
+  if (selectWatcher) {
+    selectWatcher.subscribe((val) => {
+      console.log("[DataGrid] selectWatcher updated", val, dataKey);
+      selectedTable = val.value;
+      if (selectedTable) {
+        data.store = stores[selectedTable.storeName];
+        data.columns = selectedTable.fields.map((field) => ({
+          display: field,
+          dataName: field,
+          width: 100, //field.length*10,
+        }));
+        data.rows = get(data.store)[dataKey].filter((x) => x.name == selectedTable.name);
+        console.log('=>>', data.rows);
+      }
+    });
+  }
 });
 
+function valueUpdated(e) {
+  console.log('value updated', e);
+  // data.value = e;
+}
+
+function add(x, y) {
+  return x + y;
+}
 
 </script>
 
@@ -129,16 +194,19 @@ onMount(async () => {
 <section class="grid-wrap">
   <button on:click={addNewRow}>Add</button>
   <button on:click={pushValues}>Save</button>
-  <DataGrid
-    bind:this={grid}
-    bind:rows={rows}
-    bind:columns={columns}
-    on:valueUpdated={valueUpdated}
-    bind:allowResizeFromTableCells={allowResizeFromTableCells}
-    bind:allowResizeFromTableHeaders={allowResizeFromTableHeaders}
-    bind:allowColumnReordering={allowColumnReordering}
-    bind:rowHeight={rowHeight}
-  />
+  <Select bind:watcher={selectWatcher}/>
+  {#if selectedTable}
+    <DataGrid
+      bind:this={grid}
+      bind:rows={data.rows}
+      bind:columns={data.columns}
+      on:valueUpdated={valueUpdated}
+      bind:allowResizeFromTableCells={allowResizeFromTableCells}
+      bind:allowResizeFromTableHeaders={allowResizeFromTableHeaders}
+      bind:allowColumnReordering={allowColumnReordering}
+      bind:rowHeight={rowHeight}
+    />
+  {/if}
 </section>
 
 

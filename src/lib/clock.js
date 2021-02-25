@@ -25,6 +25,7 @@ export const clockFormatter = new Intl.DateTimeFormat('en', {
 });
 
 export const dateStringFromDate = (date) => date.toLocaleDateString();
+export const dateStringNow = () => dateStringFromDate(new Date());
 
 export const clockStore = readable(new Date(), function start(set) {
     const interval = setInterval(() => {

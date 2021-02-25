@@ -7,10 +7,12 @@ TODO
 3.
 */
 
-import Select from "./Select.svelte";
 
 import { onMount, createEventDispatcher, getContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
+
+import Select from "./Select.svelte";
+import { dateStringNow } from "./lib/clock.js";
 
 const dispatch = createEventDispatcher();
 
@@ -21,10 +23,20 @@ let pollTypes = [
     name: "calories",
     context: "food",
     category: "personal_metric",
-    fields: [{
-      name: "",
-      type: "number"
-    }]
+    fields: [
+      {
+        label: "Count",
+        name: "count",
+        type: "number",
+        showValue: false
+      },
+      {
+        label: "From",
+        name: "from",
+        type: "text",
+        showValue: false
+      },
+    ]
   },
   {
     title: "Current Stress",
@@ -32,8 +44,12 @@ let pollTypes = [
     context: "current_time",
     category: "personal_metric",
     fields: [{
-      name: "",
-      type: "range"
+      label: "",
+      name: "stress",
+      type: "slider",
+      min: 0,
+      max: 10,
+      showValue: true
     }]
   },
   {
@@ -43,8 +59,10 @@ let pollTypes = [
     affinity: "morning",
     category: "session_prompt",
     fields: [{
-      name: "",
-      type: "entry"
+      label: "",
+      name: "entry",
+      type: "entry",
+      showValue: false
     }]
   },
   {
@@ -54,8 +72,10 @@ let pollTypes = [
     affinity: "morning",
     category: "session_prompt",
     fields: [{
-      name: "",
-      type: "entry"
+      label: "",
+      name: "entry",
+      type: "entry",
+      showValue: false
     }]
   },
   {
@@ -65,8 +85,10 @@ let pollTypes = [
     affinity: "evening",
     category: "session_prompt",
     fields: [{
-      name: "",
-      type: "entry"
+      label: "",
+      name: "entry",
+      type: "entry",
+      showValue: false
     }]
   },
   {
@@ -76,13 +98,13 @@ let pollTypes = [
     affinity: "checkin",
     category: "session_prompt",
     fields: [{
-      name: "",
+      label: "",
+      name: "entry",
       type: "entry",
+      showValue: false
     }]
   },
 ];
-
-// let fieldTypes = ["select", "slider", "text", "textarea"];
 
 let fieldTypes = {
   "entry_type": {
@@ -90,29 +112,32 @@ let fieldTypes = {
     type: "select",
     options: pollTypes
   },
-  "range": {
+  "slider": {
     label: "Feeling 0-10",
     type: "slider",
     min: 0,
     max: 10
   },
   "entry": {
-    label: "",
     type: "textarea",
     rows: 4,
     cols: 50
   },
-  "number": {
-    label: "",
+  // svelte doesnt allow 2way binding and dynamic <input type>
+  "text": {
     type: "input",
-    format: "integer"
+    format: "text"
+  },
+  "number": {
+    type: "input",
+    format: "number"
   }
 };
 
 // externally filled or not at all
 export let item;
 export let dataStore = null;
-export let dataKey = null;
+export let dataKey = "metrics";
 
 // internal
 export let selectedForm = null;
@@ -126,15 +151,22 @@ function doSubmit(e) {
     console.log("EntryForm got data", data);
     dataStore.update(n => {
       console.log("datastore got data", n);
-      n[dataKey] = [
-        ...(n[dataKey] || []),
+
+      n[dataKey] = n[dataKey] || {};
+      n[dataKey][selectedForm.name] = [
+        ...(n[dataKey][selectedForm.name] || []),
         {
-          formType: selectedForm.formType,
           name: selectedForm.name,
           title: selectedForm.title,
-          data: selectedForm.fields
+          category: selectedForm.category,
+          context: selectedForm.context,
+          at: Date.now(),
+          data: selectedForm.fields.map(n => {
+            return [n.name, n.value];
+          })
         }
       ];
+
       return n;
     });
   }
@@ -164,13 +196,17 @@ onMount(async () => {
   <form id="entryform" on:submit|stopPropagation|preventDefault={doSubmit}>
     {#if selectedForm}
       <label for="{selectedForm.name}">{selectedForm.title}</label>
+      <label name="sub-title">
+        {#if selectedForm.message}
+          <span>{selectedForm.message}</span>
+        {/if}
+      </label>
       {#each selectedForm.fields as field}
         <label for="{field.name}">
-          {field.label}
-          {#if field.message}
-            <span>{field.message}</span>
+          {#if field.label}
+            <span>{field.label}</span>
           {/if}
-          {#if field.value}
+          {#if field.value && field.showValue}
             <span>{field.value}</span>
           {/if}
         </label>
@@ -179,6 +215,15 @@ onMount(async () => {
           <input
             id="{field.name}"
             type="number"
+            name="{field.name}"
+            placeholder="{field.placeholder}"
+            bind:value={field.value}
+          >
+
+        {:else if field.type === "text"}
+          <input
+            id="{field.name}"
+            type="text"
             name="{field.name}"
             placeholder="{field.placeholder}"
             bind:value={field.value}
@@ -227,12 +272,15 @@ onMount(async () => {
 </section>
 
 <style>
-body {font-family: Arial, Helvetica, sans-serif;}
-* {box-sizing: border-box;}
+
+input[type=number] {
+  width: 80%;
+  padding: 5px;
+}
 
 input[type=text], select, textarea {
-  width: 100%;
-  padding: 12px;
+  width: 80%;
+  padding: 5;
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
@@ -263,7 +311,7 @@ input[type=submit]:hover {
 /* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_rangeslider */
 .slider {
   -webkit-appearance: none;
-  width: 100%;
+  width: 80%;
   height: 25px;
   background: #d3d3d3;
   outline: none;

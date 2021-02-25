@@ -84,8 +84,7 @@ export let panelTypes = {
     h: 8,
     componentName: "entryform",
     props: {
-      dataStore: "profile",
-      dataKey: "journal"
+      dataStore: "profile"
     }
   },
   "panel-eventhistory": {
@@ -96,7 +95,11 @@ export let panelTypes = {
     props: {
       readonly: true,
       dataStore: "history",
-      transform: (x) => `${x.name} @ ${x.at[1]} `
+      transform: (x) => `${x.name} @ ${x.at[1]} `,
+      transforms: {
+        title: (x) => `${x.name} @ ${x.at[1]} `,
+        api: (x) => x,
+      }
     }
   },
   "panel-actionhistory": {
@@ -156,6 +159,10 @@ export let panelTypes = {
     name: "metrics",
     w: columnMultiplier*8,
     componentName: "datagrid",
+    props: {
+      dataStore: "profile",
+      dataKey: "metrics"
+    }
   },
   "panel-pdf": {
     target: "panel-pdf",
