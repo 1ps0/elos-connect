@@ -105,8 +105,8 @@ export let panelTypes = {
   "panel-actionhistory": {
     target: "panel-actionhistory",
     name: "actionhistory",
-    w: columnMultiplier*3,
-    componentName: "itemlist",
+    w: columnMultiplier*8,
+    componentName: "chart",
     props: {
       readonly: true,
       dataStore: "log"

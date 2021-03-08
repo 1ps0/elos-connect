@@ -52,7 +52,6 @@ export function buildLinks() {}
 export function linker(node, item) {
   // handle and apply to node any "actions" in "item"
   const dispatch = createEventDispatcher();
-  const historyWritable = getContext("eventHistory");
   // const _handler = (e) => { console.log("linker handled", e); };
 
   // const updateEditorSource = (source) => {
@@ -70,7 +69,7 @@ export function linker(node, item) {
 
   // node.addEventListener('openFile', _handler);
   // on:click|preventDefault={() =>
-  node.addEventListener('click', clickHandler);
+  // node.addEventListener('click', clickHandler);
 
   // console.log("linker found", node, item);
 

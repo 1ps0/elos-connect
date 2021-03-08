@@ -1,5 +1,7 @@
 // 2nd order
 
+import { writable, get } from 'svelte/store';
+
 import { clockFormatter, dateStringFromDate } from "./clock.js";
 import { stores } from "./stores.js";
 
@@ -142,7 +144,7 @@ export function _openFile(data) {
     };
     console.log("data for open file", options);
 
-    stores.history.update(n => [...(n || []), data]);
+    // stores.history.update(n => [...(n || []), data]);
 
     stores.layoutItems.update( n => ({
         ...n,
@@ -152,14 +154,35 @@ export function _openFile(data) {
   }
 }
 
-export function _updateHistory(val) {
-  console.log("_UPDATE HISTORY", val);
+
+export function _updateLog(val) {
+  console.log("_UPDATE LOG", val);
   const date = dateStringFromDate(new Date());
   const fmtDate = clockFormatter.format(new Date());
   // warning: this could get bloated
-  let event = { ...val, at: [date, fmtDate] };
-  // console.log("update history with", e.detail, event);
-  stores.history.update((n) => [...(n || []), event]);
+  let _event = { ...val, at: [] };
+  stores.log.update((n) => {
+    let name = _event.name;
+    if (name && !n[name]) {
+      n[name] = _event;
+    }
+    n[name].at.push([Math.floor(Date.now() / 1000), date, fmtDate]);
+    return n;
+  });
+}
+export function updateLog(e) {
+  // console.log("UPDATE LOG", e);
+  let val = e.detail;
+  _updateLog(val);
+}
+
+export function _updateHistory(val) {
+  // console.log("_UPDATE HISTORY", val);
+  const date = dateStringFromDate(new Date());
+  const fmtDate = clockFormatter.format(new Date());
+  // warning: this could get bloated
+  let _event = { ...val, at: [date, fmtDate] };
+  stores.history.update((n) => [...(n || []), _event]);
 }
 export function updateHistory(e) {
   console.log("UPDATE HISTORY", e);
@@ -173,6 +196,8 @@ export function updateFiletype(e) {
   _updateFiletype(typeName);
 };
 export function _updateFiletype(typeName) {
+  if (!typeName) return;
+
   stores.files.update((obj) => {
     obj.filetype = typeName;
     return obj;
@@ -191,7 +216,6 @@ stores.files.subscribe(val => {
   if (val && val !== "undefined" && val.dirty) {
     // FIXME this could have a race condition buried
     fileList((({ files, dirty, ...rest }) => rest)(val));
-    stores.files.update(n => ({...(n || {}), dirty: false}));
   }
 });
 

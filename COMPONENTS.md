@@ -14,6 +14,16 @@
 
 ## --
 
+### Component Interfaces
+
+1. Generative
+2. Display
+3. Edit
+4. Activate
+5. Routing
+
+## --
+
 ## 1. What is a Component
 - using svelte
 - intended to be used in the LayoutGrid

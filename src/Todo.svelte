@@ -3,12 +3,12 @@
 import { onMount } from 'svelte';
 import { writable } from "svelte/store";
 
-import { historyWritable, filesWritable, todoWritable } from "./lib/stores.js"
-import { updateHistory } from "./lib/apis.js";
+import { stores } from "./lib/stores.js"
+import { updateLog } from "./lib/apis.js";
 
 import ItemList from "./ItemList.svelte";
 
-export let dataStore = todoWritable;
+export let dataStore = stores.todo;
 
 let todoItems = [
   {
@@ -55,8 +55,6 @@ let todoItems = [
   }
 ];
 
-todoWritable.update(n => [...(n.length > 0 ? n : todoItems)]);
-
 function addEntry(e) {
   console.log('adding entry to listqueue:', e);
   let name = document.getElementById('task-input').value;
@@ -76,12 +74,20 @@ function removeEntry(e) {
   // TODO mark todo as removed
 }
 
+
+
+onMount(async () => {
+  console.log('Todo mounted');
+
+  stores.todo.update(n => [...(n.length > 0 ? n : todoItems)]);
+});
+
 </script>
 
 <section>
   <ItemList
-    dataStore={todoWritable}
-    on:didClick={updateHistory}
+    dataStore={stores.todo}
+    on:didClick={updateLog}
     buttonName="Add"
     titleKey="name"
     inputEvent={addEntry}
