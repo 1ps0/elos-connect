@@ -45,9 +45,9 @@ onMount(() => {
   console.log('Files mounted');
 
   stores.files.subscribe((val) => {
-    console.log("Files subscription got update", val);
-    if (val !== undefined && !val.dirty) {
-      files = val.files;
+    if (val && !val.dirty) {
+      console.log("Files subscription got update", val);
+      files = val.files || [];
       metadata = (({ files, ...rest }) => rest)(val);
     }
   });
@@ -64,7 +64,8 @@ onMount(() => {
     buttonName="Search"
     titleKey="file.title"
     on:didClick={openFile}
-    dataStore={derived(stores.files, $a => $a.files)}
+    dataStore={stores.files}
+    dataKey="files"
     inputEvent={(e) => submitUpdates(e)}
   />
 </div>

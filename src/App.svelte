@@ -24,10 +24,11 @@ import { panelTypes, optionTypes } from "./config/panels.js";
 console.log("PANEL TYPES", panelTypes);
 
 import { _fetch, updateFiletype, openFile } from "./lib/apis.js";
-import { stores, layoutItemsWritable } from "./lib/stores.js"
+import { stores } from "./lib/stores.js"
 
 import LayoutGrid from "./LayoutGrid.svelte";
 import layoutGridHelp from "./lib/layout_grid/helper.js";
+import layoutItem from "./lib/layout_grid/item.js";
 
 const genId = () => "_" + Math.random().toString(36).substr(2, 9);
 const randomNumberInRange = (min, max) => Math.random() * (max - min) + min;
@@ -40,23 +41,22 @@ let objects = {};
 $: items;
 $: console.log("ITEMS", items);
 
-let layoutItems = layoutItemsWritable;
-layoutItems.subscribe(val => {
-  items = val.items;
-  for (let pendingItem in val.add) {
-    add(pendingItem[0], pendingItem[1]);
+stores.layoutItems.subscribe(val => {
+  if (!val || val.length === 0 || !val.dirty) {
+    return;
   }
-  // layoutItems.update( n => ({...n.items, add: []} ));
+
+  for (let x = 0; x < val.add.length; x++) {
+    let pendingItem = val.add[x];
+    if (add(pendingItem[0], pendingItem[1])) {
+
+    }
+  }
+  // items = val.items;
+  stores.layoutItems.update( n => ({...n.items, add: [], dirty: false }));
 });
 
 let adjustAfterRemove = false;
-
-let persistent = {
-  cache: {},
-  profile: {},
-  targets: {},
-  state: { data: items }
-};
 
 function hydrateParams(item) {
 
@@ -104,11 +104,11 @@ function hydrateParams(item) {
   return item;
 }
 
-const positionItem = (item) => {
+function positionItem(item) {
   let findOutPosition = layoutGridHelp.findSpace(item, items, columnCount);
   // console.log("UPDATED POSITION", item, findOutPosition, items);
   return { ...item, ...findOutPosition };
-};
+}
 
 function _newItem(options={}) {
   return positionItem(
@@ -142,6 +142,14 @@ function add(panelTarget, options={}) {
     // console.log("ADDING DEPENDENT", newItem);
     items = [...items, newItem];
   }
+
+  // stores.layoutItems.update(n => {
+  //   n.items = items;
+  //   n.dirty = true;
+  //   return n;
+  // });
+
+  return true;
 };
 
 const onAdd = (val) => {
@@ -157,15 +165,13 @@ const remove = (item) => {
   // FIXME move object to stasis BEFORE deleting it
   items = items.filter((value) => value.target !== item);
   if (adjustAfterRemove) {
-    // items = layoutGridHelp.adjust(items, columnCount);
     delete objects[item];
-    // adjustAfterRemove =
   }
-  console.log('removing ---',item, items);
+  // console.log('removing ---',item, items);
 };
 
 function togglePanel(e) {
-  console.log("TOGGLE PANEL", e);
+  // console.log("TOGGLE PANEL", e);
   let item = e.detail;
   _togglePanel(item.name);
 }
@@ -173,7 +179,7 @@ function togglePanel(e) {
 function _togglePanel(itemName) {
   let _layout = items.filter((value) => value.target === itemName);
   adjustAfterRemove = true;
-  console.log("_TOGGEL PANEL", itemName, _layout);
+  // console.log("_TOGGEL PANEL", itemName, _layout);
   if (_layout.length > 0)
     remove(itemName);
   else

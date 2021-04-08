@@ -3,8 +3,6 @@ import { createEventDispatcher } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
 // https://github.com/themarquisdesheric/simply-svelte-autocomplete
-import { boldSearchTerm, findMatches } from './apis.js';
-
 
 export function autocomplete(node, args) {
 

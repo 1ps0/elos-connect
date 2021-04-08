@@ -23,6 +23,8 @@ export const workspaceWritable = writable(workspaceConfig);
 
 export const historyWritable = writable(cacheFor("history", []));
 
+export const trackedWritable = writable(cacheFor("tracked", {}));
+
 export const logWritable = writable(cacheFor("log", {}));
 
 export const filesWritable = writable(cacheFor("files"));
@@ -39,6 +41,7 @@ export const commandOptionsWritable = writable({
   todo: () => cacheFor("todo"),
   workspace: () => cacheFor("workspace"),
   history: () => cacheFor("history"),
+  tracked: () => cacheFor("tracked"),
   log: () => cacheFor("log"),
   layoutItems: () => cacheFor("layoutItems"),
   profile: () => cacheFor("profile"),
@@ -59,6 +62,7 @@ export const stores = {
   todo: todoWritable,
   polls: pollsWritable,
   history: historyWritable,
+  tracked: trackedWritable,
   log: logWritable,
   layoutItems: layoutItemsWritable,
   // config data

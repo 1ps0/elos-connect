@@ -32,7 +32,7 @@ $: {
     chart.update();
   }
   else {
-    console.log("NO QUEUE", queue, data, dataKey);
+    // console.log("NO QUEUE", queue, data, dataKey);
   }
 };
 $: console.log("queue", queue);
@@ -84,25 +84,25 @@ function renderData() {
 function createChart() {
   let ctx = document.getElementById('chart').getContext('2d');
   return new Chart(ctx, {
-      type: 'bar',
-      data: renderData(),
-      options: {
-          scales: { yAxes: [{ ticks: { beginAtZero: true } }] },
-          fill: true,
-          maintainAspectRatio: false,
-          responsive: true,
-          indexAxis: 'y',
-          elements: { bar: { borderWidth: 2, } },
-          plugins: {
-            legend: {
-              position: 'right',
-            },
-            title: {
-              display: true,
-              text: 'Chart.js Horizontal Bar Chart'
-            }
-          }
+    type: 'bar',
+    data: renderData(),
+    options: {
+      scales: { yAxes: [{ ticks: { beginAtZero: true } }] },
+      fill: true,
+      maintainAspectRatio: false,
+      responsive: true,
+      indexAxis: 'y',
+      elements: { bar: { borderWidth: 2, } },
+      plugins: {
+        legend: {
+          position: 'right',
+        },
+        title: {
+          display: true,
+          text: 'Chart.js Horizontal Bar Chart'
+        }
       }
+    }
   });
 }
 

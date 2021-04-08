@@ -62,6 +62,8 @@ onMount(async () => {
         } else {
           queue = val;
         }
+      } else {
+        queue = [];
       }
     });
   }
@@ -71,35 +73,40 @@ onMount(async () => {
 
 
 <section class="log-body">
-  <ul id="task-list">
-    {#if !readonly}
-      <li>
-        <div id="add-btn">
-          <form on:submit|preventDefault={inputEvent}>
-            <input type="text" id="task-input" placeholder="">
-            <button type="submit">{buttonName}</button>
-          </form>
-        </div>
-      </li>
-    {/if}
-    {#each queue as _item (_item.name)}
-      <li
-        use:linker={queue}
-        class:checked={_item.checked}
-        class="item"
-        on:click={() => didClick(_item)}
-      >
-        {#if titleKey}
-          <span>{_item[titleKey]}</span>
-        {:else if transform}
-          <span>{transform(_item)}</span>
-        {/if}
-        <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
-      </li>
-    {:else}
-      <li>No Data</li>
-    {/each}
-  </ul>
+  {#if queue}
+    <ul id="task-list">
+      {#if !readonly}
+        <li>
+          <div id="add-btn">
+            <form on:submit|preventDefault={inputEvent}>
+              <input type="text" id="task-input" placeholder="">
+              <button type="submit">{buttonName}</button>
+            </form>
+          </div>
+        </li>
+      {/if}
+      {#each queue as _item (_item.name)}
+          <!-- use:linker={queue} -->
+        <li
+          class:checked={_item.checked}
+          class="item"
+          on:click={() => didClick(_item)}
+        >
+          {#if titleKey}
+            <span>{_item[titleKey]}</span>
+          {:else if transform}
+            <span>{transform(_item)}</span>
+          {/if}
+          <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
+        </li>
+      {:else}
+        <li>No Data</li>
+      {/each}
+    </ul>
+
+  {:else}
+    <p>No Data</p>
+  {/if}
 </section>
 
 <style>

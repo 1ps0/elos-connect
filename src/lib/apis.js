@@ -32,7 +32,6 @@ export const _fetch = async (url, params={}) => {
   for (let arg in params) {
     _url.searchParams.append(arg, params[arg]);
   }
-
   let response = await fetch(_url);
   return handleResponse(response);
 };
@@ -48,7 +47,14 @@ export const _send = async (url, params={}) => {
 
   params.method = "POST";
 
-  let response = await fetch(_url, params);
+  let response = await fetch(_url, {
+    method: "POST",
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(params)
+  });
   return handleResponse(response);
 }
 
@@ -59,6 +65,43 @@ export const fileList = async (params) => {
   stores.files.update(n => ({...n, ...data, dirty: false }));
 
   console.log("updated filelist", data, params);
+};
+
+let dbURIs = {
+  profile: "/api/db/profile",
+};
+
+export const sendProfileUpdate = async (tableName, val) => {
+  let values = Object.values(val);
+  let columns = Object.keys(values[0]);
+  let row_data = values.map((x) => Object.values(x));
+  let params = [{
+    table_name: tableName,
+    columns: columns.slice(0,4),
+    rows: row_data.map((x) => x.slice(0,4))
+  }];
+
+  for (let row in row_data) {
+    if (row.at) {
+      let at_set = row.at.map((x) => x[0] );
+      let rows_set = at_set.map( x => ({
+        action_id: row.id,
+        session_id: val.session_id,
+        at: x
+      }));
+      params.push({
+        table_name: 'log',
+        columns: ['action_id', 'session_id', 'at'],
+        row_data: row_set
+      });
+    }
+  }
+
+  console.log("SENDING UPDATE", tableName, val, params);
+  let data = await _send(dbURIs.profile, params);
+
+  console.log("updated remote log", val, params, data);
+  return data;
 };
 
 // -- filters
@@ -146,17 +189,21 @@ export function _openFile(data) {
 
     // stores.history.update(n => [...(n || []), data]);
 
-    stores.layoutItems.update( n => ({
-        ...n,
-        add: [...n.add, [target, options]]
-      })
-    );
+    // TODO take a step back here. this is potentially circular with add() and
+    // should be rolled into its own find/add/remove/toggle system for specific
+    // content types. so we dont double open a window, but also CAN open two windows
+    // of the same kind.
+    stores.layoutItems.update( n => {
+      n.add.push([target, options]);
+      n.dirty = true;
+      return n;
+    });
   }
 }
 
 
 export function _updateLog(val) {
-  console.log("_UPDATE LOG", val);
+  // console.log("_UPDATE LOG", val);
   const date = dateStringFromDate(new Date());
   const fmtDate = clockFormatter.format(new Date());
   // warning: this could get bloated
@@ -185,7 +232,7 @@ export function _updateHistory(val) {
   stores.history.update((n) => [...(n || []), _event]);
 }
 export function updateHistory(e) {
-  console.log("UPDATE HISTORY", e);
+  // console.log("UPDATE HISTORY", e);
   let val = e.detail;
   _updateHistory(val);
 }
@@ -206,6 +253,10 @@ export function _updateFiletype(typeName) {
 
 // -- subscriptions
 
+stores.layoutItems.subscribe(val => {
+  console.log("[update] stores.layoutItems update", val)
+});
+
 stores.files.subscribe(val => {
   console.log("[update] stores.files update", val);
   /*
@@ -222,6 +273,13 @@ stores.files.subscribe(val => {
 stores.workspace.subscribe((val) => {
   console.log("[update] stores.workspace update", val);
   //JSON.parse(localStorage.getItem(item));
+});
+
+stores.log.subscribe((val) => {
+  console.log("[update] stores.log update", val, Object.keys(val).length);
+  if (val && Object.keys(val).length > 0) {
+    sendProfileUpdate('action', val);
+  }
 });
 
 

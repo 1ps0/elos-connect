@@ -7,8 +7,6 @@ import { commandLine } from "./lib/commandLine.js";
 
 import AutoComplete from './AutoComplete.svelte';
 
-import { boldSearchTerm, findMatches } from './lib/apis.js';
-
 const tagColors = ['#000', '#3298dc', '#f14668', '#48c774', '#3273dc']
 const searchModifiers = ['cmd', 'files', 'do', 'panel', 'profile', 'settings']
 

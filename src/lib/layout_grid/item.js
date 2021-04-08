@@ -1,12 +1,5 @@
 import { makeMatrix, makeMatrixFromItemsIgnore, findCloseBlocks, findItemsById, makeMatrixFromItems } from "./matrix.js";
 import { getRowsCount } from "./other.js";
-import { findSpace } from "./helper.js";
-
-export function positionItem(item) {
-  let findOutPosition = layoutGridHelp.findSpace(item, items, columnCount);
-  // console.log("UPDATED POSITION", item, findOutPosition, items);
-  return { ...item, ...findOutPosition };
-}
 
 export function filterStatics(items) {
   return items.filter(value => !value.static);

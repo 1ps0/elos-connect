@@ -8,7 +8,7 @@ export let imageLinks = [];
 export let dataStore;
 
 $: imageLinks = images.slice(0,9).map((img) => {
-  return `/api/load?filepath=${img.locations[0].split('/Volumes/ARCHIVE/')[1]}`;
+  return `/api/load?filepath=${img.locations[0].split('/Volumes/FATMAN/')[1]}`;
 });
 $: console.log("images: ", imageLinks, images);
 
@@ -45,6 +45,7 @@ onMount(async () => {
 <div class="row">
     <div class="column">
       {#each imageLinks as image}
+        <p>{image}</p>
         <img src="{image}"/>
       {:else}
         No Data

@@ -59,7 +59,7 @@ export function linker(node, item) {
   // }
   const clickHandler = (e) => {
     e.preventDefault();
-    dispatch('didClick', {
+    dispatch('activateItem', {
       source: node.name,
       data: item
     });
@@ -67,11 +67,11 @@ export function linker(node, item) {
   // const cells = node.cells;
   // const openCell = cells.namedItems("item-open");
 
-  // node.addEventListener('openFile', _handler);
+  // node.addEventListener('openFile', clickHandler);
   // on:click|preventDefault={() =>
   // node.addEventListener('click', clickHandler);
 
-  // console.log("linker found", node, item);
+  console.log("linker found", node, item);
 
   return {
     update(newFile) {
