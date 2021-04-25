@@ -59,34 +59,44 @@ function addEntry(e) {
   console.log('adding entry to listqueue:', e);
   let name = document.getElementById('task-input').value;
   if (dataStore) {
-    // dataStore.update( n => [...n, {
-    //   name: name,
-    //   checked: false,
-    //   eventClick: (e) => {}
-    // }]);
+    dataStore.update( n => [...n, {
+      name: name,
+      checked: false,
+      eventClick: (_n) => {
+        return _n.filter((value) => value.name === name);
+      }
+    }]);
   } else {
-
+    console.log("[todo.py] NO DATASTORE");
   }
 }
 
 function removeEntry(e) {
   console.log("removing entry from listqueue:", e);
-  // TODO mark todo as removed
+  var name = e.detail.name;
+  dataStore.update(n => _n.filter((value) => value.name !== name));
 }
 
+function clearLog(e) {
+
+}
 
 
 onMount(async () => {
   console.log('Todo mounted');
 
-  stores.todo.update(n => [...(n.length > 0 ? n : todoItems)]);
+  dataStore.update(n => [...(n.length > 0 ? n : todoItems)]);
 });
 
 </script>
 
 <section>
+  <p>
+    <button id="clear" on:click={clearLog}>
+    </button>
+  </p>
   <ItemList
-    dataStore={stores.todo}
+    dataStore={dataStore}
     on:didClick={updateLog}
     buttonName="Add"
     titleKey="name"

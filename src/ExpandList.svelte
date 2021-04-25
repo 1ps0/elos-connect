@@ -20,7 +20,7 @@ export let dataKey = null;
 export let readonly = false;
 export let transform = (x) => x;
 
-let queue = [];
+let queue = null;
 // $: console.log('queue -->', queue, dataStore);
 
 // TODO make this part of the toolbar
@@ -70,8 +70,8 @@ onMount(async () => {
 </script>
 
 
-<section class="log-body">
-  <div id="task-list">
+<div class="log-body task-list">
+  {#if queue}
     {#each queue as _item (_item.name)}
       <p
         use:linker={queue}
@@ -92,8 +92,10 @@ onMount(async () => {
     {:else}
       <p>No Data</p>
     {/each}
-  </div>
-</section>
+  {:else}
+    <p>No List Given</p>
+  {/if}
+</div>
 
 <style>
 

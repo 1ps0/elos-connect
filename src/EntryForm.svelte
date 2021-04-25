@@ -19,7 +19,7 @@ const dispatch = createEventDispatcher();
 
 let pollTypes = [
   {
-    title: "Calorie Intake",
+    title: "Calories",
     name: "calories",
     context: "food",
     category: "personal_metric",
@@ -36,6 +36,20 @@ let pollTypes = [
         type: "text",
         showValue: false
       },
+    ]
+  },
+  {
+    title: "Weight",
+    name: "weight",
+    context: "body",
+    category: "personal_metric",
+    fields: [
+      {
+        label: "Lb",
+        name: "value",
+        type: "number",
+        showValue: false
+      }
     ]
   },
   {

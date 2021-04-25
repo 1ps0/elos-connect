@@ -4,6 +4,7 @@ import { writable, get } from 'svelte/store';
 
 import { clockFormatter, dateStringFromDate } from "./clock.js";
 import { stores } from "./stores.js";
+import { openWith } from "../config/open.js";
 
 // -- reactive globals
 
@@ -165,10 +166,11 @@ export function openFile(e) {
   return _openFile(data);
 };
 
+
 export function _openFile(data) {
   let target;
 
-  if (["md", "txt", "json"].indexOf(data['file.ext']) != -1) {
+  if (["md", "txt", "json", "py", "js"].indexOf(data['file.ext']) != -1) {
     target = "panel-editor";
   }
   else if (data['file.ext'] === "pdf") {
@@ -182,7 +184,10 @@ export function _openFile(data) {
     let options = {
       target_name: target,
       props: {
-        data: selectedFilePath(data)
+        data: selectedFilePath(data),
+        language: data['file.ext'] || 'markdown',
+        theme: 'vs-light',
+        features: ['wordWrap',]
       }
     };
     console.log("data for open file", options);

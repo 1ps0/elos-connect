@@ -97,7 +97,7 @@ function hydrateParams(item) {
       case "togglePanel": item.event.callback = togglePanel; break;
       case "openFile": item.event.callback = openFile; break;
     }
-    if (item && item.target && item.target in objects) {
+    if (item && item.target && item.target in objects && objects[item.target] !== null) {
       objects[item.target].$on(item.event.name, item.event.callback);
     }
   }
@@ -150,6 +150,22 @@ function add(panelTarget, options={}) {
   // });
 
   return true;
+};
+
+const addNotif = (val) => {
+  var _val = val;
+  _addNotif(_val)
+}
+
+const _addNotif = (val) => {
+  var duration = 3600;
+  add(val);
+  onAdd(val);
+  (async (x) => {
+    setTimeout((_x) => {
+      remove(val.name);
+    }, duration);
+  })();
 };
 
 const onAdd = (val) => {
