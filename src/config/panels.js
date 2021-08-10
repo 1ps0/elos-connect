@@ -77,6 +77,17 @@ export let panelTypes = {
     dependents: [ "panel-timer", "panel-eventhistory" ],
     props: {}
   },
+  "panel-cando-list": {
+    target: "panel-cando-list",
+    name: "cando-list",
+    componentName: "rotatelist",
+    w: columnMultiplier*6,
+    h: 8,
+    props: {
+      dataKey: "baitlist",
+      dataStore: "profile"
+    }
+  },
   "panel-entryform": {
     target: "panel-entryform",
     name: "entryform",
@@ -85,6 +96,26 @@ export let panelTypes = {
     componentName: "entryform",
     props: {
       dataStore: "profile"
+    }
+  },
+  "panel-tracked": {
+    target: "panel-tracked",
+    name: "tracked",
+    w: columnMultiplier*4,
+    h: 8,
+    componentName: "tracker",
+    props: {
+      dataStore: "tracked"
+    }
+  },
+  "panel-drop": {
+    target: "panel-drop",
+    name: "drop",
+    w: columnMultiplier*4,
+    h: 8,
+    componentName: "drop",
+    props: {
+      dataStore: "files"
     }
   },
   "panel-eventhistory": {
@@ -112,6 +143,35 @@ export let panelTypes = {
       dataStore: "log"
     }
   },
+  "panel-tags": {
+    target: "panel-tags",
+    name: "tags",
+    w: columnMultiplier*3,
+    componentName: "selectlist",
+    event: {
+      name: 'filterType',
+      callback: 'updateLocations'
+    },
+    props: {
+      eventName: 'filterType',
+      source: '/api/analysis/tags',
+      transform: ((e) => e)
+    }
+  },
+  "panel-locations": {
+    target: "panel-locations",
+    name: "locations",
+    w: columnMultiplier*6,
+    componentName: "itemlist",
+    props: {
+      readonly: true,
+      dataStore: "links",
+      dataSourcePath: "/api/location/search",
+      titleKey: "label",
+      transform: ((x) => x)
+    },
+    // dependents: [ "panel-tags" ]
+  },
   "panel-journal": {
     target: "panel-journal",
     name: "journal",
@@ -120,8 +180,9 @@ export let panelTypes = {
     props: {
       readonly: true,
       dataStore: "profile",
-      dataKey: "journal",
-      transform: ((x) => x.data)
+      dataKey: "metrics",
+      titleKey: "title",
+      transform: ((x) => x)
     }
   },
   "panel-filetypes": {
@@ -182,7 +243,8 @@ export let panelTypes = {
     w: columnMultiplier*5,
     componentName: "imagegallery",
     props: {
-      dataStore: "files"
+      dataStore: "files",
+      dataSourcePath: "/api/file/search",
     }
   },
   "panel-pkgindex": {

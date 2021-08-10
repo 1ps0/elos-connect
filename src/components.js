@@ -12,8 +12,11 @@ import Chart from "./Chart.svelte";
 import ExpandList from "./ExpandList.svelte";
 import ItemList from "./ItemList.svelte";
 import SelectList from "./SelectList.svelte";
+import RotateList from "./RotateList.svelte";
+import Tracker from "./Tracker.svelte";
 import Editor from "./Editor.svelte";
 import Files from "./Files.svelte";
+import DropSite from "./DropSite.svelte";
 // import Session from "./Session.svelte";
 import Pdf from "./Pdf.svelte";
 import DataGrid from "./DataGrid.svelte";
@@ -31,12 +34,16 @@ export const components = {
     "clock": Clock,
     "profile": Profile,
     "todo": Todo,
+    "rotatelist": RotateList,
     "chart": Chart,
     "expandlist": ExpandList,
     "itemlist": ItemList,
     "selectlist": SelectList,
+    "tracker": Tracker,
     "editor": Editor,
     "files": Files,
+    "drop": DropSite,
+    // "status": NotifSite,
     // "session": Session,
     "pdf": Pdf,
     "datagrid": DataGrid,

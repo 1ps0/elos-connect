@@ -14,8 +14,8 @@ export let rowHeight = 65;
 // GRID MENU PANEL
 export const menuItems = [
   {
-    name: "panel-timer",
-    value: { icon: "task-add", highlight: "Timer"},
+    name: "panel-cando-list",
+    value: { icon: "task-add", highlight: "CANDO LIST"},
     group: "1"
   },
   {
@@ -44,9 +44,14 @@ export const menuItems = [
     group: "2"
   },
   {
-    name: "panel-metrics",
-    value: { icon: "table", highlight: "Metrics"},
-    group: "1"
+    name: "panel-locations",
+    value: { icon: "view-mode-3", highlight: "File/URL locations"},
+    group: "2"
+  },
+  {
+    name: "panel-drop",
+    value: { icon: "table", highlight: "File/URL drop"},
+    group: "2"
   },
   {
     name: "panel-layouts",

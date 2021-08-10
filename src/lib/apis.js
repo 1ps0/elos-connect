@@ -61,6 +61,10 @@ export const _send = async (url, params={}) => {
 
 // -- ensemble / client / api functions
 
+export const dataLoadForPath = async (dataPath, dataStore) => {
+
+};
+
 export const fileList = async (params) => {
   let data = await _fetch("/api/file/search", params);
   stores.files.update(n => ({...n, ...data, dirty: false }));
@@ -70,6 +74,17 @@ export const fileList = async (params) => {
 
 let dbURIs = {
   profile: "/api/db/profile",
+};
+
+export const linkList = async (params) => {
+  // # keywords = request.args.get("keywords", "")
+  // # tags = request.args.get("tags", [])
+  // # order = request.args.get("order", "DESC")
+  // limit = request.args.get("limit", 10)
+  // offset = request.args.get("offset", 0)
+  let data = await _fetch("/api/location/search", params);
+  stores.links.update(n => ({...n, ...data, dirty: false}));
+  console.log("updated linklist", data, params);
 };
 
 export const sendProfileUpdate = async (tableName, val) => {
@@ -242,6 +257,16 @@ export function updateHistory(e) {
   _updateHistory(val);
 }
 
+
+export function updateLocation(e) {
+  let typeName = e.detail.name;
+  if (!typeName) return;
+
+  stores.links.update((obj) => {
+    obj.filetype = typeName;
+    return obj;
+  });
+};
 
 export function updateFiletype(e) {
   let typeName = e.detail.name;

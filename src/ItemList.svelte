@@ -12,14 +12,17 @@ TODO -
 
 import { createEventDispatcher, onMount } from 'svelte';
 import { linker } from "./lib/linker.js";
+import { _fetch } from "./lib/apis.js";
 
 const dispatch = createEventDispatcher();
 
+export let dataSourcePath = null;
 export let dataStore = null;
 export let dataKey = null;
 export let readonly = false;
 export let transform = (x) => x;
 
+let dataSource = null;
 let queue = [];
 // $: console.log('queue -->', queue, dataStore);
 
@@ -67,10 +70,31 @@ onMount(async () => {
       }
     });
   }
+
+  if (dataSourcePath) {
+    console.log("running dataSourcePath fetch", dataSourcePath);
+    // dataStore.update((n) => _fetch(dataSourcePath));
+    queue = (await _fetch(dataSourcePath)).result;
+    console.log("dataSourcePath GOT", queue);
+    if (dataStore) {
+      dataStore.update(n => queue);
+    }
+  }
+
 });
 
 </script>
 
+<!--
+TODO: replace readonly with a 'slot' like a mmo socket
+- slots can each have one of n types:
+1. text submit/activate
+2. filter by text
+3. panel toggles
+
+slots are declared in panels.js, like a component, refer to usables
+and are configured accordingly
+ -->
 
 <section class="log-body">
   {#if queue}
@@ -85,7 +109,7 @@ onMount(async () => {
           </div>
         </li>
       {/if}
-      {#each queue as _item (_item.name)}
+      {#each queue as _item}
           <!-- use:linker={queue} -->
         <li
           class:checked={_item.checked}

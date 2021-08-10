@@ -8,7 +8,7 @@ const dispatch = createEventDispatcher();
 export let item = null;
 export let target = null;
 
-export let panelOpts = null;
+export let panelOpts = [];
 $: panelOpts = item ? item.props.panelOpts : panelOpts;
 // $: debug ? console.log("OPTIONS", panelOpts) : null;
 
