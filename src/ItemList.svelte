@@ -85,16 +85,6 @@ onMount(async () => {
 
 </script>
 
-<!--
-TODO: replace readonly with a 'slot' like a mmo socket
-- slots can each have one of n types:
-1. text submit/activate
-2. filter by text
-3. panel toggles
-
-slots are declared in panels.js, like a component, refer to usables
-and are configured accordingly
- -->
 
 <section class="log-body">
   {#if queue}

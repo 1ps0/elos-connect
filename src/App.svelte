@@ -17,16 +17,16 @@ TODO - layout
 
 import { onMount } from 'svelte';
 
-import { rowHeight, panelGap, columnCount } from "./config/layout.js";
 import { icons } from "./lib/icons.js";
 import { components } from "./components.js";
-import { panelTypes, optionTypes } from "./config/panels.js";
+import { panelTypes, optionTypes, layoutConfig } from "./config/panels.js";
 console.log("PANEL TYPES", panelTypes);
 
 import { _fetch, updateFiletype, openFile } from "./lib/apis.js";
 import { stores } from "./lib/stores.js"
 
 import LayoutGrid from "./LayoutGrid.svelte";
+import { _layoutAction } from "./lib/layoutAction.js";
 import layoutGridHelp from "./lib/layout_grid/helper.js";
 import layoutItem from "./lib/layout_grid/item.js";
 
@@ -35,45 +35,14 @@ const randomNumberInRange = (min, max) => Math.random() * (max - min) + min;
 const serializeLayout = (val) => { return JSON.stringify({...val, key: 'layout'}) };
 
 
-
 let items = [];
 let objects = {};
 $: items;
-$: console.log("ITEMS", items);
-
-stores.layoutItems.subscribe(val => {
-  if (!val || val.length === 0 || !val.dirty) {
-    return;
-  }
-
-  for (let x = 0; x < val.add.length; x++) {
-    let pendingItem = val.add[x];
-    if (add(pendingItem[0], pendingItem[1])) {
-
-    }
-  }
-  // items = val.items;
-  stores.layoutItems.update( n => ({...n.items, add: [], dirty: false }));
-});
-
-let adjustAfterRemove = false;
+// $: console.log("ITEMS", items);
 
 function hydrateParams(item) {
-
   if (!components.hasOwnProperty(item.componentName)) {
     console.log("MISSING COMPONENT", item.componentName);
-  }
-
-  if (item.props !== undefined && item.props.panelOpts === undefined) {
-    item.props.panelOpts = Object.assign({}, optionTypes);
-
-    for (let opt in item.props.panelOpts) {
-      let val = item.props.panelOpts[opt];
-      switch(val.title) {
-        case 'close': val.onClick = () => { remove(item) }; break;
-        case 'pin': val.onClick = () => {}; break;
-      }
-    }
   }
 
   // hydrate datastores
@@ -89,9 +58,7 @@ function hydrateParams(item) {
   }
 
   // hydrate events
-  if (item.event !== undefined
-      && item.event.callback !== undefined) {
-
+  if (item.event !== undefined) {
     switch(item.event.callback) {
       case "updateFiletype": item.event.callback = updateFiletype; break;
       case "togglePanel": item.event.callback = togglePanel; break;
@@ -105,15 +72,16 @@ function hydrateParams(item) {
 }
 
 function positionItem(item) {
-  let findOutPosition = layoutGridHelp.findSpace(item, items, columnCount);
-  // console.log("UPDATED POSITION", item, findOutPosition, items);
-  return { ...item, ...findOutPosition };
+  return {
+    ...item,
+    ...layoutGridHelp.findSpace(item, items, layoutConfig.columnCount)
+  };
 }
 
 function _newItem(options={}) {
   return positionItem(
     layoutGridHelp.item({
-      h: 7,
+      h: 7, // FIXME add default height
       id: genId(),
       ...hydrateParams(options),
     })
@@ -123,7 +91,6 @@ function _newItem(options={}) {
 function add(panelTarget, options={}) {
   // TODO render icons into menuItems
   // TODO render source/dataStore props into actual stores
-  // TODO ...? i changed a lot
   if (!panelTypes.hasOwnProperty(panelTarget)) {
     console.log("MISSING PANEL", panelTarget);
   }
@@ -133,40 +100,9 @@ function add(panelTarget, options={}) {
   items = [...items, rootItem];
   console.log('ADDING', panelTarget, rootItem);
 
-  for (let dep in (options.dependents || [])) {
-    let newItem = _newItem({
-      ...panelTypes[dep],
-      border: "red",
-      parent: rootItem
-    });
-    // console.log("ADDING DEPENDENT", newItem);
-    items = [...items, newItem];
-  }
-
-  // stores.layoutItems.update(n => {
-  //   n.items = items;
-  //   n.dirty = true;
-  //   return n;
-  // });
-
   return true;
 };
 
-const addNotif = (val) => {
-  var _val = val;
-  _addNotif(_val)
-}
-
-const _addNotif = (val) => {
-  var duration = 3600;
-  add(val);
-  onAdd(val);
-  (async (x) => {
-    setTimeout((_x) => {
-      remove(val.name);
-    }, duration);
-  })();
-};
 
 const onAdd = (val) => {
   console.log("did onAdd", val);
@@ -180,22 +116,17 @@ const onAdd = (val) => {
 const remove = (item) => {
   // FIXME move object to stasis BEFORE deleting it
   items = items.filter((value) => value.target !== item);
-  if (adjustAfterRemove) {
+  if (items.length > 0) {
     delete objects[item];
   }
-  // console.log('removing ---',item, items);
 };
 
 function togglePanel(e) {
-  // console.log("TOGGLE PANEL", e);
-  let item = e.detail;
-  _togglePanel(item.name);
+  _togglePanel(e.detail.name);
 }
 
 function _togglePanel(itemName) {
   let _layout = items.filter((value) => value.target === itemName);
-  adjustAfterRemove = true;
-  // console.log("_TOGGEL PANEL", itemName, _layout);
   if (_layout.length > 0)
     remove(itemName);
   else
@@ -203,36 +134,26 @@ function _togglePanel(itemName) {
 };
 
 
+
 onMount(async () => {
   console.log('App mounted');
 
-  // registeredActions.update((n) => {
-  //   n.gallery = (itemName) => {};
-  //   n.video = (itemName) => {};
-  //   n.audio = (itemName) => {};
-  //   n.toggle = (itemName) => { _togglePanel(itemName) };
-  // });
-
   add("panel-mainmenu");
-  add("panel-commandbar");
-  // _togglePanel("panel-gallery");
-  // _togglePanel("panel-files");
-  // _togglePanel("panel-session");
-  // _togglePanel("panel-dashboard");
-
-
+  // add("panel-locations");
+  // add("panel-commandbar");
 });
 
+//bind:items={items}
 </script>
 
 <main>
 
   <section>
     <LayoutGrid
-      cols={columnCount}
-      gap={panelGap}
-      rowHeight={rowHeight}
-      bind:items={items}
+      cols={layoutConfig.columnCount}
+      gap={layoutConfig.panelGap}
+      rowHeight={layoutConfig.rowHeight}
+      bind:items
       let:item
       let:index
     >
@@ -245,14 +166,6 @@ onMount(async () => {
         {...item.props}
         {index}
       />
-      {#if item.props && item.props.panelOpts}
-        <svelte:component
-          id={item.id}
-          this={components.options}
-          bind:target={objects[item.target]}
-          {item}
-        />
-      {/if}
     </LayoutGrid>
   </section>
 

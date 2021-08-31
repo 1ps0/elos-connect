@@ -5,11 +5,6 @@ low order item for configuring the layoutgrid(s). no deeper dependencies that po
 - TODO icon dependency
 */
 
-// LAYOUT GRID
-export let panelGap = 5;
-export let columnMultiplier = 6;
-export let columnCount = 100;
-export let rowHeight = 65;
 
 // GRID MENU PANEL
 export const menuItems = [

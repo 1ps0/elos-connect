@@ -2,15 +2,20 @@
 
 import { createEventDispatcher, onMount } from 'svelte';
 import { icons } from "./lib/icons.js";
+import { _layoutAction } from "./lib/layoutAction.js";
 
 const dispatch = createEventDispatcher();
 
-export let item = null;
-export let target = null;
+export let config = {};
+// export let inputs = writable({});
+// export let data = await _fetch(config.url, config.params);
+// export let transforms = item.transform;
+// export let displayPanel = item.component;
+// export let feedbackHooks = item.events;
 
-export let panelOpts = [];
-$: panelOpts = item ? item.props.panelOpts : panelOpts;
-// $: debug ? console.log("OPTIONS", panelOpts) : null;
+// export let item = null;
+// export let target = null;
+
 
 onMount(async () => {
   console.log('Options mounted');
@@ -19,14 +24,15 @@ onMount(async () => {
 </script>
 
 <div id="nav" class="sidenav">
-  {#each panelOpts as opt}
+  {#each Object.entries(config) as opt (opt[0])}
     <a href="#" class="tag">
-      {console.log("OPT", opt, _)}
-      {#if opt.icon}
-        <svelte:component this={icons[opt.icon]} />
-      {:else}
-        {opt.title}
-      {/if}
+      <div use:_layoutAction={opt}>
+        {#if opt.icon}
+          <svelte:component this={icons[opt.icon]} />
+        {:else}
+          {opt.title}
+        {/if}
+      </div>
     </a>
   {/each}
 </div>
