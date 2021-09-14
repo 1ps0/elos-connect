@@ -8,6 +8,8 @@ import Clock from "./Clock.svelte";
 import Profile from "./Profile.svelte";
 import Todo from "./Todo.svelte";
 
+import ActionMenu from "./ActionMenu.svelte";
+
 import Chart from "./Chart.svelte";
 import ExpandList from "./ExpandList.svelte";
 import ItemList from "./ItemList.svelte";
@@ -43,6 +45,7 @@ export const components = {
     "editor": Editor,
     "files": Files,
     "drop": DropSite,
+    "actionmenu": ActionMenu,
     // "status": NotifSite,
     // "session": Session,
     "pdf": Pdf,

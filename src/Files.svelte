@@ -7,7 +7,7 @@ import ItemList from "./ItemList.svelte";
 
 // stores.files, stores.history, stores.layoutItems
 import { stores } from "./lib/stores.js";
-import { fileSelect, fileList, openFile } from "./lib/apis.js";
+import { fileList, openFile } from "./lib/apis.js";
 
 import { linker } from "./lib/linker.js";
 

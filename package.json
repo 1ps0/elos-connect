@@ -26,7 +26,7 @@
     "monaco-editor-webpack-plugin": "^3.0.1",
     "simply-svelte-autocomplete": "^1.3.0",
     "svelte": "^3.37.0",
-    "svelte-charts": "github:wrgoldstein/svelte-charts",
+    "svelte-charts": "github.com:wrgoldstein/svelte-charts",
     "svelte-data-grid": "^3.0.0",
     "svelte-pdf": "^1.0.9",
     "svelte-select": "^3.12.0",

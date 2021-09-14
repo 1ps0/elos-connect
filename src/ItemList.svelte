@@ -29,7 +29,7 @@ let queue = [];
 // TODO make this part of the toolbar
 // TODO make 'add' trigger a writable
 
-export let buttonName = null;
+export let buttonName = "Add";
 export let inputEvent = null;
 export let titleKey = null;
 $: readonly = !buttonName || !inputEvent;

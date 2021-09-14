@@ -13,8 +13,7 @@ import { openWith } from "../config/open.js";
 
 export const handleResponse = async (response) => {
   if (response.ok) { // if HTTP-status is 200-299
-    let data = await response.json();
-    return data;
+    return await response.json();
   } else {
     console.log("HTTP-Error: ", response.status);
     return null;
@@ -27,14 +26,14 @@ export const _fetch = async (url, params={}) => {
   - replace base url with env var or other
   - add POST option for sending to same domain.
   */
-  let baseUrl = "http://localhost:8080";
+  let baseUrl = "http://localhost:3000";
   let _url = new URL(url, baseUrl);
 
   for (let arg in params) {
     _url.searchParams.append(arg, params[arg]);
   }
   let response = await fetch(_url);
-  return handleResponse(response);
+  return await handleResponse(response);
 };
 
 export const _send = async (url, params={}) => {
@@ -43,11 +42,11 @@ export const _send = async (url, params={}) => {
   - replace base url with env var or other
   - add POST option for sending to same domain.
   */
-  let baseUrl = "http://localhost:8080";
+  let baseUrl = "http://localhost:3000";
   let _url = new URL(url, baseUrl);
 
   params.method = "POST";
-
+  console.log("fetching", _url);
   let response = await fetch(_url, {
     method: "POST",
     headers: {
@@ -56,14 +55,11 @@ export const _send = async (url, params={}) => {
     },
     body: JSON.stringify(params)
   });
+  console.log("fetched", response);
   return handleResponse(response);
 }
 
 // -- ensemble / client / api functions
-
-export const dataLoadForPath = async (dataPath, dataStore) => {
-
-};
 
 export const fileList = async (params) => {
   let data = await _fetch("/api/file/search", params);

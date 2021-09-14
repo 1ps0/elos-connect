@@ -37,8 +37,8 @@ export let panelTypes = {
   "panel-mainmenu": {
     target: "panel-mainmenu",
     name: "mainmenu",
-    w: layoutConfig.columnMultiplier*11,
-    h: 1,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*11,
+    h: 2,
     componentName: "selectlist",
     event: { name: 'menuToggle', callback: "togglePanel" },
     props: {
@@ -47,10 +47,23 @@ export let panelTypes = {
       transform: (e) => { return e.value.icon }
     }
   },
+  "panel-actionmenu": {
+    target: "panel-actionmenu",
+    name: "actionmenu",
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
+    h: 6,
+    componentName: "actionmenu",
+    // event: { name: 'menuToggle', callback: "togglePanel" },
+    // props: {
+    //   eventName: "menuToggle",
+    //   items: menuItems,
+    //   transform: (e) => { return e.value.icon }
+    // }
+  },
   "panel-commandbar": {
     target: "panel-commandbar",
     name: "commandbar",
-    w: layoutConfig.columnMultiplier * 5,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier * 5,
     h: 1,
     componentName: "commandbar",
     props: { overflow: 'visible' }
@@ -58,14 +71,14 @@ export let panelTypes = {
   "panel-layouts": {
     target: "toolbar",
     name: "toolbar",
-    w: layoutConfig.columnMultiplier*4,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
     h: 1,
     componentName: "toolbar"
   },
   "panel-clock": {
     target: "panel-clock",
     name: "clock",
-    w: layoutConfig.columnMultiplier * 5,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier * 5,
     h: 1,
     componentName: "clock",
     props: {
@@ -75,14 +88,14 @@ export let panelTypes = {
   "panel-timer": {
     target: "panel-timer",
     name: "timer",
-    w: layoutConfig.columnMultiplier * 2,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier * 2,
     h: 6,
     componentName: "timer",
   },
   "panel-todo": {
     target: "panel-todo",
     name: "todo",
-    w: layoutConfig.columnMultiplier*3,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*3,
     componentName: "todo",
     // dependents: [
     //   "panel-timer",
@@ -94,7 +107,7 @@ export let panelTypes = {
     target: "panel-cando-list",
     name: "cando-list",
     componentName: "rotatelist",
-    w: layoutConfig.columnMultiplier*6,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*6,
     h: 8,
     props: {
       dataKey: "baitlist",
@@ -104,7 +117,7 @@ export let panelTypes = {
   "panel-entryform": {
     target: "panel-entryform",
     name: "entryform",
-    w: layoutConfig.columnMultiplier*6,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*6,
     h: 8,
     componentName: "entryform",
     props: {
@@ -114,7 +127,7 @@ export let panelTypes = {
   "panel-tracked": {
     target: "panel-tracked",
     name: "tracked",
-    w: layoutConfig.columnMultiplier*4,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
     h: 8,
     componentName: "tracker",
     props: {
@@ -124,7 +137,7 @@ export let panelTypes = {
   "panel-drop": {
     target: "panel-drop",
     name: "drop",
-    w: layoutConfig.columnMultiplier*4,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
     h: 8,
     componentName: "drop",
     props: {
@@ -134,7 +147,7 @@ export let panelTypes = {
   "panel-eventhistory": {
     target: "panel-eventhistory",
     name: "eventhistory",
-    w: layoutConfig.columnMultiplier*2,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*2,
     componentName: "itemlist",
     props: {
       readonly: true,
@@ -149,7 +162,7 @@ export let panelTypes = {
   "panel-actionhistory": {
     target: "panel-actionhistory",
     name: "actionhistory",
-    w: layoutConfig.columnMultiplier*8,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*8,
     componentName: "chart",
     props: {
       readonly: true,
@@ -159,7 +172,7 @@ export let panelTypes = {
   "panel-tags": {
     target: "panel-tags",
     name: "tags",
-    w: layoutConfig.columnMultiplier*3,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*3,
     componentName: "selectlist",
     event: {
       name: 'filterType',
@@ -174,7 +187,7 @@ export let panelTypes = {
   "panel-locations": {
     target: "panel-locations",
     name: "locations",
-    w: layoutConfig.columnMultiplier*6,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*6,
     componentName: "itemlist",
     props: {
       readonly: true,
@@ -188,7 +201,7 @@ export let panelTypes = {
   "panel-journal": {
     target: "panel-journal",
     name: "journal",
-    w: layoutConfig.columnMultiplier*6,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*6,
     componentName: "expandlist",
     props: {
       readonly: true,
@@ -201,7 +214,7 @@ export let panelTypes = {
   "panel-filetypes": {
     target: "panel-filetypes",
     name: "filetypes",
-    w: layoutConfig.columnMultiplier*3,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*3,
     componentName: "selectlist",
     event: {
       name: 'filterType',
@@ -216,7 +229,7 @@ export let panelTypes = {
   "panel-files": {
     target: "panel-files",
     name: "files",
-    w: layoutConfig.columnMultiplier*6,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*6,
     toolbar: {},
     componentName: "files",
     event: { name: 'openFile', callback: "openFile" },
@@ -225,13 +238,13 @@ export let panelTypes = {
   "panel-panelhistory": {
     target: "panel-panelhistory",
     name: "history",
-    w: layoutConfig.columnMultiplier*3,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*3,
     componentName: "itemlist"
   },
   "panel-metrics": {
     target: "panel-metrics",
     name: "metrics",
-    w: layoutConfig.columnMultiplier*8,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*8,
     componentName: "datagrid",
     props: {
       dataStore: "profile",
@@ -241,19 +254,19 @@ export let panelTypes = {
   "panel-pdf": {
     target: "panel-pdf",
     name: "pdf",
-    w: layoutConfig.columnMultiplier*5,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*5,
     componentName: "pdf",
   },
   "panel-editor": {
     target: "panel-editor",
     name: "editor",
-    w: layoutConfig.columnMultiplier*5,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*5,
     componentName: "editor",
   },
   "panel-gallery": {
     target: "panel-gallery",
     name: "gallery",
-    w: layoutConfig.columnMultiplier*5,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*5,
     componentName: "imagegallery",
     props: {
       dataStore: "files",
@@ -263,13 +276,13 @@ export let panelTypes = {
   "panel-pkgindex": {
     target: "panel-pkgindex",
     name: "pkgindex",
-    w: layoutConfig.columnMultiplier*8,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*8,
     componentName: "pkgindex",
   },
   "panel-create": {
     target: "panel-create",
     name: "create",
-    w: layoutConfig.columnMultiplier*5,
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*5,
     componentName: "pkgcreate",
   }
 };
