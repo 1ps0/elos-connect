@@ -44,7 +44,7 @@ import { createEventDispatcher } from 'svelte';
 import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
-import { columnMultiplier } from "../config/layout.js";
+import { layoutConfig } from "../config/panels.js";
 
 export function buildLinks() {}
 

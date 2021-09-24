@@ -67,7 +67,7 @@ export const timerAction = (node, args) => {
   clockStore.subscribe((val) => {
     let doc = document.querySelector("p.timer");
     if (doc) {
-      console.log("p.timer", timer, formatTime(timer), doc.innerHTML);
+      console.log("p.timer", doc, timer, formatTime(timer), doc.innerHTML);
       doc.innerHTML = formatTime(timer);
     }
   });

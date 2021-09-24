@@ -99,7 +99,7 @@ onMount(async () => {
           </div>
         </li>
       {/if}
-      {#each queue as _item}
+      {#each queue as _item (_item.name) }
           <!-- use:linker={queue} -->
         <li
           class:checked={_item.checked}

@@ -9,6 +9,8 @@ import Profile from "./Profile.svelte";
 import Todo from "./Todo.svelte";
 
 import ActionMenu from "./ActionMenu.svelte";
+import SpotifyControls from "./SpotifyControls.svelte";
+import LocationOps from "./LocationOps.svelte";
 
 import Chart from "./Chart.svelte";
 import ExpandList from "./ExpandList.svelte";
@@ -24,7 +26,7 @@ import Pdf from "./Pdf.svelte";
 import DataGrid from "./DataGrid.svelte";
 import EntryForm from "./EntryForm.svelte";
 import ImageGallery from "./ImageGallery.svelte";
-
+import TemplatePanel from "./TemplatePanel.svelte";
 import PkgIndex from "./PkgIndex.svelte";
 import PkgCreate from "./PkgCreate.svelte";
 
@@ -46,6 +48,9 @@ export const components = {
     "files": Files,
     "drop": DropSite,
     "actionmenu": ActionMenu,
+    "spotify_controls": SpotifyControls,
+    "location_ops": LocationOps,
+    // "template": TemplatePanel, // for templating via storybook
     // "status": NotifSite,
     // "session": Session,
     "pdf": Pdf,

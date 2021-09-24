@@ -14,6 +14,11 @@ export const menuItems = [
     group: "1"
   },
   {
+    name: "panel-location-ops",
+    value: { icon: "view-mode-1", highlight: "Location Tagging" },
+    group: "1"
+  },
+  {
     name: "panel-timer",
     value: { icon: "task-add", highlight: "CANDO LIST"},
     group: "1"
@@ -33,21 +38,26 @@ export const menuItems = [
     value: { icon: "polls", highlight: "Journal"},
     group: "1"
   },
-  {
-    name: "panel-eventhistory",
-    value: { icon: "view-mode-1", highlight: "Event History"},
-    group: "1"
-  },
-  {
-    name: "panel-actionhistory",
-    value: { icon: "view-mode-2", highlight: "Action History"},
-    group: "2"
-  },
+  // {
+  //   name: "panel-eventhistory",
+  //   value: { icon: "view-mode-1", highlight: "Event History"},
+  //   group: "1"
+  // },
+  // {
+  //   name: "panel-actionhistory",
+  //   value: { icon: "view-mode-2", highlight: "Action History"},
+  //   group: "2"
+  // },
   {
     name: "panel-locations",
     value: { icon: "view-mode-3", highlight: "File/URL locations"},
     group: "2"
   },
+  // {
+  //   name: "panel-storybook",
+  //   value: { icon: "table", highlight: "Storybook Template"},
+  //   group: "2"
+  // }
   // {
   //   name: "panel-drop",
   //   value: { icon: "table", highlight: "File/URL drop"},

@@ -51,14 +51,23 @@ export let panelTypes = {
     target: "panel-actionmenu",
     name: "actionmenu",
     w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
-    h: 6,
+    h: 4,
     componentName: "actionmenu",
-    // event: { name: 'menuToggle', callback: "togglePanel" },
-    // props: {
-    //   eventName: "menuToggle",
-    //   items: menuItems,
-    //   transform: (e) => { return e.value.icon }
-    // }
+  },
+  "panel-location-ops": {
+    target: "panel-location-ops",
+    name: "location-ops",
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
+    h: 6,
+    componentName: "location_ops"
+  },
+  "panel-storybook": {
+    target: "panel-storybook",
+    name: "storybook-test",
+    w: layoutConfig.columnMultiplier * 6,
+    h: 5,
+    componentName: "template",
+    props: []
   },
   "panel-commandbar": {
     target: "panel-commandbar",
