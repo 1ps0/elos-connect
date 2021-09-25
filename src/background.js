@@ -1,67 +1,45 @@
-/*
 
-Once it has been loaded, a background page will stay running as long as
-it is performing an action, such as calling a Chrome API or issuing a
-network request. Additionally, the background page will not unload until
-all visible views and all message ports are closed. Note that opening a
-view does not cause the event page to load, but only prevents it from
-closing once loaded.
-*/
+import { onMount } from 'svelte';
 
-// This special eslint comment declares that the code below relies on
-// a named function in the global scope.
-
-/* global getUsefulContents */
-function start() {
-   getUsefulContents(data => {
-       var display = document.getElementById('display');
-
-       display.innerHTML = data;
-   });
-}
-
-document.addEventListener('DOMContentLoaded', start);
+// import browser from "webextension-polyfill";
+// import { writable, get } from 'svelte/store';
+import { _fetch } from "./lib/apis.js";
 
 console.log("LOADING ELOS CONNECT - background.js");
 
-// import { writable, get } from 'svelte/store';
-import { _fetch } from "lib/apis.js";
-
-
-function parseComponents(text) {
+const parseComponents = (text) => {
   let params = {};
   text.split(' ').forEach(part => {
-    var param = part.split(":");
+    let param = part.split(":");
     if (param.length > 1) {
       params[param[0]] = param[1]
     }
   });
   return params;
 }
-function createSuggestionsFromResponse(response) {
-  return new Promise(resolve => {
-    console.log(response);
-    let suggestions = [];
-    let suggestionsOnEmptyResults = [{
-      content: "about:blank",
-      description: "no results found"
-    }];
-    if (!response || !response.status || !response.results) {
-      return resolve(suggestionsOnEmptyResults);
-    }
+const createSuggestionsFromResponse = (response) => {
+  console.log(response);
+  let suggestions = [];
+  let suggestionsOnEmptyResults = [{
+    content: "about:blank",
+    description: "no results found"
+  }];
+  if (!response || !response.status || !response.results) {
+    console.log("no valid suggestions: ", response, response.status, response.results);
+    return suggestionsOnEmptyResults;
+  }
 
-    response.results.forEach( obj => {
-      suggestions.push({
-        content: obj.uri,
-        description: '['+obj.value+'] '+obj.label,
-      });
+  response.results.forEach( obj => {
+    suggestions.push({
+      content: obj.uri,
+      description: '['+obj.value+'] '+obj.label,
     });
-    console.log('suggestions',suggestions);
-    return resolve(suggestions);
   });
+  console.log('suggestions',suggestions);
+  return suggestions;
 }
 
-function getTree(node) {
+const getTree = (node) => {
     var r = {tag: node.nodeName}, a, i;
     if (node.childElementCount) {
         r.children = [];
@@ -78,7 +56,7 @@ function getTree(node) {
 // var links = document.querySelectorAll('a');
 // console.log(getTree(links[0])); // only pass the first node to the function
 
-function htmlToJson(div){
+const htmlToJson = (div) => {
  var tag = {}
  tag['tagName'] = div.tagName
  tag['children'] = []
@@ -92,13 +70,13 @@ function htmlToJson(div){
  return tag;
 }
 
-function resolve(path, obj=self, separator='.') {
+const resolve = (path, obj=self, separator='.') => {
     var properties = Array.isArray(path) ? path : path.split(separator)
     return properties.reduce((prev, curr) => prev && prev[curr], obj)
 }
 
 
-
+// onMount(async () => {
 console.log('background.js mounted');
 
 browser.omnibox.setDefaultSuggestion({
@@ -116,8 +94,9 @@ browser.omnibox.onInputChanged.addListener(async (text, addSuggestions) => {
   } else {
     data = await _fetch("/api/location/search", params);
   }
+  console.log("-- got search data", params, data);
   // stores.links.subscribe((e) => {});
-  addSuggestions(await createSuggestionsFromResponse(data));
+  addSuggestions(createSuggestionsFromResponse(data));
 });
 
 browser.omnibox.onInputEntered.addListener((url, disposition) => {
@@ -149,4 +128,5 @@ browser.omnibox.onInputEntered.addListener((url, disposition) => {
   //   }
 
   // }
+  // });
 });

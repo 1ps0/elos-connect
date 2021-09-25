@@ -22,13 +22,11 @@ async function sendTag() {
   let newTagButton = document.querySelector('#tag_name');
   console.log("Sending new tag: ", newTagButton.value);
   let tagName = newTagButton.value;
-  let result = await _send("api/analysis/tag", ({
+  _send("api/analysis/tag", ({
     name: tagName
-  }));
-  if (result.status === 200) {
-    renderTag(tagName);
-  }
-  return result;
+  })).then(() => {
+    renderTag(tagName)
+  });
 }
 
 async function loadTags() {
@@ -38,6 +36,8 @@ async function loadTags() {
   // let tabs = await browser.tabs.query({currentWindow: true, active: true});
   // browser.tabs.query({currentWindow: true}, function(tab) {
   // console.log("rendering", tabs[0], results.names);
+
+  // TODO clear .panel of previous tag entries, for idempotency
   for (let tag of results.names) {
     // console.log("[remote][load#tag] ", tag);
     renderTag(tag[1]);
@@ -75,7 +75,7 @@ onMount(async () => {
   <ul class="panel">
     <li class="new-tag">
       <input id="tag_name" type="text" name="name">
-      <button id="tag_submit" class="add">Add</button>
+      <button class="add" on:click={sendTag}>Add</button>
     </li>
   </ul>
 </section>

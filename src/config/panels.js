@@ -51,7 +51,7 @@ export let panelTypes = {
     target: "panel-actionmenu",
     name: "actionmenu",
     w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
-    h: 4,
+    h: 3,
     componentName: "actionmenu",
   },
   "panel-location-ops": {

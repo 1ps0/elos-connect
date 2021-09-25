@@ -28,7 +28,6 @@ import { stores } from "./lib/stores.js"
 import LayoutGrid from "./LayoutGrid.svelte";
 import { _layoutAction } from "./lib/layoutAction.js";
 import layoutGridHelp from "./lib/layout_grid/helper.js";
-import layoutItem from "./lib/layout_grid/item.js";
 
 const genId = () => "_" + Math.random().toString(36).substr(2, 9);
 const randomNumberInRange = (min, max) => Math.random() * (max - min) + min;
