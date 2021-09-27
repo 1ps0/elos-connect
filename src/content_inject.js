@@ -1,37 +1,38 @@
 
+console.log("LOADING ELOS CONNECT - content_inject.js");
 
-BSStrategy = (function() {
-    return {
-        _init: function() {
-            window.location.assign(function() {
-                var id_hack = 'X_BeardedSpice_Chrome_ApplescriptHack';
-                var element = document.getElementById(id_hack);
-                if (element === null) {
-                    node = document.createElement('pre');
-                    node.id = id_hack;
-                    node.hidden = true;
-                    document.getElementsByTagName('body')[0].appendChild(node);
-                }
-                element.innerText = JSON.stringify({
-                    'hackResult': result['hackResult']
-                });
-            });
-        },
-        _result: function() {
-            var element = document.getElementById('X_BeardedSpice_Chrome_ApplescriptHack');
-            return element ? JSON.parse(element.innerText) : {};
-        },
-        _delete: function() {
-            try {
-                document.getElementById('X_BeardedSpice_Chrome_ApplescriptHack').remove()
-                return true;
-            } catch {
-                console.log("caught remove")
-                return false;
-            }
-        }
-    };
-})();
+// BSStrategy = (function() {
+//     return {
+//         _init: function() {
+//             window.location.assign(function() {
+//                 var id_hack = 'X_BeardedSpice_Chrome_ApplescriptHack';
+//                 var element = document.getElementById(id_hack);
+//                 if (element === null) {
+//                     node = document.createElement('pre');
+//                     node.id = id_hack;
+//                     node.hidden = true;
+//                     document.getElementsByTagName('body')[0].appendChild(node);
+//                 }
+//                 element.innerText = JSON.stringify({
+//                     'hackResult': result['hackResult']
+//                 });
+//             });
+//         },
+//         _result: function() {
+//             var element = document.getElementById('X_BeardedSpice_Chrome_ApplescriptHack');
+//             return element ? JSON.parse(element.innerText) : {};
+//         },
+//         _delete: function() {
+//             try {
+//                 document.getElementById('X_BeardedSpice_Chrome_ApplescriptHack').remove()
+//                 return true;
+//             } catch {
+//                 console.log("caught remove")
+//                 return false;
+//             }
+//         }
+//     };
+// })();
 
 // window.addEventListener("click", notifyExtension);
 
