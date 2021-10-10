@@ -61,13 +61,20 @@ export let panelTypes = {
     h: 6,
     componentName: "location_ops"
   },
-  "panel-storybook": {
-    target: "panel-storybook",
-    name: "storybook-test",
-    w: layoutConfig.columnMultiplier * 6,
+  "panel-web-players": {
+    target: "panel-web-players",
+    name: "web_players",
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier * 6,
     h: 5,
-    componentName: "template",
-    props: []
+    componentName: "web_players",
+    event: {
+      name: 'filterType',
+      callback: 'updateLocations'
+    },
+    props: {
+      eventName: "playPause",
+      transform: ((e) => e)
+    }
   },
   "panel-commandbar": {
     target: "panel-commandbar",
@@ -98,7 +105,7 @@ export let panelTypes = {
     target: "panel-timer",
     name: "timer",
     w: layoutConfig.columnCount, //layoutConfig.columnMultiplier * 2,
-    h: 6,
+    h: 4,
     componentName: "timer",
   },
   "panel-todo": {

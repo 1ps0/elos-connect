@@ -125,20 +125,6 @@ onMount(async () => {
 
 <style>
 
-.type-study span {
-  float:left;
-  background-color: green;
-  width: 100%;
-}
-
-.type-label span {
-  border: 1px solid black;
-  padding: 10px 30px 10px 30px;
-  margin: 5px;
-  border-radius: 5px;
-  padding: 15px;
-}
-
 /*.log-body {
   margin: 10px;
   min-width: 250px;

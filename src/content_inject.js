@@ -1,59 +1,101 @@
 
 console.log("LOADING ELOS CONNECT - content_inject.js");
 
-// BSStrategy = (function() {
-//     return {
-//         _init: function() {
-//             window.location.assign(function() {
-//                 var id_hack = 'X_BeardedSpice_Chrome_ApplescriptHack';
-//                 var element = document.getElementById(id_hack);
-//                 if (element === null) {
-//                     node = document.createElement('pre');
-//                     node.id = id_hack;
-//                     node.hidden = true;
-//                     document.getElementsByTagName('body')[0].appendChild(node);
-//                 }
-//                 element.innerText = JSON.stringify({
-//                     'hackResult': result['hackResult']
-//                 });
-//             });
-//         },
-//         _result: function() {
-//             var element = document.getElementById('X_BeardedSpice_Chrome_ApplescriptHack');
-//             return element ? JSON.parse(element.innerText) : {};
-//         },
-//         _delete: function() {
-//             try {
-//                 document.getElementById('X_BeardedSpice_Chrome_ApplescriptHack').remove()
-//                 return true;
-//             } catch {
-//                 console.log("caught remove")
-//                 return false;
-//             }
-//         }
-//     };
-// })();
+/*
+GOALS
+
+1. identify sites that match a BS strategy
+2. retrieve state of tabs with identified sites
+3. enable control of identified tabs through identified strategy
+
+extras:
+- infer dark mode
+- extract article text
+-
+
+*/
+
+/*
+## PLAYABLE-ness
+
+```
+{
+  baseURI:str
+  muted:bool, volume:float
+  playbackRate:int
+  currentTime:float, duration:float
+  loop:bool, ended:bool, autoplay:bool, paused:bool
+  play:(), pause:(),
+}
+```
+
+> BS interface:
+```
+version
+displayName
+accepts: { method:None, format: "%K LIKE *site*", args: ["URL"] }
+isPlaying
+toggle
+previous
+next
+pause
+favorite
+trackInfo: { image, track, artist, progress, favorited }
+```
+
+
+*/
+
+function getPlayable() {
+  let elTypes = ['video', 'audio'];
+  let el = null;
+  let elType = null;
+  elTypes.forEach( _type => {
+    var _el = document.querySelector(_type);
+    if (_el) {
+      el = _el;
+      elType = _type;
+    }
+  });
+
+  if (el) { // && el.duration > 0
+    return [elType, el];
+  }
+
+  return [];
+}
+
+function playPause() {
+  let el = getPlayable();
+  if (el.paused) { el.play(); }
+  else { el.pause(); }
+}
+
+function isMuted() {
+  return getPlayable().muted;
+}
+
+function getCurrentTime() {
+  return [getPlayable().currentTime, getPlayable().duration];
+}
+
+function notifyExtension(e) {
+  if (e.target.tagName !== "A") {
+    return;
+  }
+  browser.runtime.sendMessage({"url": e.target.href});
+}
 
 // window.addEventListener("click", notifyExtension);
 
-// function notifyExtension(e) {
-//   if (e.target.tagName != "A") {
-//     return;
-//   }
-//   browser.runtime.sendMessage({"url": e.target.href});
-// }
+// let myPort = browser.runtime.connect({name:"port-from-cs"});
+// myPort.postMessage({greeting: "hello from content script"});
 
-// function _() {
+// myPort.onMessage.addListener(function(m) {
+//   console.log("In content script, received message from background script: ");
+//   console.log(m.greeting);
+// });
 
-//   let myPort = browser.runtime.connect({name:"port-from-cs"});
-//   myPort.postMessage({greeting: "hello from content script"});
-
-//   myPort.onMessage.addListener(function(m) {
-//     console.log("In content script, received message from background script: ");
-//     console.log(m.greeting);
-//   });
-
-//   document.body.addEventListener("click", function() {
-//     myPort.postMessage({greeting: "they clicked the page!"});
-//   });
-// }
+// document.body.addEventListener("click", function() {
+//   myPort.postMessage({greeting: "they clicked the page!"});
+// });

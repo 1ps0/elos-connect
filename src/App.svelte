@@ -17,22 +17,17 @@ TODO - layout
 
 import { onMount } from 'svelte';
 
-import { icons } from "./lib/icons.js";
 import { components } from "./components.js";
-import { panelTypes, optionTypes, layoutConfig } from "./config/panels.js";
+import { panelTypes, layoutConfig } from "./config/panels.js";
 console.log("PANEL TYPES", panelTypes);
 
-import { _fetch, updateFiletype, openFile, linkList } from "./lib/apis.js";
+import { updateFiletype, openFile } from "./lib/apis.js";
 import { stores } from "./lib/stores.js"
 
 import LayoutGrid from "./LayoutGrid.svelte";
-import { _layoutAction } from "./lib/layoutAction.js";
 import layoutGridHelp from "./lib/layout_grid/helper.js";
 
 const genId = () => "_" + Math.random().toString(36).substr(2, 9);
-const randomNumberInRange = (min, max) => Math.random() * (max - min) + min;
-const serializeLayout = (val) => { return JSON.stringify({...val, key: 'layout'}) };
-
 
 let items = [];
 let objects = {};
@@ -138,8 +133,10 @@ onMount(async () => {
   console.log('App mounted');
 
   add("panel-mainmenu");
+  add("panel-timer");
   add("panel-actionmenu");
-  add("panel-location-ops");
+  add("panel-web-players");
+  // add("panel-location-ops");
   // add("panel-locations");
   // add("panel-commandbar");
 
@@ -160,26 +157,27 @@ onMount(async () => {
       let:item
       let:index
     >
-      <svelte:component
-        id={item.target}
-        this={components[item.componentName]}
-        bind:this={objects[item.target]}
-        on:didMount={onAdd}
-        data={item}
-        {...item.props}
-        {index}
-      />
+      <div>
+        <span>
+          {item.target.replace("panel-", '').replace('-', ' ')}
+          <hr/>
+        </span>
+        <svelte:component
+          id={item.target}
+          this={components[item.componentName]}
+          bind:this={objects[item.target]}
+          on:didMount={onAdd}
+          data={item}
+          {...item.props}
+          {index}
+        />
+      </div>
     </LayoutGrid>
   </section>
 
 </main>
 
 <style>
-
-
-body {
-  margin: 0;
-}
 
 main {
   margin: 0 0 0 0;
@@ -199,13 +197,4 @@ section > div {
   transform: translate(-50%, -50%);
 }
 
-
-/* Style the tab content */
-.tabcontent {
-  float: left;
-  padding: 0px 12px;
-  border: none;
-  width: 70vw;
-  height: 90vw;
-}
 </style>

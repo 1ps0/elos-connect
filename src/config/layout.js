@@ -20,7 +20,7 @@ export const menuItems = [
   },
   {
     name: "panel-timer",
-    value: { icon: "task-add", highlight: "CANDO LIST"},
+    value: { icon: "task-add", highlight: "Pomodoro Timer"},
     group: "1"
   },
   {

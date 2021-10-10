@@ -51,24 +51,50 @@ export const clockAction = (node, args) => {
 // import { clockStore } from "./clock.js"
 
 export const timerAction = (node, args) => {
-  let timer = args.interval;
-  let timerP = document.querySelector("p.timer");
-  let buttons = document.querySelector("button");
-  // console.log("TIMERACTION INIT", timer, timerP, buttons, args);
-  for (let button in buttons) {
+  let _args = args;
+  let started = false;
+  let interval = _args.interval;
+  let timerP = node.querySelector("p.timer");
+  console.log("Loading TIMERACTION", node, '|', _args, '|', timerP);
+  node.querySelectorAll("button").forEach((button) => {
     switch(button.name) {
-      case "start": button.addEventListener("click", () => {}); break; // args.start
-      case "reset": button.addEventListener("click", args.reset); break;
-      case "pause": button.addEventListener("click", args.pause); break;
-      case "lap":   button.addEventListener("click", args.lap); break;
+      case "start":
+        button.addEventListener("click", (e) => {
+          started = true;
+          e.preventDefault();
+        });
+        break; // args.start
+      case "reset":
+        button.addEventListener("click", (e) => {
+          started = false;
+          interval = _args.interval;
+          doc.innerHTML = formatTime(interval);
+          e.preventDefault();
+        });
+        break;
+      case "pause":
+        button.addEventListener("click", (e) => {
+          started = false;
+          e.preventDefault();
+        });
+        break;
+      case "lap":
+        button.addEventListener("click", (e) => {
+          interval = args.interval;
+          doc.innerHTML = formatTime(interval);
+          // TODO register data somewhere
+          e.preventDefault();
+        });
+        break;
     }
-  }
+  });
 
   clockStore.subscribe((val) => {
     let doc = document.querySelector("p.timer");
-    if (doc) {
-      console.log("p.timer", doc, timer, formatTime(timer), doc.innerHTML);
-      doc.innerHTML = formatTime(timer);
+    if (doc && started) {
+      console.log("p.timer", doc, interval, formatTime(interval), doc.innerHTML);
+      doc.innerHTML = formatTime(interval);
+      interval -= 1;
     }
   });
 

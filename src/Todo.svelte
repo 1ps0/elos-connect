@@ -1,7 +1,6 @@
 <script>
 
 import { onMount } from 'svelte';
-import { writable } from "svelte/store";
 
 import { stores } from "./lib/stores.js"
 import { updateLog } from "./lib/apis.js";
@@ -9,6 +8,44 @@ import { updateLog } from "./lib/apis.js";
 import ItemList from "./ItemList.svelte";
 
 export let dataStore = stores.todo;
+
+let template1 = [
+  {
+    type: "action",
+    category: "drink",
+    name: "Coffee",
+    value: "count",
+    checked: false,
+  },
+  {
+    type: "action",
+    category: "exercise",
+    name: "Walk",
+    value: "duration",
+    checked: false,
+  },
+  {
+    type: "action",
+    category: "exercise",
+    name: "Ring Fit",
+    value: "duration",
+    checked: false,
+  },
+  {
+    type: "action",
+    category: "project",
+    name: "eLOS",
+    value: "duration",
+    checked: false,
+  },
+  {
+    type: "action",
+    category: "work",
+    name: "Work",
+    value: "duration",
+    checked: false,
+  }
+];
 
 let todoItems = [];
 
@@ -34,9 +71,7 @@ function removeEntry(e) {
   dataStore.update(n => _n.filter((value) => value.name !== name));
 }
 
-function clearLog(e) {
-
-}
+function clearLog(e) {}
 
 
 onMount(async () => {
@@ -49,8 +84,7 @@ onMount(async () => {
 
 <section>
   <p>
-    <button id="clear" on:click={clearLog}>
-    </button>
+    <button id="clear" on:click={clearLog}>Clear</button>
   </p>
   <ItemList
     dataStore={dataStore}
@@ -63,26 +97,4 @@ onMount(async () => {
 </section>
 
 <style>
-
-table {
-  padding: 20px 20px 20px 20px;
-}
-
-tr {
-  text-transform: uppercase;
-  font-size: 1em;
-}
-
-.header tr {
-  color: #ff3e00; /* blue */
-}
-
-.control tr {
-  color: #ff3e00; /* orange */
-}
-
-#prompt-table {
-
-}
-
 </style>

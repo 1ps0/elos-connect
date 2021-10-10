@@ -6,6 +6,8 @@ import { timerAction, formatTime, minutesToSeconds } from "./lib/clock.js";
 
 /* --- */
 
+let timerInterval;
+let timer;
 let timerDurations = {
   "pomodoro_short":  minutesToSeconds(25),
   "pomodoro_medium":  minutesToSeconds(45),
@@ -18,48 +20,10 @@ const timerTypes = ["break", "work", "study"];
 export let startTime = timerDurations.pomodoro_short;
 $: console.log("TIMER START TIME", startTime);
 
-let activeType = 0;
-$: activeType = activeType % timerTypes.length;
-// $: console.log('activeType -->', activeType);
-
-const addInterval = (time) => {
-  timerQueue.push({
-    timer: time
-  });
-  timerQueue = timerQueue;
-};
-
-const completeTimer = () => {
-  if (++activeType == 0) {
-    addInterval(timerDurations.break_short);
-    timer = timerDurations.pomodoro_short;
-  } else {
-    addInterval(timerDurations.pomodoro_short);
-    timer = timerDurations.break_short;
-  }
-  clearInterval(timerInterval);
-};
-
-const resetTimer = () => {
-  clearInterval(timerInterval);
-  if (activeType === 0) {
-    timer = timerDurations.pomodoro_short;
-  } else {
-    timer = timerDurations.break_short;
-  }
-};
-
-const pauseTimer = () => {
-  clearInterval(timerInterval);
-};
 
 let timerArgs = {
   interval: startTime,
-  complete: completeTimer,
-  // start: startTimer,
-  reset: resetTimer,
-  pause: pauseTimer,
-  // lap: lapTimer,
+  store: null,
   data: {}
 };
 
@@ -87,7 +51,7 @@ p.timer {
   font-size: 18px;
 }
 
-.timer-container section {
+section.timer-container {
   border: 1px solid black;
   padding: 10px;
   display: block;

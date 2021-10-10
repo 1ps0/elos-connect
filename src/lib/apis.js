@@ -94,7 +94,7 @@ export const sendProfileUpdate = async (tableName, val) => {
   }];
 
   for (let row in row_data) {
-    if (row.at) {
+    if (row.at.length > 0) { // what if row.at doesnt exist or isnt an array?
       let at_set = row.at.map((x) => x[0] );
       let rows_set = at_set.map( x => ({
         action_id: row.id,
@@ -303,9 +303,9 @@ stores.workspace.subscribe((val) => {
 
 stores.log.subscribe((val) => {
   console.log("[update] stores.log update", val, Object.keys(val).length);
-  if (val && Object.keys(val).length > 0) {
-    sendProfileUpdate('action', val);
-  }
+  // if (val && Object.keys(val).length > 0) {
+  //   sendProfileUpdate('action', val);
+  // }
 });
 
 

@@ -11,6 +11,7 @@ import Todo from "./Todo.svelte";
 import ActionMenu from "./ActionMenu.svelte";
 import SpotifyControls from "./SpotifyControls.svelte";
 import LocationOps from "./LocationOps.svelte";
+import WebPlayers from "./WebPlayers.svelte";
 
 import Chart from "./Chart.svelte";
 import ExpandList from "./ExpandList.svelte";
@@ -50,6 +51,7 @@ export const components = {
     "actionmenu": ActionMenu,
     "spotify_controls": SpotifyControls,
     "location_ops": LocationOps,
+    "web_players": WebPlayers,
     // "template": TemplatePanel, // for templating via storybook
     // "status": NotifSite,
     // "session": Session,
