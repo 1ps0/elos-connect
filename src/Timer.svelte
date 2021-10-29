@@ -3,7 +3,7 @@
 import { onMount } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 import { timerAction, formatTime, minutesToSeconds } from "./lib/clock.js";
-
+import { createNotify } from "./lib/apis.js";
 /* --- */
 
 let timerInterval;
@@ -24,7 +24,13 @@ $: console.log("TIMER START TIME", startTime);
 let timerArgs = {
   interval: startTime,
   store: null,
-  data: {}
+  data: {},
+  onEnd: () => {
+    createNotify({
+      title: 'Timer Completed!',
+      message: `Pomodoro interval of ${interval} is complete.`
+    });
+  }
 };
 
 onMount(async () => {

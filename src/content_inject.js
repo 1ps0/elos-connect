@@ -42,60 +42,106 @@ pause
 favorite
 trackInfo: { image, track, artist, progress, favorited }
 ```
-
-
 */
 
-function getPlayable() {
-  let elTypes = ['video', 'audio'];
-  let el = null;
-  let elType = null;
-  elTypes.forEach( _type => {
-    var _el = document.querySelector(_type);
-    if (_el) {
-      el = _el;
-      elType = _type;
+import {
+  createNotify,
+  addPort, getPorts, //removePort,
+  _fetch,
+  printFailure,
+  printSuccess
+} from "./lib/apis.js";
+
+// ----- Util
+
+const isElementVisible = (element) => {
+  let visible = element.offsetWidth ||
+    element.offsetHeight ||
+    element.getClientRects().length > 0;
+  console.log("testing element visibility:", visible, element);
+  return visible;
+}
+
+
+// ----- Element Select
+
+const startElementTracking = () => {
+  // Document.elementFromPoint()
+}
+const stopElementTracking = () => {};
+
+// ----- Media Control
+
+const getPlayable = () => {
+  return Promise.resolve(['video', 'audio'].reduce((_out, _type) => {
+    return [
+      ..._out,
+      ...Array.from(
+        document.querySelectorAll(_type))
+          .filter((el) => isElementVisible(el))
+    ];
+  }, []));
+};
+
+const playPause = () => {
+  return getPlayable().then((playing) => {
+    console.log("Playing and Pausing", playing);
+    playing.forEach((item) => {
+      if (item.paused) { item.play(); }
+      else   { item.pause(); }
+    });
+    return playing;
+  }).catch(printFailure);
+};
+
+const getPlayingInfo = (playing) => {
+  return playing.map((obj) => {
+    return {
+      url: obj.src,
+      autoplay: obj.autoplay,
+      autopip: obj.autopictureinpicture,
+      paused: obj.paused,
+      muted: obj.muted,
+      loop: obj.loop,
+      currentTime: obj.currentTime,
+      duration: obj.duration
+    }
+  });
+}
+
+const renderPlayingStatus = (playing) => {
+  if (playing.length > 0) {
+    return {
+      playable: playing.map((obj) => {
+        return {
+          ...obj,
+          hasPlayable: true,
+        }
+      }),
+      url: window.location.href
+    };
+  }
+};
+
+// ----- Init
+
+try {
+  console.log('content_inject.js mounted');
+
+  // browser.runtime.onConnect.addListener(addPort);
+
+  browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log("Message from the page script:", request, sender, sendResponse);
+    if (request === 'playPause') {
+      return playPause()
+        .then(getPlayingInfo)
+        .then(renderPlayingStatus)
+        .then(sendResponse)
+        .catch(printFailure);
     }
   });
 
-  if (el) { // && el.duration > 0
-    return [elType, el];
-  }
-
-  return [];
-}
-
-function playPause() {
-  let el = getPlayable();
-  if (el.paused) { el.play(); }
-  else { el.pause(); }
-}
-
-function isMuted() {
-  return getPlayable().muted;
-}
-
-function getCurrentTime() {
-  return [getPlayable().currentTime, getPlayable().duration];
-}
-
-function notifyExtension(e) {
-  if (e.target.tagName !== "A") {
-    return;
-  }
-  browser.runtime.sendMessage({"url": e.target.href});
-}
-
-// window.addEventListener("click", notifyExtension);
-
-// let myPort = browser.runtime.connect({name:"port-from-cs"});
-// myPort.postMessage({greeting: "hello from content script"});
-
-// myPort.onMessage.addListener(function(m) {
-//   console.log("In content script, received message from background script: ");
-//   console.log(m.greeting);
-// });
-
-// document.body.addEventListener("click", function() {
-//   myPort.postMessage({greeting: "they clicked the page!"});
-// });
+  console.log("content_inject.js finished mounting")
+} catch (e) {
+  console.log("Caught content_inject.js init error", e);
+};

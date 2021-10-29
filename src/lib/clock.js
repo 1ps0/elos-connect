@@ -56,6 +56,17 @@ export const timerAction = (node, args) => {
   let interval = _args.interval;
   let timerP = node.querySelector("p.timer");
   console.log("Loading TIMERACTION", node, '|', _args, '|', timerP);
+
+  let unsubscribe = clockStore.subscribe((val) => {
+    let doc = document.querySelector("p.timer");
+    if (doc && started) {
+      console.log("p.timer", doc, interval, formatTime(interval), doc.innerHTML);
+      doc.innerHTML = formatTime(interval);
+      interval -= 1;
+      args.onEnd ? args.onEnd() : null;
+    }
+  });
+
   node.querySelectorAll("button").forEach((button) => {
     switch(button.name) {
       case "start":
@@ -89,20 +100,11 @@ export const timerAction = (node, args) => {
     }
   });
 
-  clockStore.subscribe((val) => {
-    let doc = document.querySelector("p.timer");
-    if (doc && started) {
-      console.log("p.timer", doc, interval, formatTime(interval), doc.innerHTML);
-      doc.innerHTML = formatTime(interval);
-      interval -= 1;
-    }
-  });
-
-  // node.addEventListener("", (e) => {});
-
   return {
     update(val) {},
-    destroy() {}
+    destroy() {
+      unsubscribe();
+    }
   }
 };
 

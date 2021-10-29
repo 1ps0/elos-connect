@@ -1,7 +1,7 @@
 <script>
 import { onMount } from 'svelte';
 
-import { _fetch, _send } from "./lib/apis.js"
+import { _fetch, _send, getCurrentActiveTab } from "./lib/apis.js"
 import { renderJSON } from "./lib/render.js";
 
 // let savePDFButton = document.querySelector('#save-pdf');
@@ -18,6 +18,13 @@ function readerSelectors() {
   };
 }
 
+export const doDownloadVideo = (params) => {
+  getCurrentActiveTab().then( (tab) => {
+    return _send("api/action/download/video", {
+      uri: tab[0].url,
+    });
+  }).then(printSuccess).catch(printFailure);
+}
 
 async function addMetric() {
   let elements = document.getElementById('metrics').elements;
@@ -83,18 +90,6 @@ function updateClipboard(newClip) {
     /* clipboard write failed */
   })
 }
-
-async function doDownloadVideo(e) {
-  let _window = await browser.windows.getCurrent();
-  let tab = await browser.tabs.query({
-    active: true,
-    windowId: _window.id
-  });
-  let result = await _send("api/action/download/video", {
-    uri: tab[0].url,
-  });
-  console.log("FINISHED", result);
-};
 
 async function doSelectedCopy(e) {
   let tabs = await browser.tabs.query({
@@ -183,10 +178,14 @@ onMount(async () => {
 
 
 <section>
+
+  <p><button id="copy-tabs" on:click={doSelectedCopy}>Copy Selected Tabs</button></p>
+  <p><button id="save-pdf" on:click={extractReaderText}>Save Reader PDF</button></p>
+  <p><button id="dl-video" on:click={doDownloadVideo}>Download Video</button></p>
+
   <div class="panel-section panel-section-header">
     <div class="text-section-header">Window manipulator</div>
   </div>
-
   <a href="#" on:click|preventDefault={window_update_move_topright}>Move Top Right</a><br>
   <a href="#" on:click|preventDefault={window_update_size_768}>Resize window to 768x1024</a><br>
   <!-- <a href="#" id="window-resize-all">Resize all windows to 1024x768</a><br> -->
@@ -204,9 +203,6 @@ onMount(async () => {
   <a href="#" id="window-create-detached-panel">Create detached panel</a><br>
   <a href="#" id="window-create-popup">Create popup</a><br> -->
   <!-- TODO add collapse for this panel -->
-  <p><button id="copy-tabs" on:click={doSelectedCopy}>Copy Selected Tabs</button></p>
-  <p><button id="save-pdf" on:click={extractReaderText}>Save Reader PDF</button></p>
-  <p><button id="dl-video" on:click={doDownloadVideo}>Download Video</button></p>
 </section>
 
 <style>

@@ -11,6 +11,7 @@ TODO -
 */
 
 import { createEventDispatcher, onMount } from 'svelte';
+import { writable, get } from 'svelte/store';
 import { linker } from "./lib/linker.js";
 import { _fetch } from "./lib/apis.js";
 
@@ -21,10 +22,11 @@ export let dataStore = null;
 export let dataKey = null;
 export let readonly = false;
 export let transform = (x) => x;
+export let buttons = [];
 
 let dataSource = null;
 let queue = [];
-// $: console.log('queue -->', queue, dataStore);
+$: console.log('queue -->', queue, dataStore);
 
 // TODO make this part of the toolbar
 // TODO make 'add' trigger a writable
@@ -32,8 +34,9 @@ let queue = [];
 export let buttonName = "Add";
 export let inputEvent = null;
 export let titleKey = null;
+export let stashStack = [];
 $: readonly = !buttonName || !inputEvent;
-$: titleKey;
+$: titleKey, stashStack;
 
 
 // when we click a list item
@@ -44,11 +47,18 @@ function didClick(e) {
 
 // below code borrowed from https://www.w3schools.com/howto/howto_js_todolist.asp
 
+const stash = (item) => {
+  stashStack.push(item);
+}
+const pop = () => {
+  let item = stashStack.pop();
+  return queue.push(item);
+}
 
 function close(e) {
   // TODO remove from queue
-  var div = e.target.parentElement;
-  div.style.display = "none";
+  console.log("removing item", e);
+  queue.remove(e.detail)
   dispatch('removed', e);
 }
 
@@ -100,9 +110,9 @@ onMount(async () => {
         </li>
       {/if}
       {#each queue as _item (_item.name) }
-          <!-- use:linker={queue} -->
+          <!-- use:linker={queue}
+          class:checked={_item.checked}-->
         <li
-          class:checked={_item.checked}
           class="item"
           on:click={() => didClick(_item)}
         >
@@ -111,7 +121,21 @@ onMount(async () => {
           {:else if transform}
             <span>{transform(_item)}</span>
           {/if}
-          <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
+
+          {#if buttons.length > 0}
+            {#each buttons as prop}
+              <div
+                class="item-button"
+                on:click|preventDefault={(e) => prop.action(e.detail)}
+              >
+                {prop.icon(_item)}
+              </div>
+            {/each}
+          {/if}
+
+          {#if !readonly}
+            <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
+          {/if}
         </li>
       {:else}
         <li>No Data</li>
@@ -124,6 +148,14 @@ onMount(async () => {
 </section>
 
 <style>
+
+.item-button {
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  height:  20px;
+  border: 1px black;
+}
 
 /*.log-body {
   margin: 10px;

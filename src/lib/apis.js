@@ -59,13 +59,163 @@ export const _send = async (url, params={}) => {
   return handleResponse(response);
 }
 
+// -- modules
+
+// backbone of messaging system
+// NOTE: will be different across contexts (?)
+const ports = {};
+export const addPort = (p) => {
+  console.log("Adding port for tab", p.sender.tab.id, p);
+  ports[p.sender.tab.id] = p;
+}
+export const getPorts = () => {
+  return ports;
+}
+export const removePort = (tabId) => {
+  console.log("Deleting port for tab", tabId);
+  delete ports[tabId];
+}
+
+
+export const getCurrentActiveTab = async () => {
+  return browser.tabs.query({
+    active: true,
+    windowId: browser.windows.WINDOW_ID_CURRENT
+  });
+};
+
+export const getCurrentHighlightedTabs = async () => {
+  return browser.tabs.query({
+    highlighted: true,
+    windowId: browser.windows.WINDOW_ID_CURRENT
+  });
+};
+
+export const updateCurrentWindow = async (params) => {
+  return browser.windows.update(
+    browser.windows.WINDOW_ID_CURRENT,
+    params
+  );
+};
+
+export const createRuntimeConnection = async (params) => {
+  return browser.runtime.connect({
+    connectInfo: {
+      name: params.name
+    }
+  });
+};
+
+export const sendRuntimeMessage = async (params) => {
+  return browser.runtime.postMessage(params);
+};
+
+export const sendToContentScript = async (params) => {
+  return window.postMessage({
+    direction: params.direction,
+    message: params.message
+  }, "*");
+}
+
+export const setPinnedTab = async (params) => {
+  return getCurrentHighlightedTabs().then( (tabs) => {
+    for (const tab of tabs) {
+      browser.tabs.update(tab.id, { pinned: true });
+    }
+  });
+};
+
+// export const _ = async (params) => {};
+
+
+export const sendMessageToTabs = (tabs) => {
+  for (let tab of tabs) {
+    browser.tabs.sendMessage(
+      tab.id,
+      {greeting: "Hi from background script"}
+    ).then(response => {
+      console.log("Message from the content script:");
+      console.log(response.response);
+    }).catch(printFailure);
+  }
+};
+
+export const getBrowserInfo = async () => {
+  return browser.runtime.getBrowserInfo().then((_b) => {
+    return {
+      name: _b.name,
+      version: _b.version
+    }
+  });
+};
+
+export const reduceAudibleTabs = (tabs) => {
+  console.log("rendering audible:", tabs);
+  return tabs.map((tab) => {
+    return {
+      name: tab.id,
+      tabId: tab.id,
+      windowId: tab.windowId,
+      muted: tab.mutedInfo.muted,
+      playing: tab.audible,
+      title: tab.title,
+      url: tab.url,
+    };
+  });
+};
+
+export const addRuntimeMessageHook = async (params) => {
+  return browser.runtime.onMessage.addListener(params.hook);
+};
+
+export const createNotify = async (params) => {
+  return browser.notifications.create({
+    type: "basic",
+    title: params.title,
+    message: params.message,
+    buttons: params.buttons || []
+  });
+};
+
+
+export const createNotifySuccess = async (params) => {
+  console.log("[SUCCESS][NOTIFIED]", params);
+  return createNotify({
+    title: "Success!",
+    message: "!"+params
+  })
+}
+
+export const createNotifyError = async (params) => {
+  console.log("[FAILURE][NOTIFIED]", params);
+  return createNotify({
+    title: "Error",
+    message: ":"+params
+  })
+}
+
+export const printSuccess = (result) => {
+  console.log("[SUCCESS]", result);
+  return result;
+};
+
+export const printFailure = (err) => {
+  console.log("[FAILURE]", err);
+  return err;
+};
+
 // -- ensemble / client / api functions
 
-export const fileList = async (params) => {
-  let data = await _fetch("/api/file/search", params);
-  stores.files.update(n => ({...n, ...data, dirty: false }));
 
-  console.log("updated filelist", data, params);
+
+export const fileList = async (params) => {
+  _fetch("/api/file/search", params).then( (data) => {
+    stores.files.update(n => ({...n, ...data, dirty: false }));
+    console.log("updated filelist", data, params);
+  }).catch ((err) => {
+    console.log("failed to update filelist", err, params);
+  })
+
 };
 
 let dbURIs = {

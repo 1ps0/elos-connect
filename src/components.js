@@ -24,7 +24,7 @@ import Files from "./Files.svelte";
 import DropSite from "./DropSite.svelte";
 // import Session from "./Session.svelte";
 import Pdf from "./Pdf.svelte";
-import DataGrid from "./DataGrid.svelte";
+import DataPanel from "./DataPanel.svelte";
 import EntryForm from "./EntryForm.svelte";
 import ImageGallery from "./ImageGallery.svelte";
 import TemplatePanel from "./TemplatePanel.svelte";
@@ -56,7 +56,7 @@ export const components = {
     // "status": NotifSite,
     // "session": Session,
     "pdf": Pdf,
-    "datagrid": DataGrid,
+    "dataPanel": DataPanel,
     "entryform": EntryForm,
     "imagegallery": ImageGallery,
     "pkgindex": PkgIndex,

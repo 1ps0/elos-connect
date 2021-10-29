@@ -80,6 +80,18 @@ onMount(async () => {
   dataStore.update(n => [...(n.length > 0 ? n : todoItems)]);
 });
 
+/*
+ADD state awareness:
+- daily cycles
+-
+
+ADD FUNCTION BUTTONS:
+1. pin TODO item for every day or once
+2. hide until tomorrow
+3. check off (and hide until tomorrow)
+4.
+*/
+
 </script>
 
 <section>

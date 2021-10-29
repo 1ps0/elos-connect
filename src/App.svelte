@@ -160,6 +160,14 @@ onMount(async () => {
       <div>
         <span>
           {item.target.replace("panel-", '').replace('-', ' ')}
+          <!-- TODO: buttons
+            1. pin
+            2. shift up
+            3. shift down
+            4. close
+            5. max/shrink vertical
+            6.
+          -->
           <hr/>
         </span>
         <svelte:component
