@@ -20,46 +20,72 @@ export const handleResponse = async (response) => {
   }
 }
 
-export const _fetch = async (url, params={}) => {
-  /*
-  OPTIONS:
-  - replace base url with env var or other
-  - add POST option for sending to same domain.
-  */
-  let baseUrl = "http://localhost:3000";
-  let _url = new URL(url, baseUrl);
-
-  for (let arg in params) {
-    _url.searchParams.append(arg, params[arg]);
-  }
-  let response = await fetch(_url);
-  return await handleResponse(response);
+export const _fetch = async (params) => {
+  // let baseUrl = "http://localhost:3000";
+  let baseUrl = get(stores.config).baseUrl;
+  return Promise.resolve(new URL(params.uri, baseUrl))
+    .then((url) => {
+      for (let arg in params) {
+        _url.searchParams.append(arg, params[arg]);
+      }
+    })
+    .then(fetch)
+    .then(handleResponse)
+    .catch(printFailure);
 };
 
-export const _send = async (url, params={}) => {
-  /*
-  OPTIONS:
-  - replace base url with env var or other
-  - add POST option for sending to same domain.
-  */
-  let baseUrl = "http://localhost:3000";
-  let _url = new URL(url, baseUrl);
-
-  params.method = "POST";
-  console.log("fetching", _url);
-  let response = await fetch(_url, {
-    method: "POST",
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(params)
-  });
-  console.log("fetched", response);
-  return handleResponse(response);
+export const _send = async (params) => {
+  // let baseUrl = "http://localhost:3000";
+  let baseUrl = get(stores.config).baseUrl;
+  return Promise.resolve(new URL(params.uri, baseUrl))
+    .then((url) => {
+      return {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(params)
+      }
+    })
+    .then(fetch)
+    .then(handleResponse)
+    .then(printSuccess)
+    .catch(printFailure);
 }
 
-// -- modules
+export const findInAll = async (params) => {
+  return getAllTabs(params)
+    .then((_params) => browser.find.find(_params))
+    .then((results) => {
+      let _results = results.map((result) => {
+        return {
+          total_count: results.count,
+
+        }
+      });
+      return _results;
+    })
+    .then(printSuccess)
+    .catch(printFailure)
+}
+
+export const sendTag = async (params) => {
+  return Promise.resolve(document.querySelector('#tag_name')) // newTagButton
+    .then(printStatus)
+    .then((button) => button.value)
+    .then((tagName) => {
+      return {
+        uri: "api/analysis/tag",
+        name: tagName
+      }
+    })
+    .then(send)
+    .then(renderTag)
+    .catch(printFailure);
+}
+
+// -- messaging
 
 // backbone of messaging system
 // NOTE: will be different across contexts (?)
@@ -76,6 +102,54 @@ export const removePort = (tabId) => {
   delete ports[tabId];
 }
 
+export const sendMessage = async (msgParams) => {
+  return browser.runtime.sendMessage(msgParams);
+}
+
+export const createRuntimeConnection = async (params) => {
+  return browser.runtime.connect({
+    connectInfo: {
+      name: params.name
+    }
+  });
+};
+
+export const sendMessageToTabs = async (tabs) => {
+  for (let tab of tabs) {
+    browser.tabs.sendMessage(
+      tab.id,
+      {greeting: "Hi from background script"}
+    ).then(response => {
+      console.log("Message from the content script:");
+      console.log(response.response);
+    }).catch(printFailure);
+  }
+};
+
+export const addRuntimeMessageHook = async (params) => {
+  return browser.runtime.onMessage.addListener(params.hook);
+};
+
+export const sendRuntimeMessage = async (params) => {
+  return browser.runtime.postMessage(params);
+};
+
+export const sendToContentScript = async (params) => {
+  return window.postMessage({
+    direction: params.direction,
+    message: params.message
+  }, "*");
+}
+
+// ---
+
+
+// --- tab / window ops
+
+export const getAllTabs = async () => {
+  return browser.tabs.query({})
+    .catch(printFailure)
+}
 
 export const getCurrentActiveTab = async () => {
   return browser.tabs.query({
@@ -83,6 +157,80 @@ export const getCurrentActiveTab = async () => {
     windowId: browser.windows.WINDOW_ID_CURRENT
   });
 };
+
+export const hasTabId = (data) => {
+  console.log("checking has tab id", data);
+  if (data.tabId !== undefined) {
+    return data;
+  } else {
+    Promise.reject("tabId not in", data);
+  }
+};
+
+export const hasWindowId = (data) => {
+  console.log("checking has window id", data);
+  if (data.windowId !== undefined) {
+    return data;
+  } else {
+    Promise.reject("windowId not in", data);
+  }
+};
+
+export const setTabActive = (data) => {
+  console.log("Setting active tab with data", data);
+  let status = browser.tabs.update(data.tabId, { active: true });
+  if (status) { return data; }
+  else { return Promise.reject("Failed to update tab", data); }
+};
+
+export const setWindowActive = (data) => {
+  console.log("Setting active window with data", data);
+  let status = browser.windows.update(data.windowId, { focused: true });
+  if (status) { return data; }
+  else { return Promise.reject("Failed to update tab", data); }
+}
+
+export const sendPlayPause = (e) => {
+  // TODO if e is type element, else if object
+  console.log("sending playpause", e);
+  return Promise.resolve(e)
+    .then((data) => browser.tabs.sendMessage(data.tabId, "playPause"))
+    .then(createNotifySuccess)
+    .catch(printFailure);
+};
+
+export const updateClipboard = (newClip) => {
+  return navigator.clipboard.writeText(newClip)
+    .then(createNotifySuccess)
+    .catch(createNotifyFailure)
+}
+
+export const doSelectedCopy = async (e) => {
+  return browser.tabs.query({
+    highlighted: true,
+    // active: true,
+    windowId: browser.windows.WINDOW_ID_CURRENT
+  })
+  .then((tabs) => {
+
+  })
+  .then(createNotifySuccess)
+  .catch(printFailure);
+  console.log('doing selected copy:', browser.windows.WINDOW_ID_CURRENT, tabs);
+  updateClipboard( tabs.map((x) => x.title+","+x.url).join('\n'));
+  return tabs;
+}
+
+export const bringToFront = (e) => {
+  return Promise.resolve(e)
+    // .then(tabIdFromdata)
+    // .then(hasTabId, printFailure)
+    .then(setTabActive)
+    // .then(hasWindowId, printFailure)
+    .then(setWindowActive)
+    .then(printSuccess)
+    .catch(printFailure);
+}
 
 export const getCurrentHighlightedTabs = async () => {
   return browser.tabs.query({
@@ -98,24 +246,6 @@ export const updateCurrentWindow = async (params) => {
   );
 };
 
-export const createRuntimeConnection = async (params) => {
-  return browser.runtime.connect({
-    connectInfo: {
-      name: params.name
-    }
-  });
-};
-
-export const sendRuntimeMessage = async (params) => {
-  return browser.runtime.postMessage(params);
-};
-
-export const sendToContentScript = async (params) => {
-  return window.postMessage({
-    direction: params.direction,
-    message: params.message
-  }, "*");
-}
 
 export const setPinnedTab = async (params) => {
   return getCurrentHighlightedTabs().then( (tabs) => {
@@ -123,21 +253,6 @@ export const setPinnedTab = async (params) => {
       browser.tabs.update(tab.id, { pinned: true });
     }
   });
-};
-
-// export const _ = async (params) => {};
-
-
-export const sendMessageToTabs = (tabs) => {
-  for (let tab of tabs) {
-    browser.tabs.sendMessage(
-      tab.id,
-      {greeting: "Hi from background script"}
-    ).then(response => {
-      console.log("Message from the content script:");
-      console.log(response.response);
-    }).catch(printFailure);
-  }
 };
 
 export const getBrowserInfo = async () => {
@@ -149,6 +264,32 @@ export const getBrowserInfo = async () => {
   });
 };
 
+
+// -- render functions
+
+export const walkNodes = (walker) => {
+  let nodes = [];
+  while(node = walker.nextNode()) {
+    nodes.push([node.name, node.data]);
+  }
+  return nodes;
+}
+
+export const reduceDocumentText = () => {
+  return Promise.resolve(
+    document.createTreeWalker(
+      document,
+      window.NodeFilter.SHOW_TEXT,
+      null,
+      false
+    )
+  )
+  .then(walkNodes)
+
+  .then(printSuccess)
+  .catch(printFailure)
+}
+
 export const reduceAudibleTabs = (tabs) => {
   console.log("rendering audible:", tabs);
   return tabs.map((tab) => {
@@ -158,22 +299,21 @@ export const reduceAudibleTabs = (tabs) => {
       windowId: tab.windowId,
       muted: tab.mutedInfo.muted,
       playing: tab.audible,
+      status: tab.audible,
       title: tab.title,
       url: tab.url,
     };
   });
 };
 
-export const addRuntimeMessageHook = async (params) => {
-  return browser.runtime.onMessage.addListener(params.hook);
-};
+// -- feedback via print or notify
 
 export const createNotify = async (params) => {
   return browser.notifications.create({
     type: "basic",
     title: params.title,
     message: params.message,
-    buttons: params.buttons || []
+    // buttons: params.buttons || []
   });
 };
 
@@ -186,12 +326,17 @@ export const createNotifySuccess = async (params) => {
   })
 }
 
-export const createNotifyError = async (params) => {
+export const createNotifyFailure = async (params) => {
   console.log("[FAILURE][NOTIFIED]", params);
   return createNotify({
     title: "Error",
     message: ":"+params
   })
+}
+
+export const printStatus = (params) => {
+  console.log("[LOG][STATUS]", typeof(params), Object.keys(params));
+  return params;
 }
 
 export const printSuccess = (result) => {
@@ -204,18 +349,28 @@ export const printFailure = (err) => {
   return err;
 };
 
+export const setStore = async (params) => {
+  return stores[params.name];
+};
+
+
+export const checkKeymap = async (params) => {};
+export const updateKeymap = async (params) => {};
+export const undoKeymap = async (params) => {};
+// export const _ = async (params) => {};
+// export const _ = async (params) => {};
+
 // -- ensemble / client / api functions
 
 
 
 export const fileList = async (params) => {
-  _fetch("/api/file/search", params).then( (data) => {
-    stores.files.update(n => ({...n, ...data, dirty: false }));
-    console.log("updated filelist", data, params);
-  }).catch ((err) => {
-    console.log("failed to update filelist", err, params);
-  })
-
+  // _fetch("/api/file/search", params).then( (data) => {
+  //   stores.files.update(n => ({...n, ...data, dirty: false }));
+  //   console.log("updated filelist", data, params);
+  // }).catch ((err) => {
+  //   console.log("failed to update filelist", err, params);
+  // })
 };
 
 let dbURIs = {
@@ -419,12 +574,12 @@ export function updateFiletype(e) {
   _updateFiletype(typeName);
 };
 export function _updateFiletype(typeName) {
-  if (!typeName) return;
+  // if (!typeName) return;
 
-  stores.files.update((obj) => {
-    obj.filetype = typeName;
-    return obj;
-  });
+  // stores.files.update((obj) => {
+  //   obj.filetype = typeName;
+  //   return obj;
+  // });
 };
 
 // -- subscriptions
@@ -435,18 +590,18 @@ stores.layoutItems.subscribe(val => {
 
 stores.files.subscribe(val => {
   console.log("[update] stores.files update", val);
-  /*
-  OPTIONS:
-  - cache and load different data for api calls and params
+  // /*
+  // OPTIONS:
+  // - cache and load different data for api calls and params
 
-  */
-  if (val && val !== "undefined" && val.dirty) {
-    // FIXME this could have a race condition buried
-    fileList((({ files, dirty, ...rest }) => rest)(val));
-  }
+  // */
+  // if (val && val !== "undefined" && val.dirty) {
+  //   // FIXME this could have a race condition buried
+  //   fileList((({ files, dirty, ...rest }) => rest)(val));
+  // }
 });
 
-stores.workspace.subscribe((val) => {
+stores.config.subscribe((val) => {
   console.log("[update] stores.workspace update", val);
   //JSON.parse(localStorage.getItem(item));
 });

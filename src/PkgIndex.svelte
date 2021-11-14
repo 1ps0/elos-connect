@@ -48,13 +48,6 @@ onMount(() => {
   justify-content: center;
 }
 
-p {
-  color: #ff3e00;
-  text-transform: uppercase;
-  font-size: 4em;
-  font-weight: 100;
-}
-
 .next-button {
   /*width: 95%;*/
   border: 1px solid #aaa;
@@ -86,9 +79,6 @@ table {
 tr {
   color: black;
   font-size: 0.7em;
-}
-td {
-  max-width: 200px;
 }
 
 </style>

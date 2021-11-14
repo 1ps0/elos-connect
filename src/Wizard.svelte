@@ -137,10 +137,6 @@ templates/processing actions:
   box-sizing: border-box;
 }
 
-body {
-  background-color: #f1f1f1;
-}
-
 #regForm {
   background-color: #ffffff;
   margin: 100px auto;
@@ -150,10 +146,10 @@ body {
   min-width: 300px;
 }
 
+/*
 h1 {
   text-align: center;
 }
-
 input {
   padding: 10px;
   width: 100%;
@@ -161,11 +157,13 @@ input {
   font-family: Raleway;
   border: 1px solid #aaaaaa;
 }
+*/
 
 /* Mark input boxes that gets an error on validation: */
+/*
 input.invalid {
   background-color: #ffdddd;
-}
+}*/
 
 /* Hide all steps by default: */
 .tab {

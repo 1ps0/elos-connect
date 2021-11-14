@@ -3,7 +3,12 @@
 import { onMount } from 'svelte';
 import { writable, get } from 'svelte/store';
 
-import { reduceAudibleTabs, printFailure } from "./lib/apis.js";
+import {
+  bringToFront,
+  reduceAudibleTabs,
+  printFailure,
+  sendPlayPause
+} from "./lib/apis.js";
 import ItemList from "./ItemList.svelte";
 
 let showType = ['audio', 'video'];
@@ -20,15 +25,6 @@ TODO
 7. add "download tab"
 */
 
-const sendPlayPause = (e) => {
-  const tabData = e.detail;
-  console.log("sending playpause", tabData);
-  browser.tabs.sendMessage(tabData.tabId, "playPause")
-  .then((response) => {
-    console.log("Got playpause response", response);
-  })
-  .catch(printFailure);
-};
 
 const reducePlaying = (tabs, obj) => {
   if (!tabs) { return null; }
@@ -57,13 +53,14 @@ const updatePlaying = () => {
   }).catch(printFailure);
 };
 
-
 const handlePlayerUpdate = (request, sender, sendResponse) => {
   console.log("Message: ", request, sender);
-  updatePlaying();
-  sendResponse({
-    response: "Response from WebPlayers"
-  });
+  updatePlaying().then((params) => {
+    sendResponse({
+      params: params,
+      response: "Response from WebPlayers"
+    });
+  }).catch(printFailure);
 };
 
 /*
@@ -76,11 +73,6 @@ ADD FUNCTION BUTTONS:
 2. bring to front
 3. download
 */
-const bringToFront = (e) => {
-  const tabData = e.detail;
-  browser.tabs.update(tabData.tabId, { active: true });
-  browser.windows.update(tabData.windowId, { focus: true });
-}
 
 const buttonProps = [
   {
@@ -111,7 +103,6 @@ onMount(async () => {
   <ItemList
     readonly=true
     dataStore={tabStore}
-    on:didClick={bringToFront}
     titleKey="title"
     buttons={buttonProps}
   />

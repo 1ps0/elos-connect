@@ -1,7 +1,7 @@
 <script>
 
 import { onMount } from 'svelte';
-import { _fetch, _send } from "./lib/apis.js"
+import { _fetch, _send, sendTag, printStatus, printFailure } from "./lib/apis.js"
 
 
 async function sendLink(tagName) {
@@ -18,19 +18,9 @@ async function sendLink(tagName) {
   }, console.error);
 }
 
-async function sendTag() {
-  let newTagButton = document.querySelector('#tag_name');
-  console.log("Sending new tag: ", newTagButton.value);
-  let tagName = newTagButton.value;
-  _send("api/analysis/tag", ({
-    name: tagName
-  })).then(() => {
-    renderTag(tagName)
-  });
-}
 
 async function loadTags() {
-  let results = await _fetch('api/analysis/tag');
+  let results = await _fetch({ uri:'api/analysis/tag'});
   console.log("[remote][load#tags] ", results);
 
   // let tabs = await browser.tabs.query({currentWindow: true, active: true});

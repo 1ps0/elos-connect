@@ -1,7 +1,9 @@
 <script>
 
 /*
-a selectable todo with add entry at the top.
+a selectable item with add entry at the top.
+remote-oriented with source in/signal out
+
 select to trigger an event
 config panel to edit event
 use entryform to edit event
@@ -9,8 +11,7 @@ so we need to reduce entry form fields necessary into an event
 and send that event through config structure to the target component
 */
 
-import { onMount, createEventDispatcher, getContext } from 'svelte';
-import { writable, readable, derived, get } from "svelte/store";
+import { onMount, createEventDispatcher } from 'svelte';
 
 import { icons } from "./lib/icons.js";
 import { _fetch } from "./lib/apis.js";
@@ -29,7 +30,7 @@ export let items = [];
 
 const updateFromSource = async (source) => {
   if (source !== null) {
-    let response = await _fetch(source);
+    let response = await _fetch({ uri: source});
     console.log('getting data from', source, response);
     items = response.data;
   }
@@ -46,25 +47,20 @@ $: visibleItems = items.map((item, idx) => {
   };
 });
 
-
-// $: console.log('menu items', items, eventName, visibleItems);
-
 function toggleActive(item) {
   item.active = !item.active;
 }
 
-function sendEvent(e) {
-
-}
+function sendEvent(e) {}
 
 function _sendEvent(item) {
   console.log('clicked sendEvent --', eventName, item);
   if (eventName === "filterType") {
-    stores.files.update((n) => ({
-      ...n,
-      filetype: item.name,
-      dirty: true
-    }));
+    // stores.files.update((n) => ({
+    //   ...n,
+    //   filetype: item.name,
+    //   dirty: true
+    // }));
   } else {
     // let _data = { ...data, target: e.target.name};
     // console.log("dispatching", eventName, _data);
@@ -75,14 +71,12 @@ function _sendEvent(item) {
 
 onMount(async () => {
   console.log('SelectList mounted', data);
-  // console.log('selectlist', items, eventName, visibleItems);
 
   updateFromSource(source);
   dispatch("didMount", data);
 });
 
 
-// <MarkdownEditor />
 </script>
 
 <section>

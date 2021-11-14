@@ -30,7 +30,7 @@ $: {
 }
 
 const updateData = async () => {
-  let results = await _fetch(`/api/db/${dbName}`);
+  let results = await _fetch({ uri: `/api/db/${dbName}`});
   console.log("[DataGrid] Fetch", results);
   columns = renderColumns(results['columns']);
   rows = renderRows(results);

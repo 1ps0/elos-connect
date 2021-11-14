@@ -56,475 +56,451 @@ export const cmds = {
     description: "search",
     suggestions: (params) => {
       console.log("Searching", params);
-      _fetch("/api/location/search", params)
-        .then((response) => {
-          console.log("Got search response", response);
-          return response.results.forEach( obj => {
-            suggestions.push({
-              content: obj.uri,
-              description: '['+obj.value+'] '+obj.label,
-            });
-          });
-        })
-        .catch(printFailure);
+      return Promise.resolve({
+        ...params,
+        uri: "/api/location/search",
+      })
+      .then(_fetch)
+      .then((response) => {
+        console.log("Got search response", response);
+        return response.results.map( (obj) => {
+          return {
+            content: obj.uri,
+            description: '['+obj.value+'] '+obj.label,
+          };
+        });
+      })
+      .catch(printFailure);
     },
     action: (params) => { console.log("HIT ", "search", params)}
   },
   find: {
     content: "find",
     description: "find in tabs",
-    suggestions: (params) => { console.log("HIT SUGGEST:", "find", params); }
-  },
-  set: {
-    content: "set",
-    description: "set",
-    default: {
-      content: "default",
-      description: "default",
-      open: {
-        content: "set.default.open",
-        description: "set.default.open",
-        action: (params) => { console.log("HIT ", "set.default.open", params)},
-      },
+    // option: open find results in new "tab" or panel
+    // option: show suggestions with tabs containing criteria
+    //  - suggestions have tab name and matched criteria/surrounding
+    suggestions: (params) => {
+      console.log("HIT SUGGEST:", "find", params)
     },
-    remote: {
-      content: "set.remote",
-      description: "Set the remote uri to use by default.",
-      action: (params) => {
-
-      }
-    },
-    keymap: {
-      content: "keymap",
-      description: "keymap",
-      sidebar: {
-        content: "set.keymap.sidebar",
-        description: "set.keymap.sidebar",
-        action: (params) => { console.log("HIT ", "set.keymap.sidebar", params)},
-      },
-      popup: {
-        content: "set.keymap.popup",
-        description: "set.keymap.popup",
-        action: (params) => { console.log("HIT ", "set.keymap.popup", params)},
-      },
-      options: {
-        content: "set.keymap.options",
-        description: "set.keymap.options",
-        action: (params) => { console.log("HIT ", "set.keymap.options", params)},
-      },
-    },
-    group: {
-      content: "set.group",
-      description: "set tab group",
-      action: (params) => { console.log("HIT ", "set.group", params)},
+    action: (params) => {
+      console.log("HIT", "find", params)
     }
   },
-  open: {
-    content: "open",
-    description: "open",
-    group: {
-      content: "open.group",
-      description: "open tab group",
-      action: (params) => { console.log("HIT ", "open.group", params)},
-    },
-    package: {
-      content: "open.package",
-      description: "open.package",
-      index: {
-        content: "open.package.index",
-        description: "open.package.index",
-        action: (params) => { console.log("HIT ", "open.package.index", params)},
-      },
-      current: {
-        content: "open.package.current",
-        description: "open.package.current",
-        action: (params) => { console.log("HIT ", "open.package.current", params)},
-      },
-      mark_as_completed: {
-        content: "open.package.mark_as_completed",
-        description: "open.package.mark_as_completed",
-        action: (params) => { console.log("HIT ", "open.package.mark_as_completed", params)},
-      },
-      next: {
-        content: "open.package.next",
-        description: "open.package.next",
-        action: (params) => { console.log("HIT ", "open.package.next", params)},
-      },
-      reset: {
-        content: "open.package.reset",
-        description: "open.package.reset",
-        action: (params) => { console.log("HIT ", "open.package.reset", params)},
-      },
-    },
-    panel: {
-      content: "open.panel",
-      description: "open.panel",
-      action: (params) => { console.log("HIT ", "open.panel", params)},
-    },
-    sidebar: {
-      content: "sidebar",
-      description: "sidebar",
-      all: {
-        content: "open.sidebar.all",
-        description: "open.sidebar.all",
-        action: (params) => { console.log("HIT ", "open.sidebar.all", params)},
-      },
-      timer: {
-        content: "open.sidebar.timer",
-        description: "open.sidebar.timer",
-        action: (params) => { console.log("HIT ", "open.sidebar.timer", params)},
-      },
-      actionmenu: {
-        content: "open.sidebar.actionmenu",
-        description: "open.sidebar.actionmenu",
-        action: (params) => { console.log("HIT ", "open.sidebar.actionmenu", params)},
-      },
-    },
-    options: {
-      content: "open.options",
-      description: "open.options",
-      action: (params) => { console.log("HIT ", "open.options", params)},
-    },
-  },
-  copy: {
-    content: "copy",
-    description: "copy",
-    tabs: {
-      content: "copy.tabs",
-      description: "copy.tabs",
-      action: (params) => { console.log("HIT ", "copy.tabs", params)},
-    },
-    target: {
-      content: "copy.target",
-      description: "copy.target",
-      action: (params) => { console.log("HIT ", "copy.target", params)},
-    },
-  },
-  window: {
-    content: "window",
-    description: "window",
-    flatten: {
-      content: "window.flatten",
-      description: "window.flatten",
-      action: (params) => {
-        console.log("HIT ", "window.flatten", params);
-
-      },
-    },
-    split: {
-      content: "window.split",
-      description: "window.split",
-      action: (params) => {
-        console.log("HIT ", "window.split", params)
-      },
-    },
-    collect: {
-      content: "window.collect",
-      description: "window.collect",
-      action: (params) => {
-        console.log("HIT ", "window.collect", params)
-      },
-    },
-    left: {
-      content: "window.left",
-      description: "Fit to left side of screen",
-      action: (params) => {
-        updateCurrentWindow({
-          top: 0,
-          left: 0,
-          width: 768,
-          height: 1024
-        })
-        .then(printSuccess)
-        .catch(printFailure);
-      },
-    },
-    right: {
-      content: "window.right",
-      description: "Fit to right side of screen",
-      action: (params) => {
-        updateCurrentWindow({
-          top: 0,
-          left: 768,
-          width: 768,
-          height: 1024
-        })
-        .then(printSuccess)
-        .catch(printFailure);
-      },
-    },
-    full: {
-      content: "window.full",
-      description: "Fit to screen",
-      action: (params) => {
-        updateCurrentWindow({
-          top: 0,
-          left: 0,
-          width: 768 * 2,
-          height: 1024
-        })
-        .then(printSuccess)
-        .catch(printFailure);
-      },
-    },
-    stash: {
-      content: "window.stash",
-      description: "window.stash",
-      action: (params) => {
-        console.log("HIT ", "window.stash", params);
-        // browser.windows.remove(windowId);
-        // stash can also discard a tab instead (unload but retain it)
-        getCurrentHighlightedTabs().then( (tabs) => {
-          for (const tab of tabs) {
-
+  set_config: {
+    content: "set_config",
+    description: "set_config",
+    action: (params) => {
+      console.log("HIT ", "set_config", params)
+      return Promise.resolve(params)
+        .then((_params) => _params.split(" ").slice(1))
+        .then((args) => {
+          if (args[0] === "remote") {
+            console.log("UPDATING REMOTE TARGET:", args, params);
+            //
           }
-        });
-      },
+          return [args, params];
+        })
+        .then((_params) => {
+          return [..._params,
+            // stores.config.update((n) => {...n, remote: args[1]})
+          ];
+        })
+        .then(createNotifySuccess)
+        .catch(createNotifyFailure)
     },
   },
-  tab: {
-    stash: {
-      content: "tab.stash",
-      description: "tab.stash",
-      action: (params) => {
-        console.log("HIT ", "tab.stash", params);
-      },
-    },
-    tag: {
-      content: "",
-      description: "Set a tag for this tab",
-      action: (params) => {}
-    },
-    save: {
-      content: "tab.save",
-      description: "tab.save",
-      page: {
-        content: "tab.save.page",
-        description: "tab.save.page",
-        action: (params) => {
-          console.log("HIT ", "tab.save.page", params);
-          // TODO render with readability?
-          // TODO save full HTML
-        }
-      },
-      video: {
-        content: "tab.save.video",
-        description: "tab.save.video",
-        action: (params) => {
-          console.log("HIT tab.save.video, running doDownloadVideo", params);
-          getCurrentActiveTab.then( (tab) => {
-            return _send("api/action/download/video", {
-              uri: tab[0].url,
-            });
-          })
-          .then(createNotifySuccess)
-          .catch(createNotifyFailure);
-        },
-      },
-      song: {
-        content: "tab.save.song",
-        description: "tab.save.song",
-        action: (params) => {
-          console.log("HIT save.video, running doDownloadVideo", params);
-          getCurrentActiveTab.then( (tab) => {
-            return _send("api/action/download/audio", {
-              uri: tab[0].url,
-              args: { tag: 'music' }
-            });
-          })
-          .then(printSuccess)
-          .catch(printFailure);
-        },
-      },
+  set_remote: {
+    content: "set_remote",
+    description: "Set the remote uri to use by default.",
+    action: (params) => {
+      return Promise.resolve({
+        url: params.args
+      });
     }
   },
-  track: {
-    content: "track",
-    description: "track",
-    add: {
-      content: "track.add",
-      description: "track.add",
-      action: (params) => { console.log("HIT ", "track.add", params)},
-    },
-    set_cycle: {
-      content: "track.set_cycle",
-      description: "track.set_cycle",
-      action: (params) => { console.log("HIT ", "track.set_cycle", params)},
-    },
-    show_as: {
-      content: "track.show_as",
-      description: "track.show_as",
-      action: (params) => { console.log("HIT ", "track.show_as", params)},
+  set_keymap_sidebar: {
+    content: "set_keymap_sidebar",
+    description: "set_keymap_sidebar",
+    action: (params) => { console.log("HIT ", "set.keymap.sidebar", params)},
+  },
+  set_keymap_popup: {
+    content: "set_keymap_popup",
+    description: "set_keymap_popup",
+    action: (params) => { console.log("HIT ", "set.keymap.popup", params)},
+  },
+  set_keymap_options: {
+    content: "set_keymap_options",
+    description: "set_keymap_options",
+    action: (params) => { console.log("HIT ", "set_keymap_options", params)},
+  },
+  set_keymap_group: {
+    content: "set_group",
+    description: "set tab group",
+    action: (params) => { console.log("HIT ", "set_group", params)},
+  },
+  open_group: {
+    content: "open_group",
+    description: "open tab group",
+    action: (params) => { console.log("HIT ", "open_group", params)},
+  },
+  open_package_index: {
+    content: "open_package_index",
+    description: "open_package_index",
+    action: (params) => { console.log("HIT ", "open_package_index", params)},
+  },
+  open_package_current: {
+    content: "open_package_current",
+    description: "open_package_current",
+    action: (params) => { console.log("HIT ", "open_package_current", params)},
+  },
+  open_package_mark_as_completed: {
+    content: "open_package_mark_as_completed",
+    description: "open_package_mark_as_completed",
+    action: (params) => { console.log("HIT ", "open_package_mark_as_completed", params)},
+  },
+  open_package_next: {
+    content: "open_package_next",
+    description: "open_package_next",
+    action: (params) => { console.log("HIT ", "open_package_next", params)},
+  },
+  open_package_reset: {
+    content: "open_package_reset",
+    description: "open_package_reset",
+    action: (params) => { console.log("HIT ", "open_package_reset", params)},
+  },
+  open_panel: {
+    content: "open_panel",
+    description: "open_panel",
+    action: (params) => { console.log("HIT ", "open_panel", params)},
+  },
+  open_sidebar_all: {
+    content: "open_sidebar_all",
+    description: "open_sidebar_all",
+    action: (params) => { console.log("HIT ", "open_sidebar_all", params)},
+  },
+  open_sidebar_timer: {
+    content: "open_sidebar_timer",
+    description: "open_sidebar_timer",
+    action: (params) => { console.log("HIT ", "open_sidebar_timer", params)},
+  },
+  open_sidebar_actionmenu: {
+    content: "open_sidebar_actionmenu",
+    description: "open_sidebar_actionmenu",
+    action: (params) => { console.log("HIT ", "open_sidebar_actionmenu", params)},
+  },
+  open_options: {
+    content: "open_options",
+    description: "open_options",
+    action: (params) => { console.log("HIT ", "open_options", params)},
+  },
+  copy_tabs: {
+    content: "copy_tabs",
+    description: "copy_tabs",
+    action: (params) => {
+      console.log("HIT ", "copy_tabs", params)
+      return Promise.resolve()
+        .then(doSelectedCopy)
+        .then(createNotifySuccess, createNotifyFailure)
+        .catch(printFailure)
     },
   },
-  timer: {
-    content: "timer",
-    description: "timer",
-    start: {
-      content: "timer.start",
-      description: "timer.start",
-      action: (params) => { console.log("HIT ", "timer.start", params)},
+  copy_target: {
+    content: "copy_target",
+    description: "copy_target",
+    action: (params) => { console.log("HIT ", "copy_target", params)},
+  },
+  window_flatten: {
+    content: "window_flatten",
+    description: "window_flatten",
+    action: (params) => {
+      console.log("HIT ", "window_flatten", params);
+
+    }
+  },
+  window_split: {
+    content: "window_split",
+    description: "window_split",
+    action: (params) => {
+      console.log("HIT ", "window_split", params)
     },
-    pause: {
-      content: "timer.pause",
-      description: "timer.pause",
-      action: (params) => { console.log("HIT ", "timer.pause", params)},
+  },
+  window_collect: {
+    content: "window_collect",
+    description: "window_collect",
+    action: (params) => {
+      console.log("HIT ", "window_collect", params)
     },
-    reset: {
-      content: "timer.reset",
-      description: "timer.reset",
-      action: (params) => { console.log("HIT ", "timer.reset", params)},
+  },
+  window_left: {
+    content: "window_left",
+    description: "Fit to left side of screen",
+    action: (params) => {
+      return updateCurrentWindow({
+        top: 0,
+        left: 0,
+        width: 768,
+        height: 1024
+      })
+      .then(createNotifySuccess)
+      .catch(createNotifyFailure);
     },
-    lap: {
-      content: "timer.lap",
-      description: "timer.lap",
-      action: (params) => { console.log("HIT ", "timer.lap", params)},
+  },
+  window_right: {
+    content: "window_right",
+    description: "Fit to right side of screen",
+    action: (params) => {
+      return updateCurrentWindow({
+        top: 0,
+        left: 768,
+        width: 768,
+        height: 1024
+      })
+      .then(createNotifySuccess)
+      .catch(createNotifyFailure);
     },
+  },
+  window_full: {
+    content: "window_full",
+    description: "Fit to screen",
+    action: (params) => {
+      return updateCurrentWindow({
+        top: 0,
+        left: 0,
+        width: 768 * 2,
+        height: 1024
+      })
+      .then(createNotifySuccess)
+      .catch(createNotifyFailure);
+    },
+  },
+  window_stash: {
+    content: "window_stash",
+    description: "window_stash",
+    action: (params) => {
+      console.log("HIT ", "window_stash", params);
+      // browser.windows.remove(windowId);
+      // stash can also discard a tab instead (unload but retain it)
+      return getCurrentHighlightedTabs().then( (tabs) => {
+        for (const tab of tabs) {
+
+        }
+      });
+    },
+  },
+  tab_stash: {
+    content: "tab_stash",
+    description: "tab_stash",
+    action: (params) => {
+      console.log("HIT ", "tab_stash", params);
+    },
+  },
+  tab_tag: {
+    content: "tab_tag",
+    description: "Set a tag for this tab",
+    action: (params) => {}
+  },
+  tab_save_page: {
+    content: "tab_save_page",
+    description: "tab_save_page",
+    action: (params) => {
+      console.log("HIT ", "tab_save_page", params);
+      // TODO render with readability?
+      // TODO save full HTML
+    }
+  },
+  tab_save_video: {
+    content: "tab_save_video",
+    description: "tab_save_video",
+    action: (params) => {
+      console.log("HIT tab_save_video, running doDownloadVideo", params);
+      return getCurrentActiveTab().then( (tab) => {
+        return _send("api/action/download/video", {
+          uri: tab[0].url,
+        });
+      })
+      .then(createNotifySuccess)
+      .catch(createNotifyFailure);
+    },
+  },
+  tab_save_song: {
+    content: "tab_save_song",
+    description: "tab_save_song",
+    action: (params) => {
+      console.log("HIT save_video, running doDownloadVideo", params);
+      getCurrentActiveTab.then( (tab) => {
+        return _send("api/action/download/audio", {
+          uri: tab[0].url,
+          args: { tag: 'music' }
+        });
+      })
+      .then(createNotifySuccess)
+      .catch(createNotifyFailure);
+    },
+  },
+  track_add: {
+    content: "track_add",
+    description: "track_add",
+    action: (params) => { console.log("HIT ", "track_add", params)},
+  },
+  track_set_cycle: {
+    content: "track_set_cycle",
+    description: "track_set_cycle",
+    action: (params) => { console.log("HIT ", "track_set_cycle", params)},
+  },
+  track_show_as: {
+    content: "track_show_as",
+    description: "track_show_as",
+    action: (params) => { console.log("HIT ", "track_show_as", params)},
+  },
+  timer_start: {
+    content: "timer_start",
+    description: "timer_start",
+    action: (params) => { console.log("HIT ", "timer_start", params)},
+  },
+  timer_pause: {
+    content: "timer_pause",
+    description: "timer_pause",
+    action: (params) => { console.log("HIT ", "timer_pause", params)},
+  },
+  timer_reset: {
+    content: "timer_reset",
+    description: "timer_reset",
+    action: (params) => { console.log("HIT ", "timer_reset", params)},
+  },
+  timer_lap: {
+    content: "timer_lap",
+    description: "timer_lap",
+    action: (params) => { console.log("HIT ", "timer_lap", params)},
   },
   options: {
     content: "options",
     description: "options",
     action: (params) => { console.log("HIT ", "options", params)},
   },
-  help: {
-    content: "help",
-    description: "help",
-    about: {
-      content: "help.about",
-      description: "help.about",
-      action: (params) => { console.log("HIT ", "help.about", params)},
-    },
-    changelog: {
-      content: "help.changelog",
-      description: "help.changelog",
-      action: (params) => { console.log("HIT ", "help.changelog", params)},
-    },
-    documentation: {
-      content: "help.documentation",
-      description: "help.documentation",
-      action: (params) => { console.log("HIT ", "help.documentation", params)},
-    },
-    check_for_updates: {
-      content: "help.check_for_updates",
-      description: "help.check_for_updates",
-      action: (params) => { console.log("HIT ", "help.check_for_updates", params)},
-    },
-    worker_status: {
-      content: "help.worker_status",
-      description: "help.worker_status",
-      action: (params) => { console.log("HIT ", "help.worker_status", params)},
-    },
+  help_about: {
+    content: "help_about",
+    description: "help_about",
+    action: (params) => { console.log("HIT ", "help_about", params)},
   },
-  history: {
-    content: "history",
-    description: "history",
-    last_actions: {
-      content: "history.last_actions",
-      description: "history.last_actions",
-      action: (params) => { console.log("HIT ", "history.last_actions", params)},
-    },
-    undo_close: {
-      content: "history.undo_close",
-      description: "history.undo_close",
-      action: (params) => { console.log("HIT ", "history.undo_close", params)},
-    },
+  help_changelog: {
+    content: "help_changelog",
+    description: "help_changelog",
+    action: (params) => { console.log("HIT ", "help_changelog", params)},
   },
-  convert: {
-    content: "convert",
-    description: "convert",
-    csv_to_json: {
-      content: "convert.csv_to_json",
-      description: "convert.csv_to_json",
-      action: (params) => { console.log("HIT ", "convert.csv_to_json", params)},
-    },
-    json_to_csv: {
-      content: "convert.json_to_csv",
-      description: "convert.json_to_csv",
-      action: (params) => { console.log("HIT ", "convert.json_to_csv", params)},
-    },
+  help_documentation: {
+    content: "help_documentation",
+    description: "help_documentation",
+    action: (params) => { console.log("HIT ", "help_documentation", params)},
   },
-  package: {
-    content: "package",
-    description: "package",
-    add_channel: {
-      content: "package.add_channel",
-      description: "package.add_channel",
-      action: (params) => { console.log("HIT ", "package.add_channel", params)},
-    },
-    update_channel: {
-      content: "package.update_channel",
-      description: "package.update_channel",
-      action: (params) => { console.log("HIT ", "package.update_channel", params)},
-    },
-    list_channel: {
-      content: "package.list_channel",
-      description: "package.list_channel",
-      action: (params) => { console.log("HIT ", "package.list_channel", params)},
-    },
-    remove_channel: {
-      content: "package.remove_channel",
-      description: "package.remove_channel",
-      action: (params) => { console.log("HIT ", "package.remove_channel", params)},
-    },
-    add_index: {
-      content: "package.add_index",
-      description: "package.add_index",
-      action: (params) => { console.log("HIT ", "package.add_index", params)},
-    },
-    update_index: {
-      content: "package.update_index",
-      description: "package.update_index",
-      action: (params) => { console.log("HIT ", "package.update_index", params)},
-    },
-    list_index: {
-      content: "package.list_index",
-      description: "package.list_index",
-      action: (params) => { console.log("HIT ", "package.list_index", params)},
-    },
-    remove_index: {
-      content: "package.remove_index",
-      description: "package.remove_index",
-      action: (params) => { console.log("HIT ", "package.remove_index", params)},
-    },
-    list_installed: {
-      content: "package.list_installed",
-      description: "package.list_installed",
-      action: (params) => { console.log("HIT ", "package.list_installed", params)},
-    },
-    create_package: {
-      content: "package.create_package",
-      description: "package.create_package",
-      action: (params) => { console.log("HIT ", "package.create_package", params)},
-    },
-    install_package: {
-      content: "package.install_package",
-      description: "package.install_package",
-      action: (params) => { console.log("HIT ", "package.install_package", params)},
-    },
-    update_package: {
-      content: "package.update_package",
-      description: "package.update_package",
-      action: (params) => { console.log("HIT ", "package.update_package", params)},
-    },
-    uninstall_package: {
-      content: "package.uninstall_package",
-      description: "package.uninstall_package",
-      action: (params) => { console.log("HIT ", "package.uninstall_package", params)},
-    },
-    set_debug: {
-      content: "package.set_debug",
-      description: "package.set_debug",
-      action: (params) => { console.log("HIT ", "package.set_debug", params)},
-    },
-    discover: {
-      content: "package.discover",
-      description: "package.discover",
-      action: (params) => { console.log("HIT ", "package.discover", params)},
-    },
-    search: {
-      content: "package.search",
-      description: "package.search",
-      action: (params) => { console.log("HIT ", "package.search", params)},
-    }
+  help_check_for_updates: {
+    content: "help_check_for_updates",
+    description: "help_check_for_updates",
+    action: (params) => { console.log("HIT ", "help_check_for_updates", params)},
+  },
+  help_worker_status: {
+    content: "help_worker_status",
+    description: "help_worker_status",
+    action: (params) => { console.log("HIT ", "help_worker_status", params)},
+  },
+  history_last_actions: {
+    content: "history_last_actions",
+    description: "history_last_actions",
+    action: (params) => { console.log("HIT ", "history_last_actions", params)},
+  },
+  history_undo_close: {
+    content: "history_undo_close",
+    description: "history_undo_close",
+    action: (params) => { console.log("HIT ", "history_undo_close", params)},
+  },
+  convert_csv_to_json: {
+    content: "convert_csv_to_json",
+    description: "convert_csv_to_json",
+    action: (params) => { console.log("HIT ", "convert_csv_to_json", params)},
+  },
+  convert_json_to_csv: {
+    content: "convert_json_to_csv",
+    description: "convert_json_to_csv",
+    action: (params) => { console.log("HIT ", "convert_json_to_csv", params)},
+  },
+  package_add_channel: {
+    content: "package_add_channel",
+    description: "package_add_channel",
+    action: (params) => { console.log("HIT ", "package_add_channel", params)},
+  },
+  package_update_channel: {
+    content: "package_update_channel",
+    description: "package_update_channel",
+    action: (params) => { console.log("HIT ", "package_update_channel", params)},
+  },
+  package_list_channel: {
+    content: "package_list_channel",
+    description: "package_list_channel",
+    action: (params) => { console.log("HIT ", "package_list_channel", params)},
+  },
+  package_remove_channel: {
+    content: "package_remove_channel",
+    description: "package_remove_channel",
+    action: (params) => { console.log("HIT ", "package_remove_channel", params)},
+  },
+  package_add_index: {
+    content: "package_add_index",
+    description: "package_add_index",
+    action: (params) => { console.log("HIT ", "package_add_index", params)},
+  },
+  package_update_index: {
+    content: "package_update_index",
+    description: "package_update_index",
+    action: (params) => { console.log("HIT ", "package_update_index", params)},
+  },
+  package_list_index: {
+    content: "package_list_index",
+    description: "package_list_index",
+    action: (params) => { console.log("HIT ", "package_list_index", params)},
+  },
+  package_remove_index: {
+    content: "package_remove_index",
+    description: "package_remove_index",
+    action: (params) => { console.log("HIT ", "package_remove_index", params)},
+  },
+  package_list_installed: {
+    content: "package_list_installed",
+    description: "package_list_installed",
+    action: (params) => { console.log("HIT ", "package_list_installed", params)},
+  },
+  package_create_package: {
+    content: "package_create_package",
+    description: "package_create_package",
+    action: (params) => { console.log("HIT ", "package_create_package", params)},
+  },
+  package_install_package: {
+    content: "package_install_package",
+    description: "package_install_package",
+    action: (params) => { console.log("HIT ", "package_install_package", params)},
+  },
+  package_update_package: {
+    content: "package_update_package",
+    description: "package_update_package",
+    action: (params) => { console.log("HIT ", "package_update_package", params)},
+  },
+  package_uninstall_package: {
+    content: "package_uninstall_package",
+    description: "package_uninstall_package",
+    action: (params) => { console.log("HIT ", "package_uninstall_package", params)},
+  },
+  package_set_debug: {
+    content: "package_set_debug",
+    description: "package_set_debug",
+    action: (params) => { console.log("HIT ", "package_set_debug", params)},
+  },
+  package_discover: {
+    content: "package_discover",
+    description: "package_discover",
+    action: (params) => { console.log("HIT ", "package_discover", params)},
+  },
+  package_search: {
+    content: "package_search",
+    description: "package_search",
+    action: (params) => { console.log("HIT ", "package_search", params)},
   }
 };

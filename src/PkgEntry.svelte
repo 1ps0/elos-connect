@@ -97,7 +97,7 @@ function package_type() {
   color: #ff3e00;
 }
 
-.container p,table {
+.container p {
   font-size: 0.7em;
   text-transform: uppercase;
   /*text-decoration: underline;*/

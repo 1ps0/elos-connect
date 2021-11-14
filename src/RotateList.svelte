@@ -104,20 +104,6 @@ onMount(async () => {
 
 <style>
 
-.type-study span {
-  float:left;
-  background-color: green;
-  width: 100%;
-}
-
-.type-label span {
-  border: 1px solid black;
-  padding: 10px 30px 10px 30px;
-  margin: 5px;
-  border-radius: 5px;
-  padding: 15px;
-}
-
 /* Include the padding and border in an element's total width and height */
 * {
   box-sizing: border-box;
@@ -159,14 +145,14 @@ div p:hover {
   background: #ddd;
 }
 
-/* When clicked on, add a background color and strike out text */
+/* When clicked on, add a background color and strike out text
 div p.checked {
   background: #888;
   color: #fff;
   text-decoration: line-through;
 }
-
-/* Add a "checked" mark when clicked on */
+*/
+/* Add a "checked" mark when clicked on
 div p.checked::before {
   content: '';
   position: relative;
@@ -179,6 +165,7 @@ div p.checked::before {
   height: 15px;
   width: 7px;
 }
+*/
 
 /* Style the close button */
 .close {

@@ -84,7 +84,7 @@ onMount(async () => {
   if (dataSourcePath) {
     console.log("running dataSourcePath fetch", dataSourcePath);
     // dataStore.update((n) => _fetch(dataSourcePath));
-    queue = (await _fetch(dataSourcePath)).result;
+    queue = (await _fetch({ uri: dataSourcePath })).result;
     console.log("dataSourcePath GOT", queue);
     if (dataStore) {
       dataStore.update(n => queue);
@@ -123,10 +123,10 @@ onMount(async () => {
           {/if}
 
           {#if buttons.length > 0}
-            {#each buttons as prop}
+            {#each buttons as prop (prop.name)}
               <div
                 class="item-button"
-                on:click|preventDefault={(e) => prop.action(e.detail)}
+                on:click|preventDefault={(e) => Promise.resolve(_item).then(prop.action).catch(printFailure)}
               >
                 {prop.icon(_item)}
               </div>

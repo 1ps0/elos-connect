@@ -8,7 +8,7 @@ const dispatch = createEventDispatcher();
 
 export let config = {};
 // export let inputs = writable({});
-// export let data = await _fetch(config.url, config.params);
+// export let data = await _fetch({ ...config.params, uri: config.url});
 // export let transforms = item.transform;
 // export let displayPanel = item.component;
 // export let feedbackHooks = item.events;

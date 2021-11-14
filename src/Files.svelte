@@ -55,7 +55,7 @@ onMount(() => {
 
 </script>
 
-<div>
+<section>
   <div class="filename">
     <span>{metadata.filetype}</span>
     <span>{pageOffset} - {pageOffset + metadata.pageSize} ({(files || []).length})</span>
@@ -68,50 +68,9 @@ onMount(() => {
     dataKey="files"
     inputEvent={(e) => submitUpdates(e)}
   />
-</div>
+</section>
 
 <style>
-
-.file-name {
-  width:15%;
-  padding: 5px;
-  margin: 2px;
-}
-
-.file-mime {
-  width:20%;
-  padding: 5px;
-  margin: 2px;
-}
-
-.file-open {
-  width:5%;
-  padding: 5px;
-  margin: 2px;
-}
-
-.file-keywords {
-  width:10%;
-  padding: 5px;
-  margin: 2px;
-}
-
-
-p {
-  color: #ff3e00;
-  text-transform: uppercase;
-  font-size: 1em;
-  font-weight: 100;
-}
-
-.next-button {
-  /*width: 95%;*/
-  border: 1px solid #aaa;
-  border-radius: 2px;
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-  padding: 0.5em;
-  margin: 0 0.5em 0 0;
-}
 
 .filename {
   color: blue;
@@ -122,26 +81,8 @@ p {
   overflow-wrap: normal;
 }
 
-.status {
-  color: #ff3e00;
-  text-transform: uppercase;
-  font-size: 1.2em;
-  font-weight: 100;
-}
-
 section {
   overflow: scroll;
-}
-
-table {
-  text-align: left;
-}
-tr {
-  color: black;
-  font-size: 0.7em;
-}
-td {
-  max-width: 200px;
 }
 
 </style>

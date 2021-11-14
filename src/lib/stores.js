@@ -19,7 +19,7 @@ export const cacheFor = (name, otherwise={}) => {
   return ret ? JSON.parse(ret) : otherwise;
 };
 
-export const workspaceWritable = writable(workspaceConfig);
+export const configWritable = writable(workspaceConfig);
 
 export const historyWritable = writable(cacheFor("history", []));
 
@@ -66,7 +66,7 @@ export const stores = {
   log: logWritable,
   layoutItems: layoutItemsWritable,
   // config data
-  workspace: workspaceWritable,
+  config: configWritable,
   // api data
   files: filesWritable,
   profile: profileWritable,
