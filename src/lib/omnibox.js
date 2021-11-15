@@ -47,6 +47,7 @@ import {
   printFailure,
   getCurrentHighlightedTabs,
   getCurrentActiveTab,
+  findInAll,
   _send
 } from "./apis.js";
 
@@ -82,6 +83,7 @@ export const cmds = {
     //  - suggestions have tab name and matched criteria/surrounding
     suggestions: (params) => {
       console.log("HIT SUGGEST:", "find", params)
+      return findInAll(params);
     },
     action: (params) => {
       console.log("HIT", "find", params)

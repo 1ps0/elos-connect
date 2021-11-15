@@ -14,6 +14,11 @@ export const menuItems = [
     group: "1"
   },
   {
+    name: "panel-web-players",
+    value: { icon: "view-modes", highlight: "Web Players" },
+    group: "1"
+  },
+  {
     name: "panel-location-ops",
     value: { icon: "view-mode-1", highlight: "Location Tagging" },
     group: "1"

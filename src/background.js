@@ -175,10 +175,20 @@ const omniboxOnInputChanged = async (text, addSuggestions) => {
       });
     })
     .then((neighbors) => {
+      console.log("neighbors for", lastInput, text, neighbors);
       prevSuggestions = neighbors.map((x) => x[1]);
       return prevSuggestions;
     })
-    .then(printSuccess)
+    .then((suggestions) => {
+      if (suggestions.length == 1) {
+        let content = suggestions[0].content;
+        let args = lastInput.split(content).slice(1);
+        console.log("nested suggestions:", suggestions, content, args);
+        return suggestions[0].suggestions(args);
+      }
+      return suggestions
+    })
+    .then(printStatus)
     .then(addSuggestions)
     .catch(printFailure)
 };
@@ -197,16 +207,6 @@ const omniboxOnInputEntered = (url, disposition) => {
     })
     .then(printSuccess)
     .catch(printFailure);
-
-  // // let cmd_func = resolve(_text, cmds);
-  // let cmd_func = Object.keys(cmds);
-
-  // if (cmd_func === undefined) {
-  //   console.log("FAILED INPUT, no value for:", url, _text);
-  // }
-  // console.log("RUNNING INPUT", _text, url, cmd_func);
-  // let response = cmd_func.action(_text);
-  // console.log("RAN", response, '--', cmd_func.content, cmd_func.description);
 };
 
 const omniboxOnInputCancelled = () => {

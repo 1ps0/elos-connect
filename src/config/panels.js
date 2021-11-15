@@ -13,7 +13,7 @@ target: eg id, target value for types
 */
 
 // FIXME centralize and reactivize configs like this
-export let layoutConfig = {
+export const layoutConfig = {
   // LAYOUT GRID
   panelGap: 5,
   columnMultiplier: 6,
@@ -22,7 +22,7 @@ export let layoutConfig = {
 };
 
 
-export let optionTypes = {
+export const optionTypes = {
   close: {
     title: 'close',
     icon: "status-closemark"
@@ -33,7 +33,7 @@ export let optionTypes = {
   // }
 };
 
-export let panelTypes = {
+export const panelTypes = {
   "panel-mainmenu": {
     target: "panel-mainmenu",
     name: "mainmenu",

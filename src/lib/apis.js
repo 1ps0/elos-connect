@@ -13,7 +13,7 @@ import { openWith } from "../config/open.js";
 
 export const handleResponse = async (response) => {
   if (response.ok) { // if HTTP-status is 200-299
-    return await response.json();
+    return response.json();
   } else {
     console.log("HTTP-Error: ", response.status);
     return null;
@@ -26,10 +26,12 @@ export const _fetch = async (params) => {
   return Promise.resolve(new URL(params.uri, baseUrl))
     .then((url) => {
       for (let arg in params) {
-        _url.searchParams.append(arg, params[arg]);
+        url.searchParams.append(arg, params[arg]);
       }
+      return url;
     })
     .then(fetch)
+    .then(printStatus)
     .then(handleResponse)
     .catch(printFailure);
 };
@@ -335,7 +337,7 @@ export const createNotifyFailure = async (params) => {
 }
 
 export const printStatus = (params) => {
-  console.log("[LOG][STATUS]", typeof(params), Object.keys(params));
+  console.log("[LOG][STATUS]", params);
   return params;
 }
 

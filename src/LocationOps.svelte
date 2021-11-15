@@ -20,18 +20,23 @@ async function sendLink(tagName) {
 
 
 async function loadTags() {
-  let results = await _fetch({ uri:'api/analysis/tag'});
-  console.log("[remote][load#tags] ", results);
+  return Promise.resolve({ uri:'api/analysis/tag'})
+    .then(_fetch)
+    // .then(printStatus)
+    .then((results) => results.names )
+    .then((results) => {
+      for (let tag of results) {
+        // console.log("[remote][load#tag] ", tag);
+        renderTag(tag[1]);
+      }
+    })
+    .catch(printFailure);
 
   // let tabs = await browser.tabs.query({currentWindow: true, active: true});
   // browser.tabs.query({currentWindow: true}, function(tab) {
   // console.log("rendering", tabs[0], results.names);
 
   // TODO clear .panel of previous tag entries, for idempotency
-  for (let tag of results.names) {
-    // console.log("[remote][load#tag] ", tag);
-    renderTag(tag[1]);
-  }
   // });
   // let getAllStored = chrome.storage.local.get(null);
   // chrome.storage.local.set(tagKey);
@@ -57,7 +62,10 @@ function renderTag(tagName) {
 
 onMount(async () => {
   console.log('LocationOps mounted');
-  await loadTags();
+
+  loadTags()
+  .then(printStatus)
+  .catch(printFailure);
 });
 </script>
 
