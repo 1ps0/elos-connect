@@ -1,46 +1,25 @@
 <script>
 
 import { onMount } from 'svelte';
-import { _fetch, _send, sendTag, printStatus, printFailure } from "./lib/apis.js"
+import { _fetch,
+  _send,
+  sendTag,
+  sendLink,
+  loadTags,
+  createNotifySuccess,
+  createNotifyFailure,
+  printFailure
+} from "./lib/apis.js"
 
 
-async function sendLink(tagName) {
 
-  browser.tabs.query({currentWindow: true, active: true}).then(async (tabs) => {
-    let params = {
-      label: tabs[0].title,
-      uri: tabs[0].url,
-      tag: tagName
-    };
-    console.log('SAVING', params);
-    let result = await _send("api/location/add", params);
-    console.log('DONE SAVING', result);
-  }, console.error);
-}
+// let tabs = await browser.tabs.query({currentWindow: true, active: true});
+// browser.tabs.query({currentWindow: true}, function(tab) {
+// console.log("rendering", tabs[0], results.names);
 
-
-async function loadTags() {
-  return Promise.resolve({ uri:'api/analysis/tag'})
-    .then(_fetch)
-    // .then(printStatus)
-    .then((results) => results.names )
-    .then((results) => {
-      for (let tag of results) {
-        // console.log("[remote][load#tag] ", tag);
-        renderTag(tag[1]);
-      }
-    })
-    .catch(printFailure);
-
-  // let tabs = await browser.tabs.query({currentWindow: true, active: true});
-  // browser.tabs.query({currentWindow: true}, function(tab) {
-  // console.log("rendering", tabs[0], results.names);
-
-  // TODO clear .panel of previous tag entries, for idempotency
-  // });
-  // let getAllStored = chrome.storage.local.get(null);
-  // chrome.storage.local.set(tagKey);
-}
+// TODO clear .panel of previous tag entries, for idempotency
+// let getAllStored = chrome.storage.local.get(null);
+// chrome.storage.local.set(tagKey);
 
 function renderTag(tagName) {
   /* create tag display box */
@@ -60,12 +39,18 @@ function renderTag(tagName) {
   return tag;
 }
 
+const _sendTag = async (params) => {
+    return sendTag(params)
+      .then(renderTag)
+      .catch(printFailure);
+};
+
 onMount(async () => {
   console.log('LocationOps mounted');
 
   loadTags()
-  .then(printStatus)
-  .catch(printFailure);
+    .then((tags) => tags.forEach((tag) => renderTag(tag)))
+    .catch(createNotifyFailure)
 });
 </script>
 
@@ -73,7 +58,7 @@ onMount(async () => {
   <ul class="panel">
     <li class="new-tag">
       <input id="tag_name" type="text" name="name">
-      <button class="add" on:click={sendTag}>Add</button>
+      <button class="add" on:click={_sendTag}>Add</button>
     </li>
   </ul>
 </section>

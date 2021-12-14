@@ -24,11 +24,11 @@
       max={item.max}
       {dynamic}
       cols={getComputedCols}>
-
+<!--
       <Options
         id="opt_{item.target}"
         panelOpts={item.props}
-      />
+      /> -->
       <slot {item} index={i}/>
     </MoveResize>
   {/each}

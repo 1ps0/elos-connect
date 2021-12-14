@@ -155,6 +155,7 @@ onMount(async () => {
   width: 20px;
   height:  20px;
   border: 1px black;
+  /*display: block;*/
 }
 
 /*.log-body {
