@@ -8,7 +8,6 @@ import { openWith } from "../config/open.js";
 
 // -- reactive globals
 
-
 // -- primitive functions
 
 export const handleResponse = async (response) => {
@@ -33,7 +32,7 @@ export const _fetch = async (params) => {
     .then(fetch)
     .then(printStatus)
     .then(handleResponse)
-    .catch(printFailure);
+    // .catch(printFailure);
 };
 
 export const _send = async (params) => {
@@ -47,34 +46,25 @@ export const _send = async (params) => {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(params)
+        body: JSON.stringify(params.body)
       }
     })
     .then(fetch)
     .then(handleResponse)
-    .then(printSuccess)
-    .catch(printFailure);
+    // .catch(printFailure);
 }
 
-export const findInAll = async (params) => {
-  return getAllTabs(params)
-    .then((_params) => browser.find.find(_params))
-    .then((results) => {
-      let _results = results.map((result) => {
-        return {
-          total_count: results.count,
-
-        }
-      });
-      return _results;
-    })
-    .then(printSuccess)
-    .catch(printFailure)
-}
+// ------- Send composites
 
 export const sendTag = async (params) => {
-  return Promise.resolve(document.querySelector('#tag_name')) // newTagButton
-    .then(printStatus)
+  // TODO normalize params interface and validation of values
+  return Promise.resolve(params && params.tagName ? params.tagName : '#tag_name')
+    .then((name) => document.querySelector(name))
+    // FIXME extract css styling into module that can be integrated
+    .then((button) => {
+      button.style.borderColor = "blue";
+      return button;
+    })
     .then((button) => button.value)
     .then((tagName) => {
       return {
@@ -82,8 +72,202 @@ export const sendTag = async (params) => {
         name: tagName
       }
     })
-    .then(send)
-    .then(renderTag)
+    .then(_send)
+    .then((button) => {
+      button.style.borderColor = "green";
+      return button;
+    })
+    .catch(printFailure)
+    .then((button) => {
+      button.style.borderColor = "red";
+      return button;
+    });
+}
+
+export const sendLink = async (tagName) => {
+  browser.tabs.query({
+    currentWindow: true, active: true
+  })
+  .then((params) => {
+    return {
+      uri: "api/location/add",
+      body: {
+        label: tabs[0].title,
+        uri: tabs[0].url,
+        tag: tagName
+      }
+    }
+  })
+  .then(_send)
+  .then(createNotifySuccess)
+  .catch(printFailure)
+}
+
+export const sendSidebar = async (params) => {
+  // params is { tabId: 0, windowId: 0 } only
+  // neither gives global table, both gives rejection
+  return browser.sidebarAction.getPanel()//params)
+    .then((panel) => {
+      // browser.sidbarAction.open()
+    })
+    .catch(printFailure);
+}
+
+export const getContexts = (results) => {
+  console.log("sending results", results);
+  return Promise.all(results)
+  .then((_results) => {
+    return _results.map((result) => {
+      console.log("sending to context", result);
+      return browser.tabs.sendMessage(result.tabId, {
+        ranges: result.rangeData
+      })
+    })
+  })
+}
+
+// -------- Find composites
+
+export const findInTab = (query, tabId) => {
+  return browser.find.find(query, {
+      tabId: tabId,
+      includeRangeData: true,
+      // includeRectData: true
+    }) // TODO set timeout to filter slow promises. currently none
+    // .then(printStatus)
+    .catch((err) => console.log("Err:", tabId, query, err))
+    .finally((result) => {
+      return {
+        count: 0, // overwritten by result if not failcase
+        ...result,
+        tabId: tabId
+      }
+    })
+}
+
+export const findInAll = async (params) => {
+  // TODO add soft 'limit' on 'all tabs' count.
+  return getAllTabs(params)
+    .then((_params) => {
+      return _params.map((tab) => {
+        return findInTab(params, tab.id);
+      })
+    })
+    .then((_params) => {
+      return _params.filter((result) => (result && result.count > 0));
+    })
+    // .then(printStatus)
+    .then(getContexts)
+    .then((results) => {
+      return results.map(async (result) => {
+        return {
+          content: ` -- ${params}`, //${result.text.slice(0,10)}
+          description: await result.then(printSuccess).catch(printFailure),
+        }
+      });
+    })
+    // .then(printSuccess)
+    // .catch(printFailure);
+}
+
+// ---------- Load composites
+
+export const loadTags = async () => {
+  return Promise.resolve({ uri:'api/analysis/tag'})
+    .then(_fetch)
+    // .then(printStatus)
+    .then((results) => results.names.map((tag) => tag[1]))
+    .catch(printFailure);
+};
+
+export const loadSites = async () => {
+  return browser.topSites.get()
+    .then((sites) => {
+      return sites;
+    })
+    .then((sites) => {
+      return sites.map((site) => ({
+        title: site.title,
+        url: site.url
+      }));
+    })
+    .then((sites) => {
+      return {
+        elementId: 'item-list',
+        sites: sites,
+      }
+    })
+    .catch(printFailure);
+}
+
+export const loadSessions = async () => {
+  return browser.sessions.getRecentlyClosed()
+    .then((sessions) => {
+      return sessions.map((session) => ({
+
+      }))
+    })
+    .then(printSuccess)
+    .catch(printFailure);
+}
+
+export const loadVisits = async (params) => {
+  return browser.history.getVisits(params)
+    .catch(printFailure);
+}
+
+export const loadHistory = async (params) => {
+  // params can only be { url: string }
+  return browser.history.search({
+      text: params && params.query ? params.query : "",
+      startTime: params && params.startTime ? params.startTime : 0, // default 24h window
+      // maxResults: params && params.resultCount ? params.resultCount :
+    })
+    .then((historyItems) => {
+      return historyItems.map((item) => ({
+        id: item.id,
+        url: item.url,
+        title: item.title,
+        lastVisitTime: item.lastVisitTime, // page was last loaded, in milliseconds since the epoch.
+        visitCount: item.visitCount, // has visited the page.
+        typedCount: item.typedCount // navigated to this page by typing in the address.
+      }));
+    })
+    .catch(printFailure);
+}
+
+export const loadCommands = async (params) => {
+  return browser.commands.getAll()
+    .then((cmds) => {
+      return cmds.map((cmd) => ({
+        name: cmd.name,
+        description: cmd.description,
+        shortcut: cmd.shortcut
+      }))
+    })
+    .catch(printFailure);
+}
+
+// ---------- Actions
+
+export const restoreSession = async (_sessions) => {
+  return Promise.resolve(_sessions)
+    .then((sessions) => {
+      if (!sessions || !sessions.length) {
+        return [];
+      }
+      return sessions;
+    })
+    .then((sessions) => {
+      sessions.forEach((session) => {
+        if (session.tab) {
+          browser.sessions.restore(session.tab.sessionId);
+        } else {
+          browser.sessions.restore(session.window.sessionId);
+        }
+      })
+      return sessions;
+    })
     .catch(printFailure);
 }
 
@@ -102,11 +286,7 @@ export const getPorts = () => {
 export const removePort = (tabId) => {
   console.log("Deleting port for tab", tabId);
   delete ports[tabId];
-}
-
-export const sendMessage = async (msgParams) => {
-  return browser.runtime.sendMessage(msgParams);
-}
+};
 
 export const createRuntimeConnection = async (params) => {
   return browser.runtime.connect({
@@ -116,16 +296,26 @@ export const createRuntimeConnection = async (params) => {
   });
 };
 
+// export const sendRuntimeMessage = async (params) => {
+//   return browser.runtime.sendMessage(params)
+//     .catch(printFailure);
+// };
+
+export const sendTabMessage = async (params) => {
+  return browser.tabs.sendMessage(params.tabId)
+    .catch(printFailure);
+};
+
 export const sendMessageToTabs = async (tabs) => {
-  for (let tab of tabs) {
-    browser.tabs.sendMessage(
+  return Promise.all(tabs.map((tab) => {
+    return browser.tabs.sendMessage(
       tab.id,
       {greeting: "Hi from background script"}
     ).then(response => {
       console.log("Message from the content script:");
       console.log(response.response);
     }).catch(printFailure);
-  }
+  }));
 };
 
 export const addRuntimeMessageHook = async (params) => {
@@ -143,21 +333,126 @@ export const sendToContentScript = async (params) => {
   }, "*");
 }
 
-// ---
+// ------- WINDOW FUNCTIONS
+
+// "window_update_move_topright"
+export const window_update_move_topright = () => {
+  browser.windows.update(browser.windows.WINDOW_ID_CURRENT, {
+    left: 0,
+    top: 0
+  });
+};
+
+// "window-update-size_768"
+export const window_update_size_768 = () => {
+  browser.windows.update(browser.windows.WINDOW_ID_CURRENT, {
+    width: 768,
+    height: 1024
+  });
+}
+
+// "window-update-minimize"
+export const window_update = () => {
+  browser.windows.update(browser.windows.WINDOW_ID_CURRENT, {
+    state: "minimized",
+  });
+}
+
+// "window-create-detached-panel"
+export const window_create = () => {
+  browser.windows.create({
+    // type: "popup",
+    type: "detached_panel",
+    incognito: true,
+  }).then(() => {
+    console.log("The detached panel has been created");
+  }).catch(printFailure);
+}
+
+// "window-remove"
+export const window_stash = () => {
+  //
+  browser.tabs.query({
+    highlighted: true,
+    // active: true,
+    windowId: browser.windows.WINDOW_ID_CURRENT
+  })
+  .then((tabs) => {
+    return tabs.length > 0 ? tabs : browser.windows.getAll();
+  })
+  .then((tabs) => {
+    console.log('doing selected copy:', windows.WINDOW_ID_CURRENT, tabs);
+    // return tabs.map((x) => x.title+","+x.url).join('\n');
+    return tabs
+  })
+  .then((tabs) => {
+    return tabs.map((tab) => {
+      return {
+        "uri": tab.url,
+        "label": tab.title,
+        "tag": "stash"
+      }
+    })
+  })
+  .then(() => {
+    browser.windows.remove(windows.WINDOW_ID_CURRENT);
+  })
+  .catch(printFailure);
+}
+
+// "window-resize-all"
+export const window_resize_all = () => {
+  browser.windows.getAll().then((windows) => {
+    for (var item of windows) {
+      browser.windows.update(item.id, {
+        width: 1024,
+        height: 768
+      });
+    }
+  }).catch(printFailure);
+}
+
+// "window-preface-title"
+export const window_preface_title = () => {
+  browser.windows.update(browser.windows.WINDOW_ID_CURRENT, {
+    titlePreface: "Preface | "
+  }).catch(printFailure);
+};
 
 
-// --- tab / window ops
+export const hasWindowId = (data) => {
+  console.log("checking has window id", data);
+  if (data.windowId !== undefined) {
+    return data;
+  } else {
+    Promise.reject("windowId not in", data);
+  }
+};
+export const setWindowActive = (data) => {
+  console.log("Setting active window with data", data);
+  let status = browser.windows.update(data.windowId, { focused: true });
+  if (status) { return data; }
+  else { return Promise.reject("Failed to update tab", data); }
+}
+
+
+// --- tab ops
+// NOTE: all 'get' types dont have a catch failure by design
 
 export const getAllTabs = async () => {
   return browser.tabs.query({})
-    .catch(printFailure)
+    .then((tabs) => {
+      return tabs.filter((tab) => tab != tabs.TAB_ID_NONE);
+    })
+    // .catch(printFailure)
 }
 
 export const getCurrentActiveTab = async () => {
   return browser.tabs.query({
     active: true,
     windowId: browser.windows.WINDOW_ID_CURRENT
-  });
+  })
+  // .catch(printFailure);
 };
 
 export const hasTabId = (data) => {
@@ -169,15 +464,6 @@ export const hasTabId = (data) => {
   }
 };
 
-export const hasWindowId = (data) => {
-  console.log("checking has window id", data);
-  if (data.windowId !== undefined) {
-    return data;
-  } else {
-    Promise.reject("windowId not in", data);
-  }
-};
-
 export const setTabActive = (data) => {
   console.log("Setting active tab with data", data);
   let status = browser.tabs.update(data.tabId, { active: true });
@@ -185,12 +471,6 @@ export const setTabActive = (data) => {
   else { return Promise.reject("Failed to update tab", data); }
 };
 
-export const setWindowActive = (data) => {
-  console.log("Setting active window with data", data);
-  let status = browser.windows.update(data.windowId, { focused: true });
-  if (status) { return data; }
-  else { return Promise.reject("Failed to update tab", data); }
-}
 
 export const sendPlayPause = (e) => {
   // TODO if e is type element, else if object
@@ -204,23 +484,46 @@ export const sendPlayPause = (e) => {
 export const updateClipboard = (newClip) => {
   return navigator.clipboard.writeText(newClip)
     .then(createNotifySuccess)
-    .catch(createNotifyFailure)
+    .catch(createNotifyFailure);
+};
+
+export const getHighlightedTabs = (newClip) => {
+  return browser.tabs.query({
+      highlighted: true,
+      // active: true,
+      windowId: browser.windows.WINDOW_ID_CURRENT
+    })
+    .then((tabs) => tabs.map((tab) => ({
+      title: tab.title,
+      url: tab.url,
+      tabId: tab.id,
+      windowId: tab.windowId,
+    })))
+    .catch(printFailure);
 }
 
 export const doSelectedCopy = async (e) => {
-  return browser.tabs.query({
-    highlighted: true,
-    // active: true,
-    windowId: browser.windows.WINDOW_ID_CURRENT
-  })
-  .then((tabs) => {
+  return getHighlightedTabs()
+    .then((tabs) => {
+      console.log('doing selected copy:', browser.windows.WINDOW_ID_CURRENT, tabs);
+      return tabs.map((tab) => `${tab.title},${tab.url}`).join('\n');
+    })
+    .then(updateClipboard)
+    .then(createNotifySuccess)
+    .catch(printFailure);
+}
 
-  })
-  .then(createNotifySuccess)
-  .catch(printFailure);
-  console.log('doing selected copy:', browser.windows.WINDOW_ID_CURRENT, tabs);
-  updateClipboard( tabs.map((x) => x.title+","+x.url).join('\n'));
-  return tabs;
+export const doDownloadVideo = (params) => {
+  return getCurrentActiveTab()
+    .then((tab) => ({
+      uri: "api/action/download/video",
+      body: {
+        uri: tab[0].url,
+      }
+    }))
+    .then(_send)
+    .then(createNotifySuccess)
+    .catch(printFailure);
 }
 
 export const bringToFront = (e) => {

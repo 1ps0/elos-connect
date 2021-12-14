@@ -4,42 +4,30 @@
 import { cmds } from "./lib/omnibox.js";
 import { stores } from "./lib/stores.js";
 import {
-  createNotify,
   _fetch,
+  createNotifyFailure,
   printFailure,
-  printSuccess
+  printSuccess,
+  printStatus
 } from "./lib/apis.js";
 
 console.log("LOADING ELOS CONNECT - background.js");
 
+// ------ GLOBAL ERRORS
+
 $: {
   if (browser.runtime.lastError !== null) {
     var err = browser.runtime.lastError;
-    createNotify({
+    Promise.resolve({
       title: `browser.runtime lastError: ${err.name}`,
       message: err.message
       // buttons: ['retry', 'close']
-    });
-    console.log("Error: ", err);
+    })
+    .then(createNotifyFailure)
+    .catch(printFailure);
   }
 };
 
-const updateTab = (tabId, changeInfo, tab) => {
-  console.log("GOT TAB UPDATE", tabId, changeInfo, tab);
-    return browser.runtime.sendMessage(
-      {
-        name: tab.id,
-        tabId: tab.id,
-        windowId: tab.windowId,
-        muted: tab.mutedInfo.muted,
-        title: tab.title,
-        url: tab.url,
-        playing: tab.audible,
-        changed: changeInfo
-      }
-  ).then(printSuccess)
-  .catch(printFailure)
-}
 
 /*global getAccessToken*/
 
@@ -57,84 +45,47 @@ const setupAuth = () => {
   browser.identity.getRedirectURL();
 }
 
-const createSuggestionsFromResponse = (response) => {
-  console.log(response);
-  let suggestions = [];
-  let suggestionsOnEmptyResults = [{
-    content: "about:blank",
-    description: "no results found"
-  }];
-  if (!response || !response.status || !response.results) {
-    console.log("no valid suggestions: ", response, response.status, response.results);
-    return suggestionsOnEmptyResults;
-  }
+// ------ HANDLERS
 
-  response.results.forEach( obj => {
-    suggestions.push({
-      content: obj.uri,
-      description: '['+obj.value+'] '+obj.label,
-    });
-  });
-  console.log('suggestions',suggestions);
-  return suggestions;
-}
-
-const resolve = (path, obj, separator='.') => {
+export const resolve = (path, obj, separator='.') => {
   var properties = Array.isArray(path) ? path : path.split(separator);
   return properties.reduce((prev, curr) => prev && prev[curr], obj);
 }
 
-const runSuggestions = async (params) => {
-  console.log("SHOW SUGGESTIONS", params);
-  let data = null;
-  if (params.length === 0) {
-    data = [];
-  } else {
-    data = await _fetch("/api/location/search", params);
-  }
-  console.log("-- got search data", params, data);
-  // stores.links.subscribe((e) => {});
-  return createSuggestionsFromResponse(data);
-}
-
-
-const parseComponents = (text) => {
-  let params = { local: true, query: text };
-  text.split(' ').forEach(part => {
-    let param = part.split(":");
-    if (param.length > 1) {
-      params[param[0]] = param[1];
-      params.has_keyword = ['tag', 'title', 'url'].indexOf(params[0]) !== -1;
+export const intersection = (sA, sB) => {
+  const result = new Set();
+  const _sA = new Set(sA);
+  for (let elem of sB) {
+    if (_sA.has(elem)) {
+      result.add(elem);
     }
-  });
-  return params;
-}
-
-const handleMessage = (request, sender, sendResponse) => {
-  console.log("[background] got message", request, sender, sendResponse);
+  }
+  return [...result];
 };
 
 
-let lastInput = ""; // hack cache to move the whole input to the actuation
-let prevSuggestions = [];
-
-const findNeighborCommands = (text) => {
-  let cmd_prefix = text.replace(' ', '_');
-  let neighbors = Object.keys(cmds).filter((cmd) => cmd.includes(cmd_prefix));
-  return neighbors.map((x) => x.replace('_', ' '));
+export const union = (sA, sB) => {
+  const _keys = new Set(sA);
+  for (let elem of sB) {
+    _keys.add(elem);
+  }
+  return [..._keys];
 };
+
+
+// ------ THEME
 
 let currentTheme = null;
-const setOmniboxTheme = async (params) => {
+const setOmniboxTheme = (params) => {
   // windows.WINDOW_ID_CURRENT
   return [params, browser.theme.update(params)];
 };
 
-const resetOmniboxTheme = async (params) => {
+const resetOmniboxTheme = (params) => {
   return [params, browser.theme.reset()];
 }
 
-const createOmniboxActivationTheme = async (theme) => {
+const createOmniboxActivationTheme = (theme) => {
   return {
     ...theme,
     colors: {
@@ -148,61 +99,208 @@ const createOmniboxActivationTheme = async (theme) => {
   };
 };
 
+// ------ MESSAGING
+
+const handleMessage = (request, sender, sendResponse) => {
+  console.log("[background] got message", request, sender, sendResponse);
+  // TODO setup message handling and routing here
+};
+
+export const updateTab = (tabId, changeInfo, tab) => {
+  console.log("GOT TAB UPDATE", tabId, changeInfo, tab);
+    return browser.runtime.sendMessage(
+      {
+        name: tab.id,
+        tabId: tab.id,
+        windowId: tab.windowId,
+        muted: tab.mutedInfo.muted,
+        title: tab.title,
+        url: tab.url,
+        playing: tab.audible,
+        changed: changeInfo
+      }
+  ).then(printSuccess)
+  .catch(printFailure);
+}
+
+// ------ COMMAND SEARCH
+
+let lastInput = ""; // hack cache to move the whole input to the actuation
+let prevSuggestions = [];
+
+const findNeighborCommands =  async (node) => {
+  // https://stackoverflow.com/questions/57026895/get-unique-values-from-array-of-arrays
+  let cmd_prefix = lastInput.split(' ');
+  try {
+    // reduces omnibox cmds to a flat array of all unique keywords.
+    return Promise.resolve(
+      [...new Set(
+        Object.keys(cmds)
+        .map((cmd) => cmd.split('_'))
+        .flat(1)
+      )]
+    )
+    .then((keywords) => {
+      // find input keywords used, with possible cmd keywords.
+      let keys = intersection(cmd_prefix, keywords);
+      // return the command name for a given bag of keywords
+      return Object.values(cmds).filter((cmd) => cmd.content.includes(keys.join('_')));
+    })
+    .catch(printFailure);
+  }
+  catch (err) {
+    console.log(err);
+    return Promise.reject(err);
+  }
+};
+
 const omniboxOnInputStarted = async () => {
   console.log("User has started interacting with me.");
   lastInput = "";
-  return Promise.resolve(
-    currentTheme ?
-    currentTheme : browser.theme.getCurrent()
-  )
-  .then(createOmniboxActivationTheme)
-  .then((params) => {
-    currentTheme = browser.theme.getCurrent();
-    return params;
-  })
-  .then(setOmniboxTheme)
-  .catch(printFailure);
+  return;
+
+  // return Promise.resolve(
+  //   currentTheme ?
+  //   currentTheme : browser.theme.getCurrent()
+  // )
+  // .then(createOmniboxActivationTheme)
+  // .then((params) => {
+  //   currentTheme = browser.theme.getCurrent();
+  //   return params;
+  // })
+  // .then(setOmniboxTheme)
+  // .catch(printFailure);
 };
+
+export const buildAST = (_input) => {
+  // return _input; // until function is implemented
+
+  // supports | and >
+  // where | is normal pipe operation in unix
+  // where > is unix-like output into a target
+  return Promise.resolve(_input)
+    // ex1: find promise all
+    // ex2: find superstonk | gather > new window
+    .then((_input) => _input.trim().split("|"))
+    .then((parts) => {
+      // break into parts (tokenize), simple linear tokenizer
+      return parts.map((part) => {
+        return part.trim()
+          .split(" ")
+          .map((token) => {
+            return token.trim()
+              // .split(":")
+              // .map((_token) => _token.trim())
+          });
+      });
+    })
+    // result 2 is like
+    // [["find", "sq"], "|", ["gather"], ">", ["new", "window"]]
+    .then((parts) => {
+      // add info about tokens (lex)
+      return parts.map((section) => {
+        if (section.length > 0) {// && section[0].length > 0) {
+          return {
+            command: section[0],
+            args: section.slice(1)
+          };
+        } else {
+          return {
+            command: null,
+            args: section
+          };
+        }
+      });
+    })
+    .then((parts) => {
+      // build AST
+      let tree = [];
+      let node = {};
+      for (let part of parts) {
+        console.log("--", part, parts);
+        if (!part.command) { //(part === "|" || part === ">") {
+          node.op = part;
+        } else if (!node.left) {
+          node.left = part;
+        } else if (!node.right) {
+          node.right = part;
+        }
+
+        // hack for left-only case
+        if (node.left) {
+          tree.push(node);
+          node = {};
+        }
+      }
+      return tree;
+    })
+    .then((tree) => {
+      // clean up AST based on grammar rules
+      // 1. do commands pipe together
+      // 2. does each node have a left and right
+      // 3. are we discovering
+      // console.log("TREE", tree);
+      return tree;
+    })
+    .then((tree) => {
+      // eval AST and transform into actions
+      return Promise.all(tree.map(async (node) => {
+        return [
+          await findNeighborCommands(node.left.command),
+          node.left.args
+        ]
+      }));
+    })
+    // .then(printStatus)
+    // .then((tree) => {
+    //   // return processed action result
+    // })
+    .catch(printFailure);
+}
 
 const omniboxOnInputChanged = async (text, addSuggestions) => {
   lastInput = text;
-  return Promise.resolve(lastInput)
-    .then(findNeighborCommands)//, Promise.resolve(prevSuggestions))
-    .then((neighbors) => {
-      // return neighbors.filter((cmd) => cmd.suggestions !== undefined);
-      return Object.entries(cmds).filter((cmd) => {
-        return neighbors.includes(cmd[0].replace('_', ' '))
-      });
-    })
-    .then((neighbors) => {
-      console.log("neighbors for", lastInput, text, neighbors);
-      prevSuggestions = neighbors.map((x) => x[1]);
-      return prevSuggestions;
-    })
-    .then((suggestions) => {
-      if (suggestions.length == 1) {
-        let content = suggestions[0].content;
-        let args = lastInput.split(content).slice(1);
-        console.log("nested suggestions:", suggestions, content, args);
-        return suggestions[0].suggestions(args);
-      }
-      return suggestions
-    })
-    .then(printStatus)
-    .then(addSuggestions)
-    .catch(printFailure)
+  try {
+    return Promise.resolve(lastInput)
+      .then(buildAST)
+      .then(printStatus)
+      .then((neighbor_pairs) => {
+        if (neighbor_pairs.length === 1 && neighbor_pairs[0].length === 1) {
+          let cmd = neighbor_pairs[0][0]; // [0]:cmd index
+          console.log("nested neighbor_pairs:", cmd);
+          if (cmd.suggestions) {
+            return cmd.suggestions(cmd.args); // FIXME args
+          } else {
+            return cmd;
+          }
+        }
+        return neighbor_pairs;
+      })
+      // .then((neighbors) => {
+        // console.log("neighbors for", lastInput, text, neighbors);
+        // prevSuggestions = neighbors; //.map((x) => x[1]);
+        // return prevSuggestions;
+      // })
+      .then(addSuggestions)
+      .catch(printFailure);
+  }
+  catch (err) {
+    console.log(err);
+    return Promise.reject(err);
+  }
 };
 
 const omniboxOnInputEntered = (url, disposition) => {
   console.log("INPUT SUBMITTED", lastInput, url, cmds[url]);
 
-  Promise.resolve(currentTheme).then(setOmniboxTheme).catch(printFailure);
-
+  // Promise.resolve(currentTheme).then(setOmniboxTheme).catch(printFailure);
   return Promise.resolve(url)
     .then((cmd_key) => {
+      // let args = lastInput.replace(' ', '_').split(cmd_key).slice(1).replace('_', ' ');
+      console.log("[ENTERED]", cmd_key, lastInput);
       let args = lastInput.split(cmd_key).slice(1);
       let cmd = cmds[cmd_key];
-      console.log("[ENTERED]", cmd_key, args, cmd);
+      // console.log("[ENTERED]", cmd_key, args, cmd);
       return [cmd, args, cmd.action(args)];
     })
     .then(printSuccess)
@@ -210,8 +308,9 @@ const omniboxOnInputEntered = (url, disposition) => {
 };
 
 const omniboxOnInputCancelled = () => {
-  Promise.resolve(currentTheme).then(setOmniboxTheme).catch(printFailure);
+  // Promise.resolve(currentTheme).then(setOmniboxTheme).catch(printFailure);
 }
+
 
 try {
   console.log('background.js mounted');
@@ -223,14 +322,25 @@ try {
     // tabId: tabId
   });
 
-  browser.omnibox.setDefaultSuggestion({
-    description: "this is a limited eLOS preview; v0.0.6-prealpha"
-  });
+  // browser.omnibox.setDefaultSuggestion({
+  //   description: "this is a limited eLOS preview; v0.0.6-prealpha"
+  // });
 
   browser.omnibox.onInputStarted.addListener(omniboxOnInputStarted);
   browser.omnibox.onInputChanged.addListener(omniboxOnInputChanged);
   browser.omnibox.onInputEntered.addListener(omniboxOnInputEntered);
   browser.omnibox.onInputCancelled.addListener(omniboxOnInputCancelled);
+
+
+  browser.runtime.onInstalled.addListener(() => {
+    currentTheme = browser.theme.getCurrent();
+    return Promise.resolve(details)
+      .then(printSuccess)
+      .catch(printFailure);
+  });
+
+  // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
+
 } catch (e) {
   console.log("Caught background.js init error", e);
 };
