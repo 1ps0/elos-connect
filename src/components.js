@@ -31,7 +31,10 @@ import TemplatePanel from "./TemplatePanel.svelte";
 import PkgIndex from "./PkgIndex.svelte";
 import PkgCreate from "./PkgCreate.svelte";
 
+import Dashboard from "./Dashboard.svelte";
+
 export const components = {
+    "dashboard": Dashboard,
     "options": Options,
     "toolbar": Toolbar,
     "commandbar": CommandBar,

@@ -42,9 +42,20 @@ export const panelTypes = {
     componentName: "selectlist",
     event: { name: 'menuToggle', callback: "togglePanel" },
     props: {
+      showIn: "sidebar",
       eventName: "menuToggle",
       items: menuItems,
       transform: (e) => { return e.value.icon }
+    }
+  },
+  "panel-dashboard": {
+    target: "panel-dashboard",
+    name: "dashboard",
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
+    h: 5,
+    componentName: "dashboard",
+    props: {
+      showIn: "tab"
     }
   },
   "panel-actionmenu": {
