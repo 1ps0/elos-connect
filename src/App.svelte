@@ -132,18 +132,29 @@ function _togglePanel(itemName) {
 onMount(async () => {
   console.log('App mounted');
 
-  add("panel-mainmenu");
-  add("panel-timer");
-  add("panel-actionmenu");
-  add("panel-web-players");
-  // add("panel-location-ops");
-  // add("panel-locations");
-  // add("panel-commandbar");
+  let panels = Promise.resolve([]);
+  [
+    // "panel-timer",
+    // "panel-locations",
+    // "panel-commandbar",
+    "panel-location-ops",
+    "panel-web-players",
+    "panel-actionmenu",
+    "panel-dashboard",
+    "panel-mainmenu",
+  ].forEach((name) => {
+    panels = panels.then((prev) => {
+      console.log("[PANEL][ADD]", name, '--', prev);
+      return add(name)
+    });
+  });
+  let result = await panels.catch(printFailure);
+  console.log("FINISHED PANEL ADD", result);
+
 
 
 });
 
-//bind:items={items}
 </script>
 
 <main>
