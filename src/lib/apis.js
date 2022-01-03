@@ -24,15 +24,14 @@ export const _fetch = async (params) => {
   let baseUrl = get(stores.config).baseUrl;
   return Promise.resolve(new URL(params.uri, baseUrl))
     .then((url) => {
-      for (let arg in params) {
-        url.searchParams.append(arg, params[arg]);
+      for (let arg in params.args) {
+        url.searchParams.append(arg, params.args[arg]);
       }
       return url;
     })
     .then(fetch)
-    .then(printStatus)
     .then(handleResponse)
-    // .catch(printFailure);
+    .catch(print.failure);
 };
 
 export const _send = async (params) => {
@@ -51,7 +50,7 @@ export const _send = async (params) => {
     })
     .then(fetch)
     .then(handleResponse)
-    // .catch(printFailure);
+    .catch(print.failure);
 }
 
 // ------- Send composites
@@ -61,34 +60,36 @@ export const sendTag = async (params) => {
   return Promise.resolve(params && params.tagName ? params.tagName : '#tag_name')
     .then((name) => document.querySelector(name))
     // FIXME extract css styling into module that can be integrated
-    .then((button) => {
-      button.style.borderColor = "blue";
-      return button;
-    })
+    // .then((button) => {
+    //   button.style.borderColor = "blue";
+    //   return button;
+    // })
     .then((button) => button.value)
     .then((tagName) => {
       return {
         uri: "api/analysis/tag",
-        name: tagName
+        args: {
+          name: tagName
+        }
       }
     })
     .then(_send)
-    .then((button) => {
-      button.style.borderColor = "green";
-      return button;
-    })
-    .catch(printFailure)
-    .then((button) => {
-      button.style.borderColor = "red";
-      return button;
-    });
+    // .then((button) => {
+    //   button.style.borderColor = "green";
+    //   return button;
+    // })
+    .catch(print.failure)
+    // .then((button) => {
+    //   button.style.borderColor = "red";
+    //   return button;
+    // });
 }
 
 export const sendLink = async (tagName) => {
-  browser.tabs.query({
+  return browser.tabs.query({
     currentWindow: true, active: true
   })
-  .then((params) => {
+  .then((tabs) => {
     return {
       uri: "api/location/add",
       body: {
@@ -100,7 +101,7 @@ export const sendLink = async (tagName) => {
   })
   .then(_send)
   .then(createNotifySuccess)
-  .catch(printFailure)
+  .catch(print.failure)
 }
 
 export const sendSidebar = async (params) => {
@@ -110,7 +111,7 @@ export const sendSidebar = async (params) => {
     .then((panel) => {
       // browser.sidbarAction.open()
     })
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 export const getContexts = (results) => {
@@ -134,7 +135,7 @@ export const findInTab = (query, tabId) => {
       includeRangeData: true,
       // includeRectData: true
     }) // TODO set timeout to filter slow promises. currently none
-    // .then(printStatus)
+    // .then(print.status)
     .catch((err) => console.log("Err:", tabId, query, err))
     .finally((result) => {
       return {
@@ -156,18 +157,18 @@ export const findInAll = async (params) => {
     .then((_params) => {
       return _params.filter((result) => (result && result.count > 0));
     })
-    // .then(printStatus)
+    // .then(print.status)
     .then(getContexts)
     .then((results) => {
       return results.map(async (result) => {
         return {
           content: ` -- ${params}`, //${result.text.slice(0,10)}
-          description: await result.then(printSuccess).catch(printFailure),
+          description: await result.then(print.success).catch(print.failure),
         }
       });
     })
-    // .then(printSuccess)
-    // .catch(printFailure);
+    // .then(print.success)
+    // .catch(print.failure);
 }
 
 // ---------- Load composites
@@ -175,9 +176,8 @@ export const findInAll = async (params) => {
 export const loadTags = async () => {
   return Promise.resolve({ uri:'api/analysis/tag'})
     .then(_fetch)
-    // .then(printStatus)
     .then((results) => results.names.map((tag) => tag[1]))
-    .catch(printFailure);
+    .catch(print.failure);
 };
 
 export const loadSites = async () => {
@@ -197,7 +197,7 @@ export const loadSites = async () => {
         sites: sites,
       }
     })
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 export const loadSessions = async () => {
@@ -207,13 +207,13 @@ export const loadSessions = async () => {
 
       }))
     })
-    .then(printSuccess)
-    .catch(printFailure);
+    .then(print.success)
+    .catch(print.failure);
 }
 
 export const loadVisits = async (params) => {
   return browser.history.getVisits(params)
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 export const loadHistory = async (params) => {
@@ -233,7 +233,7 @@ export const loadHistory = async (params) => {
         typedCount: item.typedCount // navigated to this page by typing in the address.
       }));
     })
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 export const loadCommands = async (params) => {
@@ -245,7 +245,7 @@ export const loadCommands = async (params) => {
         shortcut: cmd.shortcut
       }))
     })
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 // ---------- Actions
@@ -268,7 +268,7 @@ export const restoreSession = async (_sessions) => {
       })
       return sessions;
     })
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 // -- messaging
@@ -298,12 +298,12 @@ export const createRuntimeConnection = async (params) => {
 
 // export const sendRuntimeMessage = async (params) => {
 //   return browser.runtime.sendMessage(params)
-//     .catch(printFailure);
+//     .catch(print.failure);
 // };
 
 export const sendTabMessage = async (params) => {
   return browser.tabs.sendMessage(params.tabId)
-    .catch(printFailure);
+    .catch(print.failure);
 };
 
 export const sendMessageToTabs = async (tabs) => {
@@ -314,7 +314,7 @@ export const sendMessageToTabs = async (tabs) => {
     ).then(response => {
       console.log("Message from the content script:");
       console.log(response.response);
-    }).catch(printFailure);
+    }).catch(print.failure);
   }));
 };
 
@@ -366,7 +366,7 @@ export const window_create = () => {
     incognito: true,
   }).then(() => {
     console.log("The detached panel has been created");
-  }).catch(printFailure);
+  }).catch(print.failure);
 }
 
 // "window-remove"
@@ -397,7 +397,7 @@ export const window_stash = () => {
   .then(() => {
     browser.windows.remove(windows.WINDOW_ID_CURRENT);
   })
-  .catch(printFailure);
+  .catch(print.failure);
 }
 
 // "window-resize-all"
@@ -409,14 +409,14 @@ export const window_resize_all = () => {
         height: 768
       });
     }
-  }).catch(printFailure);
+  }).catch(print.failure);
 }
 
 // "window-preface-title"
 export const window_preface_title = () => {
   browser.windows.update(browser.windows.WINDOW_ID_CURRENT, {
     titlePreface: "Preface | "
-  }).catch(printFailure);
+  }).catch(print.failure);
 };
 
 
@@ -444,7 +444,7 @@ export const getAllTabs = async () => {
     .then((tabs) => {
       return tabs.filter((tab) => tab != tabs.TAB_ID_NONE);
     })
-    // .catch(printFailure)
+    // .catch(print.failure)
 }
 
 export const getCurrentActiveTab = async () => {
@@ -452,7 +452,7 @@ export const getCurrentActiveTab = async () => {
     active: true,
     windowId: browser.windows.WINDOW_ID_CURRENT
   })
-  // .catch(printFailure);
+  // .catch(print.failure);
 };
 
 export const hasTabId = (data) => {
@@ -471,15 +471,14 @@ export const setTabActive = (data) => {
   else { return Promise.reject("Failed to update tab", data); }
 };
 
-
-export const sendPlayPause = (e) => {
-  // TODO if e is type element, else if object
-  console.log("sending playpause", e);
-  return Promise.resolve(e)
-    .then((data) => browser.tabs.sendMessage(data.tabId, "playPause"))
+export const sendToContent = (params) => {
+  console.log("[BG][->][CONTENT]", params.tabId, params.message);
+  return Promise.resolve(params)
+    .then((data) => browser.tabs.sendMessage(data.tabId, data.message))
     .then(createNotifySuccess)
-    .catch(printFailure);
-};
+    .catch(print.failure);
+}
+
 
 export const updateClipboard = (newClip) => {
   return navigator.clipboard.writeText(newClip)
@@ -499,7 +498,7 @@ export const getHighlightedTabs = (newClip) => {
       tabId: tab.id,
       windowId: tab.windowId,
     })))
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 export const doSelectedCopy = async (e) => {
@@ -510,7 +509,7 @@ export const doSelectedCopy = async (e) => {
     })
     .then(updateClipboard)
     .then(createNotifySuccess)
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 export const doDownloadVideo = (params) => {
@@ -523,18 +522,18 @@ export const doDownloadVideo = (params) => {
     }))
     .then(_send)
     .then(createNotifySuccess)
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 export const bringToFront = (e) => {
   return Promise.resolve(e)
     // .then(tabIdFromdata)
-    // .then(hasTabId, printFailure)
+    // .then(hasTabId, print.failure)
     .then(setTabActive)
-    // .then(hasWindowId, printFailure)
+    // .then(hasWindowId, print.failure)
     .then(setWindowActive)
-    .then(printSuccess)
-    .catch(printFailure);
+    .then(print.success)
+    .catch(print.failure);
 }
 
 export const getCurrentHighlightedTabs = async () => {
@@ -569,6 +568,25 @@ export const getBrowserInfo = async () => {
   });
 };
 
+// --- browser impl
+
+/*global getAccessToken*/
+
+const setupAuth = () => {
+  /**
+  When the button's clicked:
+  - get an access token using the identity API
+  - use it to get the user's info
+  - show a notification containing some of it
+  getAccessToken()
+      .then(getUserInfo)
+      .then(createNotify)
+      .catch(print.failure);
+  */
+  browser.identity.getRedirectURL();
+}
+
+
 
 // -- render functions
 
@@ -591,12 +609,12 @@ export const reduceDocumentText = () => {
   )
   .then(walkNodes)
 
-  .then(printSuccess)
-  .catch(printFailure)
+  .then(print.success)
+  .catch(print.failure)
 }
 
 export const reduceAudibleTabs = (tabs) => {
-  console.log("rendering audible:", tabs);
+  // console.log("rendering audible:", tabs);
   return tabs.map((tab) => {
     return {
       name: tab.id,
@@ -611,6 +629,24 @@ export const reduceAudibleTabs = (tabs) => {
   });
 };
 
+// -- content processing
+
+export const reducePage = async (params) => {
+
+};
+
+export const sendPage = async (params) => {
+  return Promise.resolve(params.data)
+    .then((tab) => {
+      if (tab.isInReaderMode) {}
+      else {
+        browser.tabs.toggleReaderMode();
+      }
+      return data;
+    })
+    .catch(print.failure);
+};
+
 // -- feedback via print or notify
 
 export const createNotify = async (params) => {
@@ -619,7 +655,7 @@ export const createNotify = async (params) => {
     title: params.title,
     message: params.message,
     // buttons: params.buttons || []
-  });
+  }).catch(print.failure);
 };
 
 
@@ -627,7 +663,7 @@ export const createNotifySuccess = async (params) => {
   console.log("[SUCCESS][NOTIFIED]", params);
   return createNotify({
     title: "Success!",
-    message: "!"+params
+    message: `For ${params.title}`
   })
 }
 
@@ -635,9 +671,21 @@ export const createNotifyFailure = async (params) => {
   console.log("[FAILURE][NOTIFIED]", params);
   return createNotify({
     title: "Error",
-    message: ":"+params
+    message: `For ${params.title}`
   })
 }
+
+export const print = new Proxy(() => {}, {
+  // TODO return as universal print object,
+  // like, `print.failure`, `print.success`,
+  // `print.per_is_article`, `print.hi_mom`
+  get(target, name) {
+    return (args) => {
+      console.log(`[PRINT][${name.toUpperCase()}]`, args);
+      return args;
+    }
+  }
+});
 
 export const printStatus = (params) => {
   console.log("[LOG][STATUS]", params);

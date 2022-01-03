@@ -6,8 +6,8 @@ import { writable, get } from 'svelte/store';
 import {
   bringToFront,
   reduceAudibleTabs,
-  printFailure,
-  sendPlayPause
+  sendToContent,
+  print
 } from "./lib/apis.js";
 import ItemList from "./ItemList.svelte";
 
@@ -50,17 +50,18 @@ const updatePlaying = () => {
         )
       );
     })
-  }).catch(printFailure);
+  }).catch(print.failure);
 };
 
 const handlePlayerUpdate = (request, sender, sendResponse) => {
   console.log("Message: ", request, sender);
-  updatePlaying().then((params) => {
-    sendResponse({
+  updatePlaying()
+    .then((params) => ({
       params: params,
       response: "Response from WebPlayers"
-    });
-  }).catch(printFailure);
+    }))
+    .then(sendResponse)
+    .catch(print.failure);
 };
 
 /*
@@ -73,6 +74,21 @@ ADD FUNCTION BUTTONS:
 2. bring to front
 3. download
 */
+
+export const sendToggleLoop = (e) => {
+  return Promise.resolve(e)
+    .then((data) => ({ tabId: data.tabId, message:'toggleLoop' }))
+    .then(sendToContent)
+    .catch(print.failure);
+}
+
+export const sendPlayPause = (e) => {
+  return Promise.resolve(e)
+    .then((data) => ({ tabId: data.tabId, message:'playPause' }))
+    .then(sendToContent)
+    .catch(print.failure);
+};
+
 
 const buttonProps = [
   {
@@ -88,6 +104,15 @@ const buttonProps = [
       return obj.playing ? '⏸' : '▶️';
     },
     action: sendPlayPause
+  },
+  {
+    name: 'toggleLoop',
+    description: '',
+    icon: (obj) => {
+      console.log("LOGGING TOGGLELOOP", obj);
+      return obj.loop ? '✅🔁' : '❌🔁';
+    },
+    action: sendToggleLoop
   }
 ];
 

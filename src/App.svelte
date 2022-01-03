@@ -21,7 +21,7 @@ import { components } from "./components.js";
 import { panelTypes, layoutConfig } from "./config/panels.js";
 console.log("PANEL TYPES", panelTypes);
 
-import { updateFiletype, openFile } from "./lib/apis.js";
+import { updateFiletype, openFile, print } from "./lib/apis.js";
 import { stores } from "./lib/stores.js"
 
 import LayoutGrid from "./LayoutGrid.svelte";
@@ -148,12 +148,12 @@ onMount(async () => {
       return add(name)
     });
   });
-  let result = await panels.catch(printFailure);
+  let result = await panels.catch(print.failure_panels);
   console.log("FINISHED PANEL ADD", result);
-
-
-
+  return result;
 });
+// .then((result) => printSuccess(result))
+// .catch(print.failure);
 
 </script>
 

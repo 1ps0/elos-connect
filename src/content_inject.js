@@ -44,12 +44,14 @@ trackInfo: { image, track, artist, progress, favorited }
 ```
 */
 
+import { Readability } from '@mozilla/readability';
+
 import {
   createNotify,
   addPort, getPorts, //removePort,
   _fetch,
-  printFailure,
-  printSuccess
+  printSuccess,
+  print
 } from "./lib/apis.js";
 
 // ----- Util
@@ -73,25 +75,42 @@ const stopElementTracking = () => {};
 // ----- Media Control
 
 const getPlayable = () => {
-  return Promise.resolve(['video', 'audio'].reduce((_out, _type) => {
-    return [
-      ..._out,
-      ...Array.from(
-        document.querySelectorAll(_type))
-          .filter((el) => isElementVisible(el))
-    ];
-  }, []));
+  try {
+    return Promise.resolve(['video', 'audio'].reduce((_out, _type) => {
+      return [
+        ..._out,
+        ...Array.from(
+          document.querySelectorAll(_type))
+            .filter((el) => isElementVisible(el))
+      ];
+    }, []));
+  } catch (err) {
+    print.failure_get_playable(err);
+    return Promise.reject(err);
+  }
 };
+
+const toggleLoop = () => {
+  return getPlayable()
+    .then((playing) => {
+      playing.forEach((item) => {
+        item.loop = !item.loop;
+      });
+      return playing;
+    })
+    .catch(print.failure_toggle_loop);
+}
 
 const playPause = () => {
   return getPlayable().then((playing) => {
-    console.log("Playing and Pausing", playing);
-    playing.forEach((item) => {
-      if (item.paused) { item.play(); }
-      else   { item.pause(); }
-    });
-    return playing;
-  }).catch(printFailure);
+      console.log("Playing and Pausing", playing);
+      playing.forEach((item) => {
+        if (item.paused) { item.play(); }
+        else   { item.pause(); }
+      });
+      return playing;
+    })
+    .catch(print.failure_play_pause);
 };
 
 const getPlayingInfo = (playing) => {
@@ -116,6 +135,8 @@ const renderPlayingStatus = (playing) => {
         return {
           ...obj,
           hasPlayable: true,
+          playing: !obj.paused,
+          loop: obj.loop,
         }
       }),
       url: window.location.href
@@ -161,71 +182,32 @@ function getContexts(ranges) {
   return contexts;
 }
 
-// ----- Init
+function handleMessage(request, sender, sendResponse) {
+  console.log("[CONTENT] Message from the page script:", request, sender, sendResponse);
+  if (request === 'playPause') {
+    return playPause()
+      .then(getPlayingInfo)
+      .then(renderPlayingStatus)
+      .then(sendResponse)
+      .catch(print.failure_handle_message_playpause);
 
-// unused
-const initFinderResults = () => {
-  let backgroundPage = browser.extension.getBackgroundPage();
-  document.getElementById("find-form").addEventListener("submit", function(e) {
-    // Send the query from the form to the background page.
-    backgroundPage.find(document.getElementById("find-input").value);
-    e.preventDefault();
-  });
-
-  let results = document.getElementById("result-list");
-
-  function handleMessage(request, sender, response) {
-    // Handle responses coming back from the background page.
-    if (request.msg === "clear-results") {
-      results.innerHTML = "";
-    }
-    if (request.msg === "found-result") {
-      // List out responses from the background page as they come in.
-      let li = document.createElement("li");
-      li.innerText = `Tab id: ${request.id} at url: ${request.url} had ${request.count} hits.`;
-      results.appendChild(li);
-    }
+  } else if (request === 'find') {
+    return Promise.resolve(message.ranges)
+      .then(getContexts)
+      .then(sendResponse)
+      .catch(print.failure_handle_message_find);
+  } else if (request === 'toggleLoop') {
+    return toggleLoop()
+      .then(getPlayingInfo)
+      .then(renderPlayingStatus)
+      .then(sendResponse)
+      .catch(print.failure_handle_message_toggleloop);
   }
-
-  browser.runtime.onMessage.addListener(handleMessage);
 }
-
-const initPlayer = () => {
-  console.log("[CONTENT] Init Player");
-
-  function handleMessage(request, sender, sendResponse) {
-    console.log("Message from the page script:", request, sender, sendResponse);
-    if (request === 'playPause') {
-      return playPause()
-        .then(getPlayingInfo)
-        .then(renderPlayingStatus)
-        .then(sendResponse)
-        .catch(printFailure);
-    }
-  }
-
-  browser.runtime.onMessage.addListener(handleMessage);
-}
-
-const initFinder = () => {
-  console.log("[CONTENT] Init Finder");
-
-  browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("[CONTENT] got message:", message);
-    sendResponse(getContexts(message.ranges));
-  });
-}
-
 
 try {
   console.log('content_inject.js mounted');
-
-  // browser.runtime.onConnect.addListener(addPort);
-
-  initPlayer();
-
-  initFinder();
-
+  browser.runtime.onMessage.addListener(handleMessage);
   console.log("content_inject.js finished mounting")
 } catch (e) {
   console.log("Caught content_inject.js init error", e);

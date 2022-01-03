@@ -14,40 +14,41 @@ then writable calls readable's values for those datasets
 import { writable, get } from 'svelte/store';
 import { workspaceConfig } from "../config/parameters.js";
 
-export const cacheFor = (name, otherwise={}) => {
+export const storageFor = (name, otherwise={}) => {
   let ret = localStorage.getItem(`${name}_cache`);
   return ret ? JSON.parse(ret) : otherwise;
 };
 
 export const configWritable = writable(workspaceConfig);
 
-export const historyWritable = writable(cacheFor("history", []));
+export const historyWritable = writable(storageFor("history", []));
 
-export const trackedWritable = writable(cacheFor("tracked", {}));
+export const trackedWritable = writable(storageFor("tracked", {}));
 
-export const logWritable = writable(cacheFor("log", {}));
+export const logWritable = writable(storageFor("log", {}));
 
-export const filesWritable = writable(cacheFor("files"));
-export const layoutItemsWritable = writable(cacheFor("layoutItems", { items: [], add: [] }));
+export const filesWritable = writable(storageFor("files"));
+export const layoutItemsWritable = writable(storageFor("layoutItems", { items: [], add: [] }));
 
-export const profileWritable = writable(cacheFor("profile"));
-export const todoWritable = writable(cacheFor("todo", []));
-export const pollsWritable = writable(cacheFor("polls", []));
+export const contentWritable = writable(storageFor("content"));
+export const profileWritable = writable(storageFor("profile"));
+export const todoWritable = writable(storageFor("todo", []));
+export const pollsWritable = writable(storageFor("polls", []));
 
 export const registeredActions = writable({});
 
 export const commandOptionsWritable = writable({
-  polls: () => cacheFor("polls"),
-  todo: () => cacheFor("todo"),
-  workspace: () => cacheFor("workspace"),
-  history: () => cacheFor("history"),
-  tracked: () => cacheFor("tracked"),
-  log: () => cacheFor("log"),
-  layoutItems: () => cacheFor("layoutItems"),
-  profile: () => cacheFor("profile"),
+  polls: () => storageFor("polls"),
+  todo: () => storageFor("todo"),
+  workspace: () => storageFor("workspace"),
+  history: () => storageFor("history"),
+  tracked: () => storageFor("tracked"),
+  log: () => storageFor("log"),
+  layoutItems: () => storageFor("layoutItems"),
+  profile: () => storageFor("profile"),
   actions: () => registeredActions,
   links: () => writable({}),
-  files: () => cacheFor("files", {
+  files: () => storageFor("files", {
     files: [],
     filetype: "md",
     keywords: "",
@@ -64,6 +65,7 @@ export const stores = {
   history: historyWritable,
   tracked: trackedWritable,
   log: logWritable,
+  content: contentWritable,
   layoutItems: layoutItemsWritable,
   // config data
   config: configWritable,

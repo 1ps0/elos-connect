@@ -13,22 +13,67 @@ import { profileEdit } from "./lib/profileEdit.js";
 
 const dashboardContext = getContext("dashboard");
 
-const updateCommand = async (params) => {
-  return browser.commands.update(params.name, )
-}
-
 const resetCommand = async (params) => {
   return browser.commands.reset(params.name)
     .catch(printFailure);
 };
 
-const updateOnCommand = async (params) => {
-
+const updateCommand = async (params) => {
+  console.log("update shortcut params", params);
+  browser.commands.update({
+    name: params.name,
+    shortcut: params.parent.input.value
+  })
+  .then(createNotifySuccess)
+  .catch(printFailure);
 };
+
+const bucketHistory = async (results) => {
+  // TODO turn this into a dict/bucket set
+  // with key:uri-domain, values:[history-obj]
+  return results;
+}
+
+const isAudible = async (params) => {
+  // TODO return if the given tab counts as audible
+  // different strategies like tab state and url domain or sendMessage
+  return true;
+}
+
+const browserStats = async (params) => {
+
+  // count of videos
+  // percentage isArticle
+  // count of isReaderMode
+  //
+  return Promise.resolve({})
+      .then(browser.tabs.query)
+      .then((tabs) => {
+        return tabs.map((tab) => {
+          return {
+            tabId: tab.id,
+            url: tab.url,
+            title: tab.title,
+            windowId: tab.windowId,
+            isArticle: tab.isArticle,
+          }
+        })
+      })
+      .then((data) => {
+        return {
+          count_videos: data.filter((tab) => isAudible(tab)).length,
+          count_article: data.filter((tab) => tab.isArticle).length,
+          per_is_article: data.filter((tab) => tab.isArticle).length / data.length,
+        }
+      })
+      .catch(printFailure);
+
+}
+
 
 onMount(async () => {
   console.log('Dashboard mounted');
-  browser.commands.onCommand.addListener(updateOnCommand);
+  // browser.commands.onCommand.addListener(updateCommand);
 });
 
 </script>
@@ -42,6 +87,15 @@ onMount(async () => {
   <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
 
   <p>
+
+    <h3>List of Commands</h3>
+      <div id="item-list">
+        {#each Object.keys(cmds) as cmd}
+        <p><a on:click|preventDefault={cmds[cmd].action}>{cmd}</a> : {cmds[cmd].description}</p>
+        {/each}
+      </div>
+    <br>
+
     <h3>Set Remote host</h3>
     <br>
     <h3>Keyboard shortcut</h3>
@@ -74,9 +128,9 @@ onMount(async () => {
     <br>
 
     <h3>History Top Sites</h3>
-      {#await loadSites() then data}
+      {#await bucketHistory(loadSites()) then data}
         <div id="item-list">
-          {#each data.sites as site}
+          {#each data.sites as site (site.title)}
             <p><a href="{site.url}">{site.title}</a></p>
           {/each}
         </div>
@@ -86,9 +140,9 @@ onMount(async () => {
     <br>
 
     <h3>Browsing History breakdown</h3>
-      {#await loadHistory() then history}
+      {#await bucketHistory(loadHistory()) then history}
         <div id="item-list">
-          {#each history as item}
+          {#each history as item (item.title)}
             <p><a href="{item.url}">{item.title}</a></p>
           {/each}
         </div>
@@ -104,14 +158,6 @@ onMount(async () => {
     <h3>View Data Stores</h3>
     <br>
     <h3>Explore Store</h3>
-    <br>
-
-    <h3>List of Commands</h3>
-      <div id="item-list">
-        {#each Object.keys(cmds) as cmd}
-        <p>{cmd} -- {cmds[cmd].description}</p>
-        {/each}
-      </div>
     <br>
 
     <h3></h3>

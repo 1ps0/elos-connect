@@ -13,7 +13,7 @@ TODO -
 import { createEventDispatcher, onMount } from 'svelte';
 import { writable, get } from 'svelte/store';
 import { linker } from "./lib/linker.js";
-import { _fetch } from "./lib/apis.js";
+import { _fetch, print } from "./lib/apis.js";
 
 const dispatch = createEventDispatcher();
 
@@ -126,7 +126,7 @@ onMount(async () => {
             {#each buttons as prop (prop.name)}
               <div
                 class="item-button"
-                on:click|preventDefault={(e) => Promise.resolve(_item).then(prop.action).catch(printFailure)}
+                on:click|preventDefault={(e) => Promise.resolve(_item).then(prop.action).catch(print.failure)}
               >
                 {prop.icon(_item)}
               </div>

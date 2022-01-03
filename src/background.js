@@ -6,9 +6,7 @@ import { stores } from "./lib/stores.js";
 import {
   _fetch,
   createNotifyFailure,
-  printFailure,
-  printSuccess,
-  printStatus
+  print
 } from "./lib/apis.js";
 
 console.log("LOADING ELOS CONNECT - background.js");
@@ -24,26 +22,10 @@ $: {
       // buttons: ['retry', 'close']
     })
     .then(createNotifyFailure)
-    .catch(printFailure);
+    .catch(print.failure);
   }
 };
 
-
-/*global getAccessToken*/
-
-const setupAuth = () => {
-  /**
-  When the button's clicked:
-  - get an access token using the identity API
-  - use it to get the user's info
-  - show a notification containing some of it
-  getAccessToken()
-      .then(getUserInfo)
-      .then(createNotify)
-      .catch(printFailure);
-  */
-  browser.identity.getRedirectURL();
-}
 
 // ------ HANDLERS
 
@@ -119,8 +101,8 @@ export const updateTab = (tabId, changeInfo, tab) => {
         playing: tab.audible,
         changed: changeInfo
       }
-  ).then(printSuccess)
-  .catch(printFailure);
+  ).then(print.success)
+  .catch(print.failure);
 }
 
 // ------ COMMAND SEARCH
@@ -128,7 +110,7 @@ export const updateTab = (tabId, changeInfo, tab) => {
 let lastInput = ""; // hack cache to move the whole input to the actuation
 let prevSuggestions = [];
 
-const findNeighborCommands =  async (node) => {
+const findNeighborCommands = (node) => {
   // https://stackoverflow.com/questions/57026895/get-unique-values-from-array-of-arrays
   let cmd_prefix = lastInput.split(' ');
   try {
@@ -146,30 +128,12 @@ const findNeighborCommands =  async (node) => {
       // return the command name for a given bag of keywords
       return Object.values(cmds).filter((cmd) => cmd.content.includes(keys.join('_')));
     })
-    .catch(printFailure);
+    .catch(print.failure);
   }
   catch (err) {
     console.log(err);
     return Promise.reject(err);
   }
-};
-
-const omniboxOnInputStarted = async () => {
-  console.log("User has started interacting with me.");
-  lastInput = "";
-  return;
-
-  // return Promise.resolve(
-  //   currentTheme ?
-  //   currentTheme : browser.theme.getCurrent()
-  // )
-  // .then(createOmniboxActivationTheme)
-  // .then((params) => {
-  //   currentTheme = browser.theme.getCurrent();
-  //   return params;
-  // })
-  // .then(setOmniboxTheme)
-  // .catch(printFailure);
 };
 
 export const buildAST = (_input) => {
@@ -217,7 +181,7 @@ export const buildAST = (_input) => {
       let tree = [];
       let node = {};
       for (let part of parts) {
-        console.log("--", part, parts);
+        // console.log("--", part, parts);
         if (!part.command) { //(part === "|" || part === ">") {
           node.op = part;
         } else if (!node.left) {
@@ -242,20 +206,14 @@ export const buildAST = (_input) => {
       // console.log("TREE", tree);
       return tree;
     })
-    .then((tree) => {
+    .then(async (_tree) => {
       // eval AST and transform into actions
-      return Promise.all(tree.map(async (node) => {
-        return [
-          await findNeighborCommands(node.left.command),
-          node.left.args
-        ]
-      }));
+      return {
+        tree: await findNeighborCommands(_tree[0].left.command),
+        args: _tree[0].left.args
+      }
     })
-    // .then(printStatus)
-    // .then((tree) => {
-    //   // return processed action result
-    // })
-    .catch(printFailure);
+    .catch(print.failure);
 }
 
 const omniboxOnInputChanged = async (text, addSuggestions) => {
@@ -263,26 +221,27 @@ const omniboxOnInputChanged = async (text, addSuggestions) => {
   try {
     return Promise.resolve(lastInput)
       .then(buildAST)
-      .then(printStatus)
-      .then((neighbor_pairs) => {
-        if (neighbor_pairs.length === 1 && neighbor_pairs[0].length === 1) {
-          let cmd = neighbor_pairs[0][0]; // [0]:cmd index
-          console.log("nested neighbor_pairs:", cmd);
+      // .then(print.hi_mom)
+      .then((ast) => {
+        console.log("[INSPECT]", ast.tree.length, ast.tree[0].length);
+        return ast;
+      })
+      .then((ast) => {
+        if (ast.tree.length >= 1 && ast.tree[0].length >= 1) {
+          let cmd = ast.tree[0];
+          console.log("ast tree:", cmd);
           if (cmd.suggestions) {
-            return cmd.suggestions(cmd.args); // FIXME args
+            let tmp = cmd.suggestions(ast.args); // FIXME args
+            console.log("suggestions:", tmp);
+            return tmp;
           } else {
             return cmd;
           }
         }
-        return neighbor_pairs;
+        return []
       })
-      // .then((neighbors) => {
-        // console.log("neighbors for", lastInput, text, neighbors);
-        // prevSuggestions = neighbors; //.map((x) => x[1]);
-        // return prevSuggestions;
-      // })
       .then(addSuggestions)
-      .catch(printFailure);
+      .catch(print.failure);
   }
   catch (err) {
     console.log(err);
@@ -290,25 +249,43 @@ const omniboxOnInputChanged = async (text, addSuggestions) => {
   }
 };
 
-const omniboxOnInputEntered = (url, disposition) => {
-  console.log("INPUT SUBMITTED", lastInput, url, cmds[url]);
+const omniboxOnInputStarted = async () => {
+  console.log("User has started interacting with me.");
+  lastInput = "";
+  return;
 
-  // Promise.resolve(currentTheme).then(setOmniboxTheme).catch(printFailure);
-  return Promise.resolve(url)
-    .then((cmd_key) => {
-      // let args = lastInput.replace(' ', '_').split(cmd_key).slice(1).replace('_', ' ');
-      console.log("[ENTERED]", cmd_key, lastInput);
-      let args = lastInput.split(cmd_key).slice(1);
-      let cmd = cmds[cmd_key];
-      // console.log("[ENTERED]", cmd_key, args, cmd);
-      return [cmd, args, cmd.action(args)];
-    })
-    .then(printSuccess)
-    .catch(printFailure);
+  // return Promise.resolve(
+  //   currentTheme ?
+  //   currentTheme : browser.theme.getCurrent()
+  // )
+  // .then(createOmniboxActivationTheme)
+  // .then((params) => {
+  //   currentTheme = browser.theme.getCurrent();
+  //   return params;
+  // })
+  // .then(setOmniboxTheme)
+  // .catch(print.failure);
+};
+
+const omniboxOnInputEntered = (input, disposition) => {
+  console.log("INPUT SUBMITTED", lastInput, input, cmds[input]);
+
+  // return Promise.resolve(currentTheme)
+  //   .then(setOmniboxTheme)
+  //   .catch(print.failure)
+    return Promise.resolve(input)
+      .then(buildAST)
+      .then((ast) => {
+        console.log("[ENTERED]", ast, ast.tree);
+        // console.log("[ENTERED]", tree, args, cmd);
+        return [ast, Promise.resolve(ast.args).then(ast.tree[0].action).catch(print.failure)];
+      })
+      .then(print.success)
+      .catch(print.failure);
 };
 
 const omniboxOnInputCancelled = () => {
-  // Promise.resolve(currentTheme).then(setOmniboxTheme).catch(printFailure);
+  // Promise.resolve(currentTheme).then(setOmniboxTheme).catch(print.failure);
 }
 
 
@@ -334,9 +311,9 @@ try {
 
   browser.runtime.onInstalled.addListener(() => {
     currentTheme = browser.theme.getCurrent();
-    return Promise.resolve(details)
-      .then(printSuccess)
-      .catch(printFailure);
+    // return Promise.resolve(details)
+    //   .then(print.success)
+    //   .catch(print.failure);
   });
 
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);

@@ -1,6 +1,8 @@
 <script>
 
 import { onMount } from 'svelte';
+import ItemList from "./ItemList.svelte";
+
 import { _fetch,
   _send,
   sendTag,
@@ -10,7 +12,7 @@ import { _fetch,
   createNotifyFailure,
   printFailure
 } from "./lib/apis.js"
-
+import { stores } from "./lib/stores.js";
 
 
 // let tabs = await browser.tabs.query({currentWindow: true, active: true});
@@ -32,9 +34,25 @@ function renderTag(tagName) {
 
   tag.appendChild(tagLabel);
   tagContainer.appendChild(tag);
-  tagLabel.addEventListener('click',async () => {
-    if (await sendLink(tagName) === 200) {}
-    // TODO flash activation css
+  tagLabel.addEventListener('click', () => {
+    return Promise.resolve(tagName)
+      .then(sendLink)
+      .then((status) => {
+        if (status === 200) {
+          let bgColor = tag.style.backgroundColor;
+          tag.style.backgroundColor = "green";
+          setTimeout(() => {
+            tag.style.backgroundColor = bgColor;
+          }, 500);
+        } else if (status >= 400) {
+          let bgColor = tag.style.backgroundColor;
+          tag.style.backgroundColor = "red";
+          setTimeout(() => {
+            tag.style.backgroundColor = bgColor;
+          }, 500);
+        }
+      })
+      .catch(printFailure)
   });
   return tag;
 }
@@ -49,7 +67,9 @@ onMount(async () => {
   console.log('LocationOps mounted');
 
   loadTags()
-    .then((tags) => tags.forEach((tag) => renderTag(tag)))
+    .then((tags) => {
+      return (tags ? tags : []).forEach((tag) => renderTag(tag))
+    })
     .catch(createNotifyFailure)
 });
 </script>
@@ -61,6 +81,10 @@ onMount(async () => {
       <button class="add" on:click={_sendTag}>Add</button>
     </li>
   </ul>
+  <ItemList
+    readonly=true
+    dataStore={stores.contentTag}
+  />
 </section>
 
 <style>
