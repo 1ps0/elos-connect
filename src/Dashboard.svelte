@@ -87,15 +87,19 @@ onMount(async () => {
   <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
 
   <p>
-
-    <h3>List of Commands</h3>
-      <div id="item-list">
-        {#each Object.keys(cmds) as cmd}
-        <p><a on:click|preventDefault={cmds[cmd].action}>{cmd}</a> : {cmds[cmd].description}</p>
-        {/each}
-      </div>
+<!--     <h3>System Info</h3>
+    <ul>
+      <li><label>PlatformOs</label>{browser.runtime.PlatformOs}</li>
+      <li><label>PlatformArch</label>{browser.runtime.PlatformArch}</li>
+      <li><label>PlatformInfo</label>{browser.runtime.PlatformInfo.os}</li>
+      <li><label>PlatformInfo</label>{browser.runtime.PlatformInfo.arch}</li>
+      <li><label>PlatformInfo</label>{browser.runtime.PlatformInfo.nacl_arch}</li>
+    </ul> -->
+    <h3>Goodbye</h3>
+      <ul>
+        <!-- <li><label></label>{}</li> -->
+      </ul>
     <br>
-
     <h3>Set Remote host</h3>
     <br>
     <h3>Keyboard shortcut</h3>
@@ -113,6 +117,14 @@ onMount(async () => {
     {:catch failure}
       <p>Failed to load commands: {failure}</p>
     {/await}
+    <br>
+
+    <h3>List of Commands</h3>
+      <div id="item-list">
+        {#each Object.keys(cmds) as cmd}
+        <p><a on:click|preventDefault={cmds[cmd].action}>{cmd}</a> : {cmds[cmd].description}</p>
+        {/each}
+      </div>
     <br>
 
     <h3>Change Color Scheme</h3>

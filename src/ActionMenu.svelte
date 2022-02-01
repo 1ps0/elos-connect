@@ -7,7 +7,8 @@ import {
   getCurrentActiveTab,
   doSelectedCopy,
   doDownloadVideo,
-  createNotifySuccess
+  createNotifySuccess,
+  print
 } from "./lib/apis.js"
 import { renderJSON } from "./lib/render.js";
 
@@ -60,7 +61,7 @@ async function registerScript(message) {
 
 }
 
-async function extractReaderText(e) {
+const extractReaderText = (e) => {
   browser.runtime.onMessage.addListener(registerScript);
   // let tabs = await browser.tabs.query({
   //   currentWindow: true,
@@ -69,13 +70,20 @@ async function extractReaderText(e) {
   let pageData = renderJSON(document);
   console.log('doing reader text:', pageData);
   if (tabs.isArticle && !tabs.isInReaderMode) {
-    await browser.tabs.toggleReaderMode();
-    // await browser.tabs.saveAsPDF({}); // toFileName
-    await _send("api/analysis/data", renderJSON());
-    await browser.tabs.toggleReaderMode();
+    browser.tabs.toggleReaderMode()
+      .then((_) => ({
+        uri: "api/analysis/data",
+        body: pageData
+      }))
+      .then(_send)
+      .then((_) => ({}))
+      // .then(browser.tabs.saveAsPDF) // toFileName
+      .then(browser.tabs.toggleReaderMode)
+      .catch(print.failure_extract_reader_text);
   } else {
     // await browser.tabs.toggleReaderMode();
-    await browser.tabs.saveAsPDF({}); // toFileName
+      browser.tabs.saveAsPDF({})
+        .catch(print.failure_save_as_pdf) // toFileName
     // await browser.tabs.toggleReaderMode();
   }
 }

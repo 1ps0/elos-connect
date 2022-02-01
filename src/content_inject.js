@@ -44,13 +44,11 @@ trackInfo: { image, track, artist, progress, favorited }
 ```
 */
 
-import { Readability } from '@mozilla/readability';
+// import { Readability } from '@mozilla/readability';
 
 import {
-  createNotify,
-  addPort, getPorts, //removePort,
+  setupRelay,
   _fetch,
-  printSuccess,
   print
 } from "./lib/apis.js";
 
@@ -75,19 +73,18 @@ const stopElementTracking = () => {};
 // ----- Media Control
 
 const getPlayable = () => {
-  try {
-    return Promise.resolve(['video', 'audio'].reduce((_out, _type) => {
-      return [
-        ..._out,
-        ...Array.from(
-          document.querySelectorAll(_type))
-            .filter((el) => isElementVisible(el))
-      ];
-    }, []));
-  } catch (err) {
-    print.failure_get_playable(err);
-    return Promise.reject(err);
-  }
+  return Promise.resolve(['video', 'audio'])
+    .then((types) => {
+      return types.reduce((_out, _type) => {
+        return [
+          ..._out,
+          ...Array.from(
+            document.querySelectorAll(_type))
+              .filter((el) => isElementVisible(el))
+        ];
+      }, []);
+    })
+    .catch(print.failure_get_playable);
 };
 
 const toggleLoop = () => {
@@ -165,7 +162,7 @@ function getNodes() {
  * If a match spanned more than one node, concatenate the textContent
  * of each node.
  */
-function getContexts(ranges) {
+function getContent(ranges) {
 
   let contexts = [];
   let nodes = getNodes();
@@ -184,19 +181,23 @@ function getContexts(ranges) {
 
 function handleMessage(request, sender, sendResponse) {
   console.log("[CONTENT] Message from the page script:", request, sender, sendResponse);
-  if (request === 'playPause') {
+  if (request.message === 'playPause') {
     return playPause()
       .then(getPlayingInfo)
       .then(renderPlayingStatus)
       .then(sendResponse)
       .catch(print.failure_handle_message_playpause);
 
-  } else if (request === 'find') {
-    return Promise.resolve(message.ranges)
-      .then(getContexts)
+  } else if (request.message === 'find') {
+    return Promise.resolve(request)
+      .then(getContent)
+      .then(print.find_status)
+      .then((findObj) => {
+        return findObj;
+      })
       .then(sendResponse)
       .catch(print.failure_handle_message_find);
-  } else if (request === 'toggleLoop') {
+  } else if (request.message === 'toggleLoop') {
     return toggleLoop()
       .then(getPlayingInfo)
       .then(renderPlayingStatus)

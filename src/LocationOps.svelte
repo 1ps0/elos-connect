@@ -10,7 +10,7 @@ import { _fetch,
   loadTags,
   createNotifySuccess,
   createNotifyFailure,
-  printFailure
+  print
 } from "./lib/apis.js"
 import { stores } from "./lib/stores.js";
 
@@ -52,7 +52,7 @@ function renderTag(tagName) {
           }, 500);
         }
       })
-      .catch(printFailure)
+      .catch(print.failure)
   });
   return tag;
 }
@@ -60,7 +60,7 @@ function renderTag(tagName) {
 const _sendTag = async (params) => {
     return sendTag(params)
       .then(renderTag)
-      .catch(printFailure);
+      .catch(print.failure);
 };
 
 onMount(async () => {

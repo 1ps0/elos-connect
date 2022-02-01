@@ -23,6 +23,7 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.4.1",
     "carbon-icons-svelte": "^10.21.0",
     "chart.js": "^2.9.4",
     "monaco-editor": "^0.23.0",

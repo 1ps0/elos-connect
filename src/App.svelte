@@ -32,7 +32,7 @@ const genId = () => "_" + Math.random().toString(36).substr(2, 9);
 let items = [];
 let objects = {};
 $: items;
-// $: console.log("ITEMS", items);
+$: console.log("ITEMS", items);
 
 function hydrateParams(item) {
   if (!components.hasOwnProperty(item.componentName)) {
@@ -140,6 +140,7 @@ onMount(async () => {
     "panel-location-ops",
     "panel-web-players",
     "panel-actionmenu",
+    "panel-playlists",
     "panel-dashboard",
     "panel-mainmenu",
   ].forEach((name) => {

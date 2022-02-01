@@ -57,21 +57,24 @@
 */
 
 // import { stores } from "./lib/stores.js";
-
+console.log("LOAD///omnibox");
 import {
-  updateCurrentWindow,
-  createNotifySuccess,
+  _fetch,
+  _send,
   createNotifyFailure,
-  printSuccess,
-  printFailure,
-  window_update_size_768,
-  getCurrentHighlightedTabs,
-  getCurrentActiveTab,
-  findInAll,
-  sendSidebar,
+  createNotifySuccess,
   doSelectedCopy,
-  _send
+  findInAll,
+  getAllTabs,
+  getCurrentActiveTab,
+  getCurrentHighlightedTabs,
+  print,
+  setWindowTitle,
+  tabQueries,
+  updateCurrentWindow,
+  updateClipboard,
 } from "./apis.js";
+import { stores } from "./stores.js";
 
 let _cmds = {};
 try {
@@ -83,7 +86,7 @@ try {
         console.log("SELECT HIT", params);
         if (params[0] === 'all') {
           browser.tabs.query({currentWindow: true }) // or windowId: windows.WINDOW_ID_CURRENT
-            .then(printStatus)
+            .then(print.status_select_tabs)
             .then((tabs) => {
               return Promise.all(
                 tabs.map((tab) => browser.tabs.update(
@@ -91,8 +94,8 @@ try {
                 ))
               )
             })
-            .then(printSuccess)
-            .catch(printFailure);
+            .then(print.success)
+            .catch(print.failure);
         }
       }
     },
@@ -117,14 +120,14 @@ try {
               browser.windows.WINDOW_ID_CURRENT,
               "tag",
               params && params.tag ? params.tag : "elos"
-            ).catch(printFailure);
+            ).catch(print.failure);
             return _window;
           })
           .then((_window) => {
             // browser. // set container?
             return _window;
           })
-          .catch(printFailure);
+          .catch(print.failure);
       }
     },
     gather: {
@@ -136,94 +139,244 @@ try {
         // let windows = browser.windows.getAll().then((windows) => {
         //     return windows.filter((_window) => _window.type === "normal")
         //   })
+        let _tabs = getAllTabs()
+          .then((tabs) => tabs.filter((tab) => new RegExp(params[0]).test(tab.url)))
+          .then((tabs) => tabs.map((tab) => tab.id))
+          .catch(print.failure_gather_tabs)
 
-        browser.tabs.query({})
-          .then((tabs) => tabs.maps((tab) => tab.id))
-          .then(async (tabIds) => {
-            let _window = await browser.windows.create().catch(printFailure);
-            return browser.tabs.move(tabIds, {
-              windowId: _window.id
+        return Promise.resolve({})
+          .then(browser.windows.create)
+          .then((windowInfo) => windowInfo.id)
+          .then(async (_windowId) => {
+            // TODO if _tabs not rejected
+            console.log("TABS", _tabs);
+            return browser.tabs.move(await _tabs, {
+              index: -1, // param reverse: 0 to reverse, -1 to stay same
+              windowId: _windowId
             })
           })
-          .catch(printFailure);
+          .catch(print.failure_gather);
+      }
+    },
+    popout: {
+      content: "popout",
+      description: "popout current tab (default to left half",
+      action: (params) => {
+        return getCurrentActiveTab()
+          .then((tab) => {
+            return {
+              tabId: tab.id,
+              top: 0,
+              left: 0,
+              width: 768,
+              height: 1024
+            }
+          })
+          .then(browser.windows.create)
+          .catch(print.failure_popout);
+      }
+    },
+    goto: {
+      content: "goto",
+      description: "goto a given tab",
+      suggestions: (params) => {
+        // how to replace, augment, or otherwise stand by firefox suggestions
+        // push/pop last tab
+        // numbered keys for popular sites
+        //
+      },
+      action: (params) => {
+
+      }
+    },
+    title: {
+      content: "title",
+      description: "set the title of the window/tab",
+      action: (params) => {
+        console.log("HIT", "title", params);
+        if (params.length) {
+          return Promise.resolve(params)
+            .then(setWindowTitle)
+            .catch(print.failure_set_window_title);
+        }
       }
     },
     stash: {
       content: "stash",
       description: "capture essential content in each of the selected tabs, and store with stash",
+      suggestions: (params) => {
+        console.log("SUGGESTIONS", params);
+        return browser.storage.local.get("stash")
+          .then((_stash) => {
+            return _stash.stash.map((item) => {
+              return {
+                content: item.uri,
+                description: item.label,
+                ...item,
+              }
+            })
+          })
+          .catch(print.failure_stash_suggestions);
+      },
       action: (params) => {
-        console.log("HIT", "stash", params);
-        return Promise.resolve(params)
-          .catch(printFailure);
+        console.log("HIT", "stash", params, tabQueries);
+        // params: null, "this", "window", "all"
+        let _tabs = Promise.resolve(params.length ? params[0] : 'this')
+          .then((keyword) => tabQueries[keyword])
+          .then(print.status_tab_query)
+          .then((tabQuery) => tabQuery())
+          .then((tabs) => {
+            return tabs.map((tab) => {
+              return {
+                tabId: tab.id,
+                uri: tab.url,
+                label: tab.title,
+                tag: params.length > 1 ? params[1] : 'unsorted'
+              }
+            })
+          });
+        return Promise.resolve(_tabs)
+          .then((tabs) => {
+            return browser.storage.local.get("stash")
+              .then((_stash) => {
+                return {
+                  stash: [
+                    ...(
+                      // get or init with empty array
+                      _stash && _stash.stash ?
+                        _stash.stash : []
+                    ),
+                    ...tabs]
+                }
+              })
+              .then(print.status_storage_stash)
+              .catch(print.failure_storage_stash);
+          })
+          .then(browser.storage.local.set)
+          .then(async () => {
+            return Promise.resolve(_tabs)
+              .then(print.status_stash_tabs)
+              .then((_tabData) => _tabData.map((_tab) => _tab.tabId))
+              .then(browser.tabs.remove)
+              .catch(print.failure_stash_tabs_remove)
+          })
+          .catch(print.failure_stash)
       }
     },
-    add: {
-      content: "add",
-      description: "add this tab's location with a given tag (or not)",
+    playlist: {
+      content: "playlist",
+      description: "playlist",
+      action: (params) => {
+        console.log("HIT", "playlist", params);
+        // get
+        return Promise.resolve(params)
+          .catch(print.failure);
+      }
+    },
+    save_link: {
+      content: "save link",
+      description: "save link this tab's location with a given tag (or not)",
       action: (params) => {
         return sendLink(params ? params : 'unsorted');
       }
     },
     save_page: {
-      content: "save_page",
+      content: "save page",
       description: "Renders the page with readability and sends content to remote.",
       action: (params) => {
-        console.log("HIT ", "save_page", params);
+        console.log("HIT ", "save page", params);
         // TODO render with readability?
         // TODO save full HTML
       }
     },
     save_video: {
-      content: "save_video",
+      content: "save video",
       description: "Tells the remote server to download the video in this tab.",
       action: (params) => {
         console.log("HIT save_video, running doDownloadVideo", params);
-        return getCurrentActiveTab().then( (tab) => {
-          return _send("api/action/download/video", {
-            uri: tab[0].url,
-            save: true,
-            tag: "unsorted"
-          });
-        })
-        .then(createNotifySuccess)
-        .catch(createNotifyFailure);
+        return getCurrentActiveTab()
+          .then((tab) => ({
+            uri: "api/action/download/video",
+            body: {
+              uri: tab[0].url,
+              save: true,
+              tag: params.length ? params[0] : "video"
+            }
+          }))
+          .then(_send)
+          .then(createNotifySuccess)
+          .catch(createNotifyFailure)
       },
     },
     save_song: {
-      content: "save_song",
+      content: "save song",
       description: "Tells the remote server to download the music in this tab.",
       action: (params) => {
         console.log("HIT save_audio, running doDownloadAudio", params);
-        getCurrentActiveTab.then( (tab) => {
-          return _send("api/action/download/audio", {
-            uri: tab[0].url,
-            args: { tag: 'audio' }
-          });
-        })
-        .then(createNotifySuccess)
-        .catch(createNotifyFailure);
+        return getCurrentActiveTab()
+          .then((tab) => ({
+            uri: "api/action/download/audio",
+            body: {
+              uri: tab[0].url,
+              save: true,
+              tag: params.length ? params[0] : "audio"
+            }
+          }))
+          .then(_send)
+          .then(createNotifySuccess)
+          .catch(createNotifyFailure);
       },
     },
     copy_tabs: {
-      content: "copy_tabs",
-      description: "copy_tabs",
+      content: "copy tabs",
+      description: "copy tabs",
       action: (params) => {
         console.log("HIT ", "copy_tabs", params)
-        return Promise.resolve()
+        return Promise.resolve({})
           .then(doSelectedCopy)
           .then(createNotifySuccess, createNotifyFailure)
-          .catch(printFailure)
+          .catch(print.failure)
       },
     },
+    copy_storage: {
+      content: "copy storage",
+      description: "copy to clipboard the contents of storage",
+      action: (params) => {
+        console.log("HIT", "copy_storage", params);
+        return browser.storage.local.get()
+          .then(JSON.stringify)
+          .then(updateClipboard)
+          .catch(print.failure_copy_storage)
+      }
+    },
     copy_target: {
-      content: "copy_target",
-      description: "copy_target",
+      content: "copy target",
+      description: "copy target",
       action: (params) => {
         console.log("HIT ", "copy_target", params)
         // selected target ON PAGE
       },
     },
-    mute: {
+    // what constitutes an 'action', and a 'subcommand'
+    control_play: {
+      content: "Play current content",
+      description: "",
+      suggestions: (params) => {},
+      action: (params) => {}
+    },
+    control_pause: {
+      content: "Pause current content",
+      description: "",
+      suggestions: (params) => {},
+      action: (params) => {}
+    },
+    control_restart: {
+      content: "Restart current content",
+      description: "",
+      suggestions: (params) => {},
+      action: (params) => {}
+    },
+    control_mute: {
       content: "mute",
       description: "mute notifications or current/other tab",
       suggestions: (params) => {
@@ -245,33 +398,41 @@ try {
     search: {
       content: "search",
       description: "search",
-      suggestions: (params) => {
-        console.log("Searching", params);
+      suggestions: (_params) => {
+        console.log("Searching", _params);
         const suggestionsOnEmptyResults = [{
           content: "about:blank",
           description: "no results found"
         }];
-        return Promise.resolve(suggestionsOnEmptyResults)
-        .then((params) => {
-          return {
-            ...params,
-            uri: "/api/location/search",
-          }
-        })
-        .then(_fetch)
-        .then((response) => {
-          console.log("Got search response", response);
-          return response.results.map( (obj) => {
+        return Promise.resolve(_params)
+          .then((params) => {
             return {
-              content: obj.uri,
-              description: '['+obj.value+'] '+obj.label,
-            };
-          });
-        })
-        .catch(printFailure)
-        .then(_ => suggestionsOnEmptyResults);
+              ...params,
+              uri: "/api/location/search",
+            }
+          })
+          .then(_fetch)
+          .then((response) => {
+            console.log("Got search response", response);
+            return response.results.map( (obj) => {
+              return {
+                content: obj.uri,
+                description: `[${obj.tag}] ${obj.label}`,
+              };
+            });
+          })
+          // .then(print.fetch_response)
+          .catch(print.failure_search)
+          // .then(err => suggestionsOnEmptyResults);
       },
-      action: (params) => { console.log("HIT ", "search", params)}
+      action: (params) => {
+        console.log("HIT ", "search", params);
+        browser.tabs.create({
+            active: true,
+            url: params.url
+          })
+          .catch(print.failure_search_open)
+      }
     },
     find: {
       content: "find",
@@ -280,7 +441,6 @@ try {
       // option: show suggestions with tabs containing criteria
       //  - suggestions have tab name and matched criteria/surrounding
       suggestions: (params) => {
-        console.log("HIT SUGGEST:", "find", params);
         return findInAll(params);
       },
       action: (params) => {
@@ -330,7 +490,7 @@ try {
               browser.sessions.setTabValue(pair[0], pair[1]);
             });
           })
-          .catch(printFailure);
+          .catch(print.failure);
       },
     },
     open: {
@@ -338,7 +498,7 @@ try {
       description: "Opens a panel or tagged group of links",
       action: (params) => {
         console.log("HIT ", "open", params)
-        return;
+        return browser.windows.create({ url: params.url });
         /*
         group:
         package: index, current, mark_as_completed, next, reset
@@ -359,11 +519,29 @@ try {
         return params;
       }
     },
-    window_split: {
-      content: "window_split",
-      description: "window_split",
+    split: {
+      content: "split",
+      description: "split",
       action: (params) => {
-        console.log("HIT ", "window_split", params)
+        console.log("HIT ", "split", params);
+        // elos split selected tile column,
+        return getCurrentHighlightedTabs()
+          .then((tabs) => {
+            let screen_width = 768 * 2;
+            let _width = Math.floor(screen_width / tabs.length);
+            let _height = 1024;
+            tabs.forEach((tab, idx) => {
+              browser.windows.create({
+                  tabId: tab.id,
+                  height: _height,
+                  width: _width,
+                  left: _width * idx,
+                  top: 0
+                })
+                .catch(print.failure_split_tabs);
+            })
+          })
+          .catch(createNotifyFailure)
       },
     },
     window_left: {

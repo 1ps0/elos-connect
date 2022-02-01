@@ -109,7 +109,6 @@ const buttonProps = [
     name: 'toggleLoop',
     description: '',
     icon: (obj) => {
-      console.log("LOGGING TOGGLELOOP", obj);
       return obj.loop ? '✅🔁' : '❌🔁';
     },
     action: sendToggleLoop

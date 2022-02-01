@@ -1,5 +1,5 @@
 // 2nd order
-
+console.log("LOAD///omnibox");
 import { writable, get } from 'svelte/store';
 
 import { clockFormatter, dateStringFromDate } from "./clock.js";
@@ -31,7 +31,7 @@ export const _fetch = async (params) => {
     })
     .then(fetch)
     .then(handleResponse)
-    .catch(print.failure);
+    .catch(print.failure_fetch);
 };
 
 export const _send = async (params) => {
@@ -40,7 +40,9 @@ export const _send = async (params) => {
   return Promise.resolve(new URL(params.uri, baseUrl))
     .then((url) => {
       return {
+        url: url,
         method: "POST",
+        credentials: "omit",
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
@@ -48,9 +50,10 @@ export const _send = async (params) => {
         body: JSON.stringify(params.body)
       }
     })
-    .then(fetch)
+    .then(print.status_sending)
+    .then((args) => fetch(args.url, args))
     .then(handleResponse)
-    .catch(print.failure);
+    .catch(print.failure_send);
 }
 
 // ------- Send composites
@@ -60,10 +63,6 @@ export const sendTag = async (params) => {
   return Promise.resolve(params && params.tagName ? params.tagName : '#tag_name')
     .then((name) => document.querySelector(name))
     // FIXME extract css styling into module that can be integrated
-    // .then((button) => {
-    //   button.style.borderColor = "blue";
-    //   return button;
-    // })
     .then((button) => button.value)
     .then((tagName) => {
       return {
@@ -74,15 +73,7 @@ export const sendTag = async (params) => {
       }
     })
     .then(_send)
-    // .then((button) => {
-    //   button.style.borderColor = "green";
-    //   return button;
-    // })
-    .catch(print.failure)
-    // .then((button) => {
-    //   button.style.borderColor = "red";
-    //   return button;
-    // });
+    .catch(print.failure_send_tag)
 }
 
 export const sendLink = async (tagName) => {
@@ -117,26 +108,33 @@ export const sendSidebar = async (params) => {
 export const getContexts = (results) => {
   console.log("sending results", results);
   return Promise.all(results)
-  .then((_results) => {
-    return _results.map((result) => {
-      console.log("sending to context", result);
-      return browser.tabs.sendMessage(result.tabId, {
-        ranges: result.rangeData
+    .then((_results) => {
+      return _results.map((result) => {
+        console.log("sending to context", result);
+        return browser.tabs.sendMessage(result.tabId, {
+          ...result,
+          message: "find"
+        }).catch(print.failure_send_message_context)
       })
     })
-  })
 }
 
 // -------- Find composites
 
 export const findInTab = (query, tabId) => {
-  return browser.find.find(query, {
+  return browser.find.find(query.join(' '), {
       tabId: tabId,
       includeRangeData: true,
       // includeRectData: true
     }) // TODO set timeout to filter slow promises. currently none
-    // .then(print.status)
-    .catch((err) => console.log("Err:", tabId, query, err))
+    .then((results) => {
+      return {
+        tabId: tabId,
+        count: results.count,
+        rangeData: results.rangeData
+      }
+    })
+    .catch(print.failure_find_in_tab)
     .finally((result) => {
       return {
         count: 0, // overwritten by result if not failcase
@@ -150,9 +148,9 @@ export const findInAll = async (params) => {
   // TODO add soft 'limit' on 'all tabs' count.
   return getAllTabs(params)
     .then((_params) => {
-      return _params.map((tab) => {
+      return Promise.all(_params.map((tab) => {
         return findInTab(params, tab.id);
-      })
+      }))
     })
     .then((_params) => {
       return _params.filter((result) => (result && result.count > 0));
@@ -167,8 +165,7 @@ export const findInAll = async (params) => {
         }
       });
     })
-    // .then(print.success)
-    // .catch(print.failure);
+    .catch(print.failure_find_in_all);
 }
 
 // ---------- Load composites
@@ -296,6 +293,94 @@ export const createRuntimeConnection = async (params) => {
   });
 };
 
+export const registerContentScript = (hosts) => {
+  return Promise.resolve({
+      matches: ["<all_urls>"],
+      js: [{file: "build/content_inject.js"}],
+      runAt: "document_idle"
+    })
+    .then(browser.contentScripts.register)
+    .catch(print.failure_content_scripts_register);
+}
+
+export const setupStorage = (params) => {
+  browser.storage.local.onChanged.addListener((changes) => {
+    Promise.resolve(changes)
+      .then(Object.entries)
+      .then((entries) => {
+        entries.forEach((entry) => {
+          let key = entry[0];
+          let oldValue = entry[1].oldValue;
+          let newValue = entry[1].newValue;
+        })
+      })
+      .catch(print.failure_setup_storage);
+    });
+}
+
+
+const relayRegistry = {};
+export const setupRelay = (params) => {
+  // TODO lazy capture incoming ports from external sources:
+  // external sources: sidebar, page content.
+
+  // getPorts
+  // TODO add 'args' which let you include select keys too
+  const ports = () => {
+    return Promise.resolve(relayRegistry)
+      .then(Object.values)
+      .then((values) => values.map((relay) => relay.port))
+      .then(Array.from)
+      .catch(print.failure_get_ports)
+  }
+
+  const handleMessage = (args) => {
+    console.log("[RELAY][MESSAGE][RECEIVE]", args, params.debug ? params : '');
+    if (params.handler) {
+      params.handler(args);
+    }
+  }
+  const postMessage = (args) => {
+    let _postData = relayRegistry[params.name];
+    console.log("[RELAY][MESSAGE][SEND]", args, params.debug ? params : '');
+    if (args.action === "disconnect") {
+      postData.port.disconnect(); // should trigger a callback disconnecting the rest
+    }
+    return _postData.port.postMessage(args)
+  }
+  const initRelay = (name) => {
+    const port = browser.runtime.connect({ name: name });
+    port.onMessage.addListener((args) => {
+      return Promise.resolve(args)
+        .then(handleMessage)
+        .catch(print.failure_port_message)
+    });
+    return port;
+  };
+  // addPort
+  browser.runtime.onConnect.addListener((args) => {
+    console.log("[RELAY][CONNECT][NEW]", args);
+    let _port = initRelay(args);
+    args.name = args.name ? args.name : params.name // TODO add random gen etag type
+    relayRegistry[args.name] = {
+      ...params,
+      ...args,
+      port: _port
+    };
+  });
+  // removePort
+  browser.runtime.onDisconnect.addListener((params) => {
+    if (!params.name) {
+      console.log("[RELAY][DISCONNECT][FAILURE]", "No field 'name'", params)
+    }
+    let _connection = relayRegistry[params.name];
+    _connection.port.disconnect(); // can be used to validate a mutual disconnection
+    relayRegistry[params.name] = null;
+  })
+  console.log("[RELAY][INIT]", params);
+  return postMessage; // everything else is internally handled
+}
+
 // export const sendRuntimeMessage = async (params) => {
 //   return browser.runtime.sendMessage(params)
 //     .catch(print.failure);
@@ -335,99 +420,29 @@ export const sendToContentScript = async (params) => {
 
 // ------- WINDOW FUNCTIONS
 
-// "window_update_move_topright"
-export const window_update_move_topright = () => {
-  browser.windows.update(browser.windows.WINDOW_ID_CURRENT, {
-    left: 0,
-    top: 0
-  });
-};
-
-// "window-update-size_768"
-export const window_update_size_768 = () => {
-  browser.windows.update(browser.windows.WINDOW_ID_CURRENT, {
-    width: 768,
-    height: 1024
-  });
-}
-
-// "window-update-minimize"
-export const window_update = () => {
-  browser.windows.update(browser.windows.WINDOW_ID_CURRENT, {
-    state: "minimized",
-  });
-}
-
-// "window-create-detached-panel"
-export const window_create = () => {
-  browser.windows.create({
+export const createWindow = (args) => {
+  return Promise.resolve(args ? args : {
     // type: "popup",
     type: "detached_panel",
     incognito: true,
-  }).then(() => {
-    console.log("The detached panel has been created");
-  }).catch(print.failure);
+  })
+  .then(browser.windows.create)
+  .catch(print.failure_window_create);
 }
 
-// "window-remove"
-export const window_stash = () => {
-  //
-  browser.tabs.query({
-    highlighted: true,
-    // active: true,
-    windowId: browser.windows.WINDOW_ID_CURRENT
-  })
-  .then((tabs) => {
-    return tabs.length > 0 ? tabs : browser.windows.getAll();
-  })
-  .then((tabs) => {
-    console.log('doing selected copy:', windows.WINDOW_ID_CURRENT, tabs);
-    // return tabs.map((x) => x.title+","+x.url).join('\n');
-    return tabs
-  })
-  .then((tabs) => {
-    return tabs.map((tab) => {
-      return {
-        "uri": tab.url,
-        "label": tab.title,
-        "tag": "stash"
-      }
+export const setWindowTitle = (data) => {
+  return Promise.resolve({
+      titlePreface: (data && data.length ? `${data[0]} | ` : "Preface | ")
     })
-  })
-  .then(() => {
-    browser.windows.remove(windows.WINDOW_ID_CURRENT);
-  })
-  .catch(print.failure);
-}
-
-// "window-resize-all"
-export const window_resize_all = () => {
-  browser.windows.getAll().then((windows) => {
-    for (var item of windows) {
-      browser.windows.update(item.id, {
-        width: 1024,
-        height: 768
-      });
-    }
-  }).catch(print.failure);
-}
-
-// "window-preface-title"
-export const window_preface_title = () => {
-  browser.windows.update(browser.windows.WINDOW_ID_CURRENT, {
-    titlePreface: "Preface | "
-  }).catch(print.failure);
+    .then((preface) => {
+      return browser.windows.update(
+        browser.windows.WINDOW_ID_CURRENT,
+        preface
+      )
+    })
+    .catch(print.failure_set_window_title);
 };
 
-
-export const hasWindowId = (data) => {
-  console.log("checking has window id", data);
-  if (data.windowId !== undefined) {
-    return data;
-  } else {
-    Promise.reject("windowId not in", data);
-  }
-};
 export const setWindowActive = (data) => {
   console.log("Setting active window with data", data);
   let status = browser.windows.update(data.windowId, { focused: true });
@@ -444,7 +459,17 @@ export const getAllTabs = async () => {
     .then((tabs) => {
       return tabs.filter((tab) => tab != tabs.TAB_ID_NONE);
     })
-    // .catch(print.failure)
+    .catch(print.failure_get_all_tabs)
+}
+
+export const getCurrentWindowTabs = () => {
+  return browser.tabs.query({
+    windowId: browser.windows.WINDOW_ID_CURRENT
+  })
+  .then((tabs) => {
+    return tabs.filter((tab) => tab != tabs.TAB_ID_NONE);
+  })
+  .catch(print.failure_get_current_window_tabs);
 }
 
 export const getCurrentActiveTab = async () => {
@@ -452,8 +477,21 @@ export const getCurrentActiveTab = async () => {
     active: true,
     windowId: browser.windows.WINDOW_ID_CURRENT
   })
-  // .catch(print.failure);
+  .catch(print.failure_get_current_tab);
 };
+
+export const tabQueries = { // objects: all, window, this
+  this: getCurrentActiveTab,
+  window: getCurrentWindowTabs,
+  all: getAllTabs,
+  clear: () => {
+    browser.storage.local.set({
+      stash:[]
+    })
+    .then(() => [])
+    .catch(print.failure_stash_clear)
+  },
+}
 
 export const hasTabId = (data) => {
   console.log("checking has tab id", data);
@@ -472,9 +510,12 @@ export const setTabActive = (data) => {
 };
 
 export const sendToContent = (params) => {
-  console.log("[BG][->][CONTENT]", params.tabId, params.message);
+  console.log("[BG][->][CONTENT]", params.tabId, params);
   return Promise.resolve(params)
-    .then((data) => browser.tabs.sendMessage(data.tabId, data.message))
+    .then((data) => {
+      browser.tabs.sendMessage(data.tabId, data);
+      return data;
+    })
     .then(createNotifySuccess)
     .catch(print.failure);
 }
@@ -482,8 +523,7 @@ export const sendToContent = (params) => {
 
 export const updateClipboard = (newClip) => {
   return navigator.clipboard.writeText(newClip)
-    .then(createNotifySuccess)
-    .catch(createNotifyFailure);
+    .catch(print.failure_update_clipboard);
 };
 
 export const getHighlightedTabs = (newClip) => {
@@ -663,7 +703,7 @@ export const createNotifySuccess = async (params) => {
   console.log("[SUCCESS][NOTIFIED]", params);
   return createNotify({
     title: "Success!",
-    message: `For ${params.title}`
+    message: `For ${params ? params.title : 'your action.' }`
   })
 }
 

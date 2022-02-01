@@ -19,6 +19,11 @@ export const menuItems = [
     group: "1"
   },
   {
+    name: "panel-playlists",
+    value: { icon: "table", highlight: "Playlists" },
+    group: "1"
+  },
+  {
     name: "panel-location-ops",
     value: { icon: "view-mode-1", highlight: "Location Tagging" },
     group: "1"

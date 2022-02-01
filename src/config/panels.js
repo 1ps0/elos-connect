@@ -87,6 +87,16 @@ export const panelTypes = {
       transform: ((e) => e)
     }
   },
+  "panel-playlists": {
+    target: "panel-playlists",
+    name: "playlists",
+    w: layoutConfig.columnCount,
+    h: 5,
+    componentName: "playlists",
+    props: {
+      storeKey: 'stash',
+    }
+  },
   "panel-commandbar": {
     target: "panel-commandbar",
     name: "commandbar",

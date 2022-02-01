@@ -15,8 +15,10 @@ import { writable, get } from 'svelte/store';
 import { workspaceConfig } from "../config/parameters.js";
 
 export const storageFor = (name, otherwise={}) => {
-  let ret = localStorage.getItem(`${name}_cache`);
-  return ret ? JSON.parse(ret) : otherwise;
+  return Promise.resolve(`${name}`)
+    .then(browser.storage.local.get)
+    .catch(print.failure_storage_for)
+    .then(_ => otherwise)
 };
 
 export const configWritable = writable(workspaceConfig);
@@ -79,9 +81,22 @@ export const stores = {
 for (let name in stores) {
   stores[name].subscribe((val) => {
     if (val !== undefined && val !== "undefined") {
-      localStorage.setItem(`${name}_cache`, JSON.stringify(val));
+      return Promise.resolve({ name: val })
+        .then(print.status_storage)
+        .then(browser.storage.local.set)
+        .catch(print.failure_status_store);
     }
   });
 }
+
+export const syncLocal = () => {};
+export const syncRemote = () => {};
+
+
+
+
+
+
+
 
 

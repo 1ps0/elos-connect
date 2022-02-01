@@ -6,6 +6,7 @@ import { stores } from "./lib/stores.js";
 import {
   _fetch,
   createNotifyFailure,
+  setupRelay,
   print
 } from "./lib/apis.js";
 
@@ -169,6 +170,7 @@ export const buildAST = (_input) => {
             args: section.slice(1)
           };
         } else {
+          // TODO replace with '|' or '>' operations across cmds
           return {
             command: null,
             args: section
@@ -221,27 +223,22 @@ const omniboxOnInputChanged = async (text, addSuggestions) => {
   try {
     return Promise.resolve(lastInput)
       .then(buildAST)
-      // .then(print.hi_mom)
       .then((ast) => {
-        console.log("[INSPECT]", ast.tree.length, ast.tree[0].length);
-        return ast;
-      })
-      .then((ast) => {
-        if (ast.tree.length >= 1 && ast.tree[0].length >= 1) {
-          let cmd = ast.tree[0];
-          console.log("ast tree:", cmd);
-          if (cmd.suggestions) {
-            let tmp = cmd.suggestions(ast.args); // FIXME args
-            console.log("suggestions:", tmp);
-            return tmp;
-          } else {
-            return cmd;
-          }
+        if (ast.tree.length > 3) {
+          return ast.tree;
         }
-        return []
+        return Promise.all(ast.tree.map((node) => {
+          if (node.suggestions) {
+            console.log("SUGGESTIONS", ast, ast.args);
+            return node.suggestions(ast.args).catch(print.failure_suggestions);
+          } else {
+            return node;
+          }
+        }));
       })
+      .then((results) => results.flat(1))
       .then(addSuggestions)
-      .catch(print.failure);
+      .catch(print.failure_omnibox_changed);
   }
   catch (err) {
     console.log(err);
@@ -268,20 +265,25 @@ const omniboxOnInputStarted = async () => {
 };
 
 const omniboxOnInputEntered = (input, disposition) => {
-  console.log("INPUT SUBMITTED", lastInput, input, cmds[input]);
+  console.log("INPUT SUBMITTED", lastInput, '--', input, '--', cmds[input]);
 
   // return Promise.resolve(currentTheme)
   //   .then(setOmniboxTheme)
   //   .catch(print.failure)
-    return Promise.resolve(input)
+    return Promise.resolve(lastInput)
       .then(buildAST)
       .then((ast) => {
         console.log("[ENTERED]", ast, ast.tree);
         // console.log("[ENTERED]", tree, args, cmd);
-        return [ast, Promise.resolve(ast.args).then(ast.tree[0].action).catch(print.failure)];
+        return [
+          ast,
+          Promise.resolve(ast.args.length > 0 ? ast.args : input)
+            .then(ast.tree[0].action)
+            .catch(print.failure)
+        ];
       })
       .then(print.success)
-      .catch(print.failure);
+      .catch(print.failure_omnibox_entered);
 };
 
 const omniboxOnInputCancelled = () => {
@@ -291,6 +293,13 @@ const omniboxOnInputCancelled = () => {
 
 try {
   console.log('background.js mounted');
+
+  // let params = {
+  //   name: `sidebar-${browser.windows.getCurrent().id}`,
+  //   debug: true,
+  //   handler: (args) => console.log("[HANDLER][MESSAGE][RECEIVE]", args),
+  // };
+  // params.postMessage = setupRelay(params);
 
   browser.runtime.onMessage.addListener(handleMessage);
 
