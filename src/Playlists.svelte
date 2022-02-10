@@ -1,4 +1,14 @@
 <script>
+/*
+DESIGN
+
+advanced form of stash
+select storeKeys
+add storeKey
+sync with remote store
+remote stores are grouped by playlist storekey
+
+*/
 
 import { onMount } from 'svelte';
 import { writable, get } from 'svelte/store';
@@ -15,6 +25,7 @@ playlistStore.subscribe((val) => {
 });
 
 let storeKey = 'stash';
+
 
 const updatePlaylistStore = () => {
   return Promise.resolve(storeKey)

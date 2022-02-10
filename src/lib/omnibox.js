@@ -79,6 +79,29 @@ import { stores } from "./stores.js";
 let _cmds = {};
 try {
   _cmds = {
+    sync: {
+      content: "sync",
+      description: "sync current state with remote.",
+      suggestions: (params) => ({
+        mine: {
+          content: "mine",
+          description: "send mine and prefer it for value conflicts"
+        }
+      }),
+      action: (params) => {
+        console.log("HIT sync", params);
+        return Promise.resolve(params ? params : [])
+          .then(browser.storage.local.get)
+          .then(print.status_sync_data)
+          .then((data) => ({
+            url: `/api/pkg/${data.name ? data.name : 'mine'}/sync`,
+            body: JSON.stringify(data)
+          }))
+          .then(_send)
+          .then(print.success_send_sync)
+          .catch(print.failure_sync);
+      }
+    },
     select: {
       content: "select",
       description: "select specified tabs",
@@ -208,7 +231,7 @@ try {
         console.log("SUGGESTIONS", params);
         return browser.storage.local.get("stash")
           .then((_stash) => {
-            return _stash.stash.map((item) => {
+            return (_stash.stash ? _stash.stash : []).map((item) => {
               return {
                 content: item.uri,
                 description: item.label,
@@ -249,13 +272,11 @@ try {
                     ...tabs]
                 }
               })
-              .then(print.status_storage_stash)
               .catch(print.failure_storage_stash);
           })
           .then(browser.storage.local.set)
-          .then(async () => {
+          .then(() => {
             return Promise.resolve(_tabs)
-              .then(print.status_stash_tabs)
               .then((_tabData) => _tabData.map((_tab) => _tab.tabId))
               .then(browser.tabs.remove)
               .catch(print.failure_stash_tabs_remove)

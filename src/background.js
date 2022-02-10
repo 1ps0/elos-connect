@@ -113,7 +113,7 @@ let prevSuggestions = [];
 
 const findNeighborCommands = (node) => {
   // https://stackoverflow.com/questions/57026895/get-unique-values-from-array-of-arrays
-  let cmd_prefix = lastInput.split(' ');
+  let cmd_prefix = (node && node.length > 0 ? node[0].left.command : lastInput).split(' ');
   try {
     // reduces omnibox cmds to a flat array of all unique keywords.
     return Promise.resolve(
@@ -123,13 +123,15 @@ const findNeighborCommands = (node) => {
         .flat(1)
       )]
     )
-    .then((keywords) => {
+    .then((keywords) => intersection(cmd_prefix, keywords))
+    .then((keys) => {
       // find input keywords used, with possible cmd keywords.
-      let keys = intersection(cmd_prefix, keywords);
+      // let keys = intersection(cmd_prefix, keywords);
       // return the command name for a given bag of keywords
       return Object.values(cmds).filter((cmd) => cmd.content.includes(keys.join('_')));
     })
-    .catch(print.failure);
+    // .then(print.status_neighbor_keywords)
+    .catch(print.failure_find_neighbor_commands);
   }
   catch (err) {
     console.log(err);
@@ -144,8 +146,7 @@ export const buildAST = (_input) => {
   // where | is normal pipe operation in unix
   // where > is unix-like output into a target
   return Promise.resolve(_input)
-    // ex1: find promise all
-    // ex2: find superstonk | gather > new window
+    // TODO: find superstonk | gather > new window
     .then((_input) => _input.trim().split("|"))
     .then((parts) => {
       // break into parts (tokenize), simple linear tokenizer
@@ -159,10 +160,9 @@ export const buildAST = (_input) => {
           });
       });
     })
-    // result 2 is like
-    // [["find", "sq"], "|", ["gather"], ">", ["new", "window"]]
+    // ["stash", "window"]
+    // TODO: [["find", "sq"], "|", ["gather"], ">", ["new", "window"]]
     .then((parts) => {
-      // add info about tokens (lex)
       return parts.map((section) => {
         if (section.length > 0) {// && section[0].length > 0) {
           return {
@@ -178,12 +178,10 @@ export const buildAST = (_input) => {
         }
       });
     })
-    .then((parts) => {
-      // build AST
+    .then((parts) => { // build AST
       let tree = [];
       let node = {};
       for (let part of parts) {
-        // console.log("--", part, parts);
         if (!part.command) { //(part === "|" || part === ">") {
           node.op = part;
         } else if (!node.left) {
@@ -200,43 +198,34 @@ export const buildAST = (_input) => {
       }
       return tree;
     })
-    .then((tree) => {
-      // clean up AST based on grammar rules
-      // 1. do commands pipe together
-      // 2. does each node have a left and right
-      // 3. are we discovering
-      // console.log("TREE", tree);
-      return tree;
-    })
-    .then(async (_tree) => {
-      // eval AST and transform into actions
-      return {
-        tree: await findNeighborCommands(_tree[0].left.command),
-        args: _tree[0].left.args
+    // .then((_tree) => _tree[0])
+    .catch(print.failure_build_ast);
+}
+
+export const renderSuggestions = (ast) => {
+  if (ast.tree && ast.tree.length > 3) {
+    return ast.tree;
+  }
+  return Promise.all((ast.tree ? ast.tree : [])
+    .map((node) => {
+      if (node.suggestions) {
+        console.log("SUGGESTIONS", ast, ast.args);
+        return node.suggestions(ast.args).catch(print.failure_suggestions);
+      } else {
+        return node;
       }
-    })
-    .catch(print.failure);
+    }))
+    .then((results) => results.flat(1))
+    .catch(print.failure_render_suggestions);
 }
 
 const omniboxOnInputChanged = async (text, addSuggestions) => {
+  console.log("CHANGED", lastInput, ", BECAME:", text);
   lastInput = text;
   try {
     return Promise.resolve(lastInput)
       .then(buildAST)
-      .then((ast) => {
-        if (ast.tree.length > 3) {
-          return ast.tree;
-        }
-        return Promise.all(ast.tree.map((node) => {
-          if (node.suggestions) {
-            console.log("SUGGESTIONS", ast, ast.args);
-            return node.suggestions(ast.args).catch(print.failure_suggestions);
-          } else {
-            return node;
-          }
-        }));
-      })
-      .then((results) => results.flat(1))
+      .then(renderSuggestions)
       .then(addSuggestions)
       .catch(print.failure_omnibox_changed);
   }
@@ -264,25 +253,31 @@ const omniboxOnInputStarted = async () => {
   // .catch(print.failure);
 };
 
+export const renderAction = (ast) => {
+  console.log("[ENTERED]", ast);
+
+  return Promise.resolve(ast)
+    .then(findNeighborCommands)
+    .then((neighbors) => ({
+      tree: neighbors,
+      args: ast.args ? ast.args : []
+    }))
+    .then((_ast) => _ast.tree[0].action(_ast.args))
+    // .then(print.success_render_action)
+    .catch(print.failure_render_action);
+}
+
 const omniboxOnInputEntered = (input, disposition) => {
   console.log("INPUT SUBMITTED", lastInput, '--', input, '--', cmds[input]);
 
   // return Promise.resolve(currentTheme)
   //   .then(setOmniboxTheme)
   //   .catch(print.failure)
+
     return Promise.resolve(lastInput)
       .then(buildAST)
-      .then((ast) => {
-        console.log("[ENTERED]", ast, ast.tree);
-        // console.log("[ENTERED]", tree, args, cmd);
-        return [
-          ast,
-          Promise.resolve(ast.args.length > 0 ? ast.args : input)
-            .then(ast.tree[0].action)
-            .catch(print.failure)
-        ];
-      })
-      .then(print.success)
+      .then(renderAction)
+      .then(print.success_on_input_entered)
       .catch(print.failure_omnibox_entered);
 };
 
@@ -316,7 +311,6 @@ try {
   browser.omnibox.onInputChanged.addListener(omniboxOnInputChanged);
   browser.omnibox.onInputEntered.addListener(omniboxOnInputEntered);
   browser.omnibox.onInputCancelled.addListener(omniboxOnInputCancelled);
-
 
   browser.runtime.onInstalled.addListener(() => {
     currentTheme = browser.theme.getCurrent();

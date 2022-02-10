@@ -13,6 +13,39 @@ import { profileEdit } from "./lib/profileEdit.js";
 
 const dashboardContext = getContext("dashboard");
 
+const getCommands = (params) => {
+
+  // built-in events
+  "_execute_sidebar_action"
+  "_execute_page_action"
+  "_execute_browser_action"
+
+
+  // suggested for OS
+  "default"
+  "mac" // Ctrl -> Command, MacCtrl
+  "linux"
+  "windows"
+  "chromeos"
+  "android"
+  "ios"
+
+  // shortcut format (modifier + secondary modifier(?) + key)
+  // modifier: "Ctrl", "Alt", "Command", "MacCtrl"
+  // secondary: "Shift", "Ctrl", "Alt", "Command", "MacCtrl"
+  // keys: A-Z, 0-9, F1-F12, Comma, Period, Home, End, PageUp, PageDown, Space, Insert, Delete, Up, Down, Left, Right, MediaNextTrack, MediaPlayPause, MediaPrevTrack, MediaStop
+
+  // NOTE cant override existing keybinding of another extension
+  // {
+  //   "event_name": {
+  //       "suggested_key": {
+  //           "default": "MacCtrl+E"
+  //       },
+  //       "description": "eLOS Connect save"
+  //   }
+  // }
+}
+
 const resetCommand = async (params) => {
   return browser.commands.reset(params.name)
     .catch(printFailure);
@@ -121,6 +154,7 @@ onMount(async () => {
 
     <h3>List of Commands</h3>
       <div id="item-list">
+
         {#each Object.keys(cmds) as cmd}
         <p><a on:click|preventDefault={cmds[cmd].action}>{cmd}</a> : {cmds[cmd].description}</p>
         {/each}

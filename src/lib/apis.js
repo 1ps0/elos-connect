@@ -6,6 +6,36 @@ import { clockFormatter, dateStringFromDate } from "./clock.js";
 import { stores } from "./stores.js";
 import { openWith } from "../config/open.js";
 
+// -- global logging
+
+export const print = new Proxy(() => {}, {
+  // TODO return as universal print object,
+  // like, `print.failure`, `print.success`,
+  // `print.per_is_article`, `print.hi_mom`
+  get(target, name) {
+    return (args) => {
+      console.log(`[PRINT][${name.toUpperCase()}]`, args);
+      return args;
+    }
+  }
+});
+
+export const printStatus = (params) => {
+  console.log("[LOG][STATUS]", params);
+  return params;
+}
+
+export const printSuccess = (result) => {
+  console.log("[SUCCESS]", result);
+  return result;
+};
+
+export const printFailure = (err) => {
+  console.log("[FAILURE]", err);
+  return err;
+};
+
+
 // -- reactive globals
 
 // -- primitive functions
@@ -493,6 +523,48 @@ export const tabQueries = { // objects: all, window, this
   },
 }
 
+// export const reduceToFields = (fields, data) => {
+//   return Promise.resolve(data).then((_data) => fields.map((field), ))
+// }
+
+export const tabIdQueries = {
+  this: tabQueries.this().then((tab) => tab.id).catch(print.failure_tabIdQueries),
+  window: tabQueries.window().then((tabs) => tabs.map((tab) => tab.id)).catch(print.failure_tabIdQueries),
+  all: tabQueries.all().then((tabs) => tabs.map((tab) => tab.id)).catch(print.failure_tabIdQueries),
+}
+
+// ------- Location Storage and sync
+
+export const saveTab = (params) => {
+  // params: tabData, saveKey
+}
+
+export const loadTab = (params) => {
+  // params: tabUri, originKey
+}
+
+export const syncStorage = (params) => {
+  // params: storageKey, priority:mine|theirs|merge
+  return Promise.resolve(params)
+    // .then((args) => )
+    // .then((keys) => {
+    //   return
+    // })
+}
+
+export const clearStorageKey = (params) => {
+  // params: storageKey == saveKey == originKey
+  let storageKey = params[0];
+  return Promise.resolve({
+      storageKey:[]
+    })
+    .then(browser.storage.local.set)
+    .catch(print.failure_storage_clear)
+
+}
+
+// -------
+
 export const hasTabId = (data) => {
   console.log("checking has tab id", data);
   if (data.tabId !== undefined) {
@@ -714,33 +786,6 @@ export const createNotifyFailure = async (params) => {
     message: `For ${params.title}`
   })
 }
-
-export const print = new Proxy(() => {}, {
-  // TODO return as universal print object,
-  // like, `print.failure`, `print.success`,
-  // `print.per_is_article`, `print.hi_mom`
-  get(target, name) {
-    return (args) => {
-      console.log(`[PRINT][${name.toUpperCase()}]`, args);
-      return args;
-    }
-  }
-});
-
-export const printStatus = (params) => {
-  console.log("[LOG][STATUS]", params);
-  return params;
-}
-
-export const printSuccess = (result) => {
-  console.log("[SUCCESS]", result);
-  return result;
-};
-
-export const printFailure = (err) => {
-  console.log("[FAILURE]", err);
-  return err;
-};
 
 export const setStore = async (params) => {
   return stores[params.name];
