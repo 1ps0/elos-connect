@@ -36,14 +36,21 @@ export const resolve = (path, obj, separator='.') => {
 }
 
 export const intersection = (sA, sB) => {
-  const result = new Set();
-  const _sA = new Set(sA);
-  for (let elem of sB) {
-    if (_sA.has(elem)) {
-      result.add(elem);
-    }
-  }
-  return [...result];
+  return Promise.resolve(sA)
+    .then((_sA) => new Set([_sA].flat(1)))
+    .then(print.status_intersection_sA)
+    .then((_sA) => {
+      const result = new Set();
+      for (let elem of sB) {
+        if (_sA.has(elem)) {
+          console.log("[INTERSECTION]", elem)
+          result.add(elem);
+        }
+      }
+      console.log("[DONE]", result)
+      return [...result];
+    })
+    .catch(print.failure_intersection);
 };
 
 
@@ -111,10 +118,27 @@ export const updateTab = (tabId, changeInfo, tab) => {
 let lastInput = ""; // hack cache to move the whole input to the actuation
 let prevSuggestions = [];
 
-const findNeighborCommands = (node) => {
+const getCommandPrefix = (ast) => {
+  return (ast && ast.length > 0 ?
+    ast[0].left.command :
+    lastInput.split(' ')[0]
+  );
+}
+
+const getCommandArgs = (ast) => {
+  return (ast && ast.length > 0 ?
+    ast[0].left.args :
+    lastInput.split(' ').slice(1)
+  );
+}
+
+const findNeighborCommands = (ast) => {
   // https://stackoverflow.com/questions/57026895/get-unique-values-from-array-of-arrays
-  let cmd_prefix = (node && node.length > 0 ? node[0].left.command : lastInput).split(' ');
   try {
+    let cmd_prefix = Promise.resolve(ast)
+      .then(getCommandPrefix)
+      .catch(print.failure_cmd_prefix);
+
     // reduces omnibox cmds to a flat array of all unique keywords.
     return Promise.resolve(
       [...new Set(
@@ -124,6 +148,7 @@ const findNeighborCommands = (node) => {
       )]
     )
     .then((keywords) => intersection(cmd_prefix, keywords))
+    .then(print.status_neighbors_intersection)
     .then((keys) => {
       // find input keywords used, with possible cmd keywords.
       // let keys = intersection(cmd_prefix, keywords);
@@ -220,7 +245,7 @@ export const renderSuggestions = (ast) => {
 }
 
 const omniboxOnInputChanged = async (text, addSuggestions) => {
-  console.log("CHANGED", lastInput, ", BECAME:", text);
+  // console.log("CHANGED", lastInput, ", BECAME:", text);
   lastInput = text;
   try {
     return Promise.resolve(lastInput)
@@ -260,8 +285,9 @@ export const renderAction = (ast) => {
     .then(findNeighborCommands)
     .then((neighbors) => ({
       tree: neighbors,
-      args: ast.args ? ast.args : []
+      args: getCommandArgs(ast)
     }))
+    .then(print.status_render_action)
     .then((_ast) => _ast.tree[0].action(_ast.args))
     // .then(print.success_render_action)
     .catch(print.failure_render_action);

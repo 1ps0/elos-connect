@@ -80,7 +80,6 @@ export const _send = async (params) => {
         body: JSON.stringify(params.body)
       }
     })
-    .then(print.status_sending)
     .then((args) => fetch(args.url, args))
     .then(handleResponse)
     .catch(print.failure_send);
@@ -334,7 +333,7 @@ export const registerContentScript = (hosts) => {
 }
 
 export const setupStorage = (params) => {
-  browser.storage.local.onChanged.addListener((changes) => {
+  return browser.storage.local.onChanged.addListener((changes) => {
     Promise.resolve(changes)
       .then(Object.entries)
       .then((entries) => {

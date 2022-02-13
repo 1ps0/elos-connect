@@ -126,7 +126,7 @@ onMount(async () => {
             {#each buttons as prop (prop.name)}
               <div
                 class="item-button"
-                on:click|preventDefault={(e) => Promise.resolve(_item).then(prop.action).catch(print.failure)}
+                on:click|preventDefault={(e) => Promise.resolve(_item).then(prop.action).catch(print.failure_item_list)}
               >
                 {prop.icon(_item)}
               </div>

@@ -90,12 +90,11 @@ try {
       }),
       action: (params) => {
         console.log("HIT sync", params);
-        return Promise.resolve(params ? params : [])
+        return Promise.resolve(params.length ? params : undefined)
           .then(browser.storage.local.get)
-          .then(print.status_sync_data)
           .then((data) => ({
-            url: `/api/pkg/${data.name ? data.name : 'mine'}/sync`,
-            body: JSON.stringify(data)
+            uri: `/api/pkg/mine/sync`, // TODO enable custom and automatic package names
+            body: data
           }))
           .then(_send)
           .then(print.success_send_sync)
@@ -224,9 +223,24 @@ try {
         }
       }
     },
+    sidebar: {
+      content: "sidebar",
+      description: "PARAMS: open, close, ...?; Manage the sidebar state.",
+      suggestions: (params) => {},
+      action: (params) => {
+        console.log("HIT", "sidebar", params);
+        let arg = params && params.length ? params[0] : 'open';
+        switch(arg) {
+          case 'open':
+          case 'close':
+          default:
+            console.log("[CMD][sidebar]", arg);
+        }
+      }
+    },
     stash: {
       content: "stash",
-      description: "capture essential content in each of the selected tabs, and store with stash",
+      description: "PARAMS: this, window, all; Capture essential content in each of the selected tabs, and store with stash.",
       suggestions: (params) => {
         console.log("SUGGESTIONS", params);
         return browser.storage.local.get("stash")
@@ -244,7 +258,8 @@ try {
       action: (params) => {
         console.log("HIT", "stash", params, tabQueries);
         // params: null, "this", "window", "all"
-        let _tabs = Promise.resolve(params.length ? params[0] : 'this')
+        let _tabs = Promise.resolve(params)
+          .then((_params) => _params[0])
           .then((keyword) => tabQueries[keyword])
           .then(print.status_tab_query)
           .then((tabQuery) => tabQuery())

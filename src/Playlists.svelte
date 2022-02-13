@@ -49,18 +49,18 @@ const openLink = (e) => {
 
 };
 
-const itemButtons = [
-  {
-    name: "",
-    icon: (item) => JSON.stringify(item),
-    action: (item) => {
-      // TODO "open in new window"
-      // TODO "open in new tab"
-      // TODO "open here"
-      // TODO "remove this"
-    },
-  },
-];
+const itemButtons = [];
+//   {
+//     name: "",
+//     icon: (item) => JSON.stringify(item),
+//     action: (item) => {
+//       // TODO "open in new window"
+//       // TODO "open in new tab"
+//       // TODO "open here"
+//       // TODO "remove this"
+//     },
+//   },
+// ];
 
 onMount(async () => {
   console.log('Playlists mounted');
