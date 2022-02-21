@@ -93,9 +93,9 @@ export const panelTypes = {
     w: layoutConfig.columnCount,
     h: 5,
     componentName: "playlists",
-    props: {
-      storeKey: 'stash',
-    }
+    // props: {
+    //   storeKey: 'stash',
+    // }
   },
   "panel-commandbar": {
     target: "panel-commandbar",

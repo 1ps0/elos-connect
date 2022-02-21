@@ -240,7 +240,7 @@ try {
     },
     stash: {
       content: "stash",
-      description: "PARAMS: this, window, all; Capture essential content in each of the selected tabs, and store with stash.",
+      description: "PARAMS: this, window, all | [tag_name]; Capture essential content in each of the selected tabs, and store with stash.",
       suggestions: (params) => {
         console.log("SUGGESTIONS", params);
         return browser.storage.local.get("stash")
@@ -261,7 +261,7 @@ try {
         let _tabs = Promise.resolve(params)
           .then((_params) => _params[0])
           .then((keyword) => tabQueries[keyword])
-          .then(print.status_tab_query)
+          // .then(print.status_tab_query)
           .then((tabQuery) => tabQuery())
           .then((tabs) => {
             return tabs.map((tab) => {
@@ -284,7 +284,7 @@ try {
                       _stash && _stash.stash ?
                         _stash.stash : []
                     ),
-                    ...tabs]
+                    ...[tabs]]
                 }
               })
               .catch(print.failure_storage_stash);

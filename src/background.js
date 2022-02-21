@@ -223,6 +223,7 @@ export const buildAST = (_input) => {
       }
       return tree;
     })
+    .then(print.success_build_ast)
     // .then((_tree) => _tree[0])
     .catch(print.failure_build_ast);
 }
@@ -231,15 +232,19 @@ export const renderSuggestions = (ast) => {
   if (ast.tree && ast.tree.length > 3) {
     return ast.tree;
   }
-  return Promise.all((ast.tree ? ast.tree : [])
-    .map((node) => {
-      if (node.suggestions) {
-        console.log("SUGGESTIONS", ast, ast.args);
-        return node.suggestions(ast.args).catch(print.failure_suggestions);
-      } else {
-        return node;
-      }
-    }))
+  // TODO does ast return the expected values?
+  return Promise.resolve(ast)
+    .then((_ast) => Promise.all(_ast.tree ? _ast.tree : []))
+    .then((tree) => {
+      return tree.map((node) => {
+        if (node.suggestions) {
+          console.log("SUGGESTIONS", ast, ast.args);
+          return node.suggestions(ast.args).catch(print.failure_suggestions);
+        } else {
+          return node;
+        }
+      })
+    })
     .then((results) => results.flat(1))
     .catch(print.failure_render_suggestions);
 }

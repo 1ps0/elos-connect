@@ -11,30 +11,55 @@ remote stores are grouped by playlist storekey
 */
 
 import { onMount } from 'svelte';
-import { writable, get } from 'svelte/store';
+import { writable, get, derived } from 'svelte/store';
 
+import ItemList from "./ItemList.svelte";
 import {
   createNotifySuccess,
-  print
+  print,
 } from "./lib/apis.js";
-import ItemList from "./ItemList.svelte";
 
+
+let storeKey = 'stash';
 let playlistStore = writable([]);
 playlistStore.subscribe((val) => {
   console.log("PLAYLIST UPDATE", val);
 });
 
-let storeKey = 'stash';
+let inputFilter = "";
+
+// FIXME trigger on update to inputFilter, not just playlistStore
+export const filterList = (_in, key) => {
+  try {
+    if (key && key.length > 0) {
+      return _in.filter((x) => {
+        return x.label
+          .toLowerCase()
+          .indexOf(
+            key.toLowerCase()
+          ) != -1
+      })
+    } else {
+      return _in;
+    }
+  } catch (err) {
+    console.log('ERR', err);
+    return _in;
+  }
+};
 
 
-const updatePlaylistStore = () => {
+
+const updatePlaylistStore = (key) => {
   return Promise.resolve(storeKey)
     .then(browser.storage.local.get)
     .then((result) => result[storeKey])
+    .then(print.status_update_playlist_store)
+    .then((result) => filterList(result, key))
     .then((tabs) => playlistStore.update((n) => tabs))
     .catch(print.failure_stash_playlist_get);
 }
-$: updatePlaylistStore();
+$: updatePlaylistStore(inputFilter);
 
 
 const openLink = (e) => {
@@ -61,21 +86,22 @@ const itemButtons = [];
 //     },
 //   },
 // ];
+    // buttons={itemButtons}
 
 onMount(async () => {
   console.log('Playlists mounted');
-  updatePlaylistStore()
+  updatePlaylistStore(inputFilter)
 });
 
 </script>
 
 <section>
+  <p><input bind:value={inputFilter} type="text"/></p>
   <ItemList
     readonly=true
     dataStore={playlistStore}
     titleKey="label"
     on:didClick={openLink}
-    buttons={itemButtons}
   />
 </section>
 

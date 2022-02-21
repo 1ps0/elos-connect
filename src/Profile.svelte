@@ -1,5 +1,25 @@
 <script>
+/*
+WHOAMI
 
+1. identifying information
+2. personal/private profile
+3. public profile
+4. communications preferences
+5. key interests
+6. machine user (m2m systems)
+7. learning topics
+8. expertise topics
+9. authentications
+10. external integrations
+11. rules and templates
+12. loaded packages
+13. passive backlog (stash)
+14. package/playlist builder
+15. sync options
+16,
+
+*/
 import { onMount } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 

@@ -9,9 +9,6 @@ import { openWith } from "../config/open.js";
 // -- global logging
 
 export const print = new Proxy(() => {}, {
-  // TODO return as universal print object,
-  // like, `print.failure`, `print.success`,
-  // `print.per_is_article`, `print.hi_mom`
   get(target, name) {
     return (args) => {
       console.log(`[PRINT][${name.toUpperCase()}]`, args);

@@ -78,17 +78,27 @@ onMount(async () => {
       } else {
         queue = [];
       }
-    });
+    })
+    .catch(print.failure_itemlist_datastore_update);
+    console.log("dataStore mounted in ItemList");
   }
 
   if (dataSourcePath) {
     console.log("running dataSourcePath fetch", dataSourcePath);
-    // dataStore.update((n) => _fetch(dataSourcePath));
-    queue = (await _fetch({ uri: dataSourcePath })).result;
-    console.log("dataSourcePath GOT", queue);
-    if (dataStore) {
-      dataStore.update(n => queue);
-    }
+    // queue = dataStore.update((n) => _fetch(dataSourcePath));
+    Promise.resolve(dataSourcePath)
+      .then({
+        uri: dataSourcePath
+      })
+      .then(_fetch)
+      .then((result) => {
+        queue = result
+        return result;
+      })
+      .then((result) => {
+        dataStore ? dataStore.update(n => result) : null;
+      })
+      .catch(print.failure_itemlist_data_source_path)
   }
 
 });
@@ -109,7 +119,7 @@ onMount(async () => {
           </div>
         </li>
       {/if}
-      {#each queue as _item (_item.name) }
+      {#each queue as _item (_item) }
           <!-- use:linker={queue}
           class:checked={_item.checked}-->
         <li
@@ -122,16 +132,14 @@ onMount(async () => {
             <span>{transform(_item)}</span>
           {/if}
 
-          {#if buttons.length > 0}
-            {#each buttons as prop (prop.name)}
-              <div
-                class="item-button"
-                on:click|preventDefault={(e) => Promise.resolve(_item).then(prop.action).catch(print.failure_item_list)}
-              >
-                {prop.icon(_item)}
-              </div>
-            {/each}
-          {/if}
+          {#each buttons as prop (prop)}
+            <div
+              class="item-button"
+              on:click|preventDefault={(e) => Promise.resolve(_item).then(prop.action).catch(print.failure_item_list)}
+            >
+              {prop.icon(_item)}
+            </div>
+          {/each}
 
           {#if !readonly}
             <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
