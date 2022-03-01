@@ -10,8 +10,9 @@ import { openWith } from "../config/open.js";
 
 export const print = new Proxy(() => {}, {
   get(target, name) {
+    let _name = name.toUpperCase().split('_');
     return (args) => {
-      console.log(`[PRINT][${name.toUpperCase()}]`, args);
+      console.log(`[${_name[0]}][${_name.slice(1).join('_')}]`, args);
       return args;
     }
   }
@@ -48,7 +49,7 @@ export const handleResponse = async (response) => {
 
 export const _fetch = async (params) => {
   // let baseUrl = "http://localhost:3000";
-  let baseUrl = get(stores.config).baseUrl;
+  let baseUrl = get(stores.config).host.uri;
   return Promise.resolve(new URL(params.uri, baseUrl))
     .then((url) => {
       for (let arg in params.args) {
@@ -63,7 +64,7 @@ export const _fetch = async (params) => {
 
 export const _send = async (params) => {
   // let baseUrl = "http://localhost:3000";
-  let baseUrl = get(stores.config).baseUrl;
+  let baseUrl = get(stores.config).host.uri;
   return Promise.resolve(new URL(params.uri, baseUrl))
     .then((url) => {
       return {
@@ -1015,6 +1016,40 @@ export function _updateFiletype(typeName) {
   //   return obj;
   // });
 };
+
+// -- playlist controls 1
+
+const start = (playlist) => {
+  /*
+  1. get profile data
+  2. update profile data with playlist cursor
+  3. cursor entry for 'active package'
+  4. cursor location is url, and progress
+  5. cursor has a history
+  6. shows past played, duration, notes
+  7. cursor lookahead shows next item in playlist
+  8. cursor history is a collection of objects in key-value stores
+  9. suggestion functions based on next, and past history items
+  10. operations for the current playlist item, the current cursor location
+  11. location is by object, as location is over time and object resulting from action
+  12.
+  */
+}
+
+export function startPlaylist(name) {
+  return Promise.resolve(name)
+    .then(browser.storage.local.get)
+    .then((data) => data[name])
+    .then((playlist) => {
+      return playlist.reduce((sum, item) => {
+        return sum[item.name]
+      }, {})
+    })
+    .then(start)
+    .catch(print.failure_start_playlist);
+}
+
+
 
 // -- subscriptions
 

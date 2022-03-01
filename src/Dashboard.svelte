@@ -73,6 +73,24 @@ const isAudible = async (params) => {
   return true;
 }
 
+const addHost = (params) => {
+  return Promise.resolve(params) // e.value
+    .then((_input) = _input.text)
+    // TODO validate input as name
+    .then(print.status_add_host)
+    // TODO ... do something with the value
+    .catch(print.failure_add_host)
+}
+
+const loadHosts = (params) => {
+  return Promise.resolve(params)
+    .then((_params) => {
+      return browser.storage.local.get('config')
+    })
+    .then((data) => [data['config'].host])
+    .catch(print.failure_load_hosts);
+}
+
 const browserStats = async (params) => {
 
   // count of videos
@@ -134,6 +152,20 @@ onMount(async () => {
       </ul>
     <br>
     <h3>Set Remote host</h3>
+    <div>
+      <ul>Add New: <input on:submit={addHost} type="text"/></ul>
+      {#await loadHosts() then hosts}
+        {#each hosts as host}
+          <li>
+            <p>{host.name}</p>
+            <p>{host.uri}</p>
+          </li>
+        {/each}
+      {:catch failure}
+      <p>Failed to load remote hosts: {failure}</p>
+      {/await}
+      <ul></ul>
+    </div>
     <br>
     <h3>Keyboard shortcut</h3>
     {#await loadCommands() then commands}

@@ -21,7 +21,7 @@ import {
 
 
 let storeKey = 'stash';
-let playlistStore = writable([]);
+let playlistStore = writable({});
 playlistStore.subscribe((val) => {
   console.log("PLAYLIST UPDATE", val);
 });
@@ -32,13 +32,15 @@ let inputFilter = "";
 export const filterList = (_in, key) => {
   try {
     if (key && key.length > 0) {
-      return _in.filter((x) => {
-        return x.label
+      let fit = _in.filter((x) => {
+        return (x.label ? x.label : `${x}`)
           .toLowerCase()
           .indexOf(
             key.toLowerCase()
           ) != -1
-      })
+      });
+      console.log("FILTER LIST", key, fit, _in);
+      return fit;
     } else {
       return _in;
     }
@@ -56,7 +58,19 @@ const updatePlaylistStore = (key) => {
     .then((result) => result[storeKey])
     .then(print.status_update_playlist_store)
     .then((result) => filterList(result, key))
-    .then((tabs) => playlistStore.update((n) => tabs))
+    .then((tabs) => {
+      return playlistStore.update((n) => ({
+        ...n,
+        ...tabs.filter((store, tab) => {
+          if (store[key] && store[key].length)
+            store[key].append(tab)
+          else {
+            store[key] = [tab];
+          }
+          return store;
+        }, {})
+      }))
+    })
     .catch(print.failure_stash_playlist_get);
 }
 $: updatePlaylistStore(inputFilter);

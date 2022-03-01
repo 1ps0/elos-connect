@@ -1,6 +1,6 @@
 
 /*
-- 'stash' a window or select group of tabs,
+- (DONE) 'stash' a window or select group of tabs,
     label the group in a panel,
     reopen one or all
 
@@ -82,12 +82,12 @@ try {
     sync: {
       content: "sync",
       description: "sync current state with remote.",
-      suggestions: (params) => ({
-        mine: {
-          content: "mine",
-          description: "send mine and prefer it for value conflicts"
-        }
-      }),
+      // suggestions: (params) => {
+      //   mine: {
+      //     content: "mine",
+      //     description: "send mine and prefer it for value conflicts"
+      //   }
+      // }),
       action: (params) => {
         console.log("HIT sync", params);
         return Promise.resolve(params.length ? params : undefined)
@@ -161,6 +161,7 @@ try {
         // let windows = browser.windows.getAll().then((windows) => {
         //     return windows.filter((_window) => _window.type === "normal")
         //   })
+        // params in ('all', '<domain>', <tag>, ilike <title>, type: video, audio, article)
         let _tabs = getAllTabs()
           .then((tabs) => tabs.filter((tab) => new RegExp(params[0]).test(tab.url)))
           .then((tabs) => tabs.map((tab) => tab.id))
@@ -201,12 +202,12 @@ try {
     goto: {
       content: "goto",
       description: "goto a given tab",
-      suggestions: (params) => {
+      // suggestions: (params) => {
         // how to replace, augment, or otherwise stand by firefox suggestions
         // push/pop last tab
         // numbered keys for popular sites
         //
-      },
+      // },
       action: (params) => {
 
       }
@@ -258,8 +259,9 @@ try {
       action: (params) => {
         console.log("HIT", "stash", params, tabQueries);
         // params: null, "this", "window", "all"
+        let _tag = params.length > 1 ? params[1] : 'unsorted';
         let _tabs = Promise.resolve(params)
-          .then((_params) => _params[0])
+          .then((_params) => _params.length ? _params[0] : 'this')
           .then((keyword) => tabQueries[keyword])
           // .then(print.status_tab_query)
           .then((tabQuery) => tabQuery())
@@ -269,7 +271,9 @@ try {
                 tabId: tab.id,
                 uri: tab.url,
                 label: tab.title,
-                tag: params.length > 1 ? params[1] : 'unsorted'
+                tag: _tag,
+                icon: tab.favIconUrl,
+
               }
             })
           });
@@ -278,10 +282,10 @@ try {
             return browser.storage.local.get("stash")
               .then((_stash) => {
                 return {
-                  stash: [
+                  _tag: [
                     ...(
                       // get or init with empty array
-                      _stash && _stash.stash ?
+                      _stash && _stash[_tag] ?
                         _stash.stash : []
                     ),
                     ...[tabs]]
@@ -492,7 +496,10 @@ try {
           .then((_params) => _params.split(" ").slice(1))
           .then((args) => {
             // command shortcut, remote uri, color pallete
-            if (args[0] === "remote") {
+            if (!args || args.length === 0 || args[0] === 'open') {
+
+            }
+            else if (args[0] === "remote") {
               console.log("UPDATING REMOTE TARGET:", args, params);
               //
             }
@@ -534,7 +541,16 @@ try {
       description: "Opens a panel or tagged group of links",
       action: (params) => {
         console.log("HIT ", "open", params)
-        return browser.windows.create({ url: params.url });
+        if (!params && params.length == 0) { return; }
+        if (params[0] === 'options') {
+          return browser.runtime.openOptionsPage()
+            .catch(print.failure_open_options);
+        } else if (params[0] === 'sidebar') {
+          return browser.sidebarAction.open()
+            .catch(print.failure_open_sidebar);
+        } else {
+          return browser.windows.create({ url: params.url });
+        }
         /*
         group:
         package: index, current, mark_as_completed, next, reset

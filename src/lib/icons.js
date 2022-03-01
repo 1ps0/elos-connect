@@ -29,6 +29,7 @@ import Crossroads16 from "carbon-icons-svelte/lib/Crossroads16";
 import CrossTab16 from "carbon-icons-svelte/lib/CrossTab16";
 import Cut16 from "carbon-icons-svelte/lib/Cut16";
 import Delete16 from "carbon-icons-svelte/lib/Delete16";
+import DataVis_416 from "carbon-icons-svelte/lib/DataVis_416";
 import DeployRules16 from "carbon-icons-svelte/lib/DeployRules16";
 import Download16 from "carbon-icons-svelte/lib/Download16";
 import Education16 from "carbon-icons-svelte/lib/Education16";
@@ -78,6 +79,9 @@ export let icons = {
   "settings": Settings16,
   "preferences": AudioConsole16,
   "polls": DeployRules16,
+
+  // dataviz
+  "composite": DataVis_416,
 
   // toolbar
   "status-hidden": AccessibilityColor16,

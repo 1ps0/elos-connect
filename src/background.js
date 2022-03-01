@@ -224,7 +224,6 @@ export const buildAST = (_input) => {
       return tree;
     })
     .then(print.success_build_ast)
-    // .then((_tree) => _tree[0])
     .catch(print.failure_build_ast);
 }
 
@@ -255,6 +254,7 @@ const omniboxOnInputChanged = async (text, addSuggestions) => {
   try {
     return Promise.resolve(lastInput)
       .then(buildAST)
+      .then(print.status_changed_ast)
       .then(renderSuggestions)
       .then(addSuggestions)
       .catch(print.failure_omnibox_changed);

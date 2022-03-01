@@ -1,6 +1,6 @@
 // 2nd order
 
-import { menuItems } from "./layout.js";
+import { menuItems, actionItems } from "./layout.js";
 
 /*
 Item Interface:
@@ -45,6 +45,20 @@ export const panelTypes = {
       showIn: "sidebar",
       eventName: "menuToggle",
       items: menuItems,
+      transform: (e) => { return e.value.icon }
+    }
+  },
+  "panel-layout": {
+    target: "panel-layout",
+    name: "layout",
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*11,
+    h: 2,
+    componentName: "selectlist",
+    event: { name: 'layoutAction', callback: "alighPanel" },
+    props: {
+      showIn: "sidebar",
+      eventName: "layoutAction",
+      items: actionItems,
       transform: (e) => { return e.value.icon }
     }
   },

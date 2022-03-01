@@ -7,6 +7,20 @@
 
 export let workspaceConfig = {
   loadedAt: new Date(),
-  baseUrl: "http://localhost:3000"
+  version: '0.0.7-prealpha',
+  config: {},
+  host: {
+    name: "localhost",
+    uri: "http://localhost:3000",
+  },
+  activePlaylist: {
+    notes: {},
+    items: {},
+  },
+  playlistHistory: [],
+  recentlySaved: [],
+  todo: {},
+  journal: [],
+
 };
 

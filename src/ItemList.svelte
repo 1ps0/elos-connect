@@ -66,7 +66,6 @@ onMount(async () => {
   console.log('ItemList mounted');
 
   if (dataStore) {
-    console.log("dataStore mounted in ItemList");
     dataStore.subscribe((val) => {
       if (val) {
         console.log("ItemList update", val);

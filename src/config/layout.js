@@ -5,6 +5,19 @@ low order item for configuring the layoutgrid(s). no deeper dependencies that po
 - TODO icon dependency
 */
 
+export const actionItems = [
+  {
+    name: "action-compact",
+    value: { icon: "view-mode-2", highlight: "Move panels in close together." },
+    group: "1"
+  },
+  // {
+  //   name: "action-",
+  //   value: { icon: "view-mode-2", highlight: "Move panels in close together." },
+  //   group: "1"
+  // },
+]
+
 
 // GRID MENU PANEL
 export const menuItems = [
@@ -39,6 +52,11 @@ export const menuItems = [
     group: "1"
   },
   {
+    name: "panel-dashboard",
+    value: { icon: "composite", highlight: "Dashboard"},
+    group: "1"
+  },
+  {
     name: "panel-todo",
     value: { icon: "list", highlight: "TODO List"},
     group: "1"
@@ -48,16 +66,16 @@ export const menuItems = [
     value: { icon: "polls", highlight: "Journal"},
     group: "1"
   },
-  // {
-  //   name: "panel-eventhistory",
-  //   value: { icon: "view-mode-1", highlight: "Event History"},
-  //   group: "1"
-  // },
-  // {
-  //   name: "panel-actionhistory",
-  //   value: { icon: "view-mode-2", highlight: "Action History"},
-  //   group: "2"
-  // },
+  {
+    name: "panel-eventhistory",
+    value: { icon: "view-mode-1", highlight: "Event History"},
+    group: "1"
+  },
+  {
+    name: "panel-actionhistory",
+    value: { icon: "view-mode-2", highlight: "Action History"},
+    group: "2"
+  },
   {
     name: "panel-locations",
     value: { icon: "view-mode-3", highlight: "File/URL locations"},

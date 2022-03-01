@@ -134,15 +134,15 @@ onMount(async () => {
 
   let panels = Promise.resolve([]);
   [
+    "panel-mainmenu",
     // "panel-timer",
-    // "panel-locations",
     // "panel-commandbar",
-    "panel-location-ops",
+    // "panel-location-ops",
+    "panel-dashboard",
+    "panel-playlists",
     "panel-web-players",
     "panel-actionmenu",
-    "panel-playlists",
-    "panel-dashboard",
-    "panel-mainmenu",
+    // "panel-locations",
   ].forEach((name) => {
     panels = panels.then((prev) => {
       console.log("[PANEL][ADD]", name, '--', prev);
