@@ -508,14 +508,16 @@ export const getCurrentActiveTab = async () => {
 };
 
 export const tabQueries = { // objects: all, window, this
+  here: getCurrentActiveTab,
   this: getCurrentActiveTab,
+  tab: getCurrentActiveTab,
   window: getCurrentWindowTabs,
   all: getAllTabs,
   clear: () => {
     browser.storage.local.set({
-      stash:[]
+      stash:{}
     })
-    .then(() => [])
+    .then(() => {})
     .catch(print.failure_stash_clear)
   },
 }

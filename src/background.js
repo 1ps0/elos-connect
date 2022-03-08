@@ -66,10 +66,16 @@ export const union = (sA, sB) => {
 // ------ THEME
 
 let currentTheme = null;
-const setOmniboxTheme = (params) => {
+const _setOmniboxTheme = (params) => {
   // windows.WINDOW_ID_CURRENT
   return [params, browser.theme.update(params)];
 };
+
+const setOmniboxTheme = () => {
+  Promise.resolve(currentTheme)
+    .then(setOmniboxTheme)
+    .catch(print.failure_reset_omnibox_theme);
+}
 
 const resetOmniboxTheme = (params) => {
   return [params, browser.theme.reset()];
@@ -89,6 +95,21 @@ const createOmniboxActivationTheme = (theme) => {
   };
 };
 
+const restoreCurrentTheme = () => {
+  return Promise.resolve(
+    currentTheme ?
+    currentTheme : browser.theme.getCurrent()
+  )
+  .then(createOmniboxActivationTheme)
+  .then((params) => {
+    currentTheme = browser.theme.getCurrent();
+    return params;
+  })
+  .then(setOmniboxTheme)
+  .catch(print.failure_restore_current_theme);
+}
+
+
 // ------ MESSAGING
 
 const handleMessage = (request, sender, sendResponse) => {
@@ -107,10 +128,12 @@ export const updateTab = (tabId, changeInfo, tab) => {
         title: tab.title,
         url: tab.url,
         playing: tab.audible,
+        article: tab.isArticle,
         changed: changeInfo
       }
-  ).then(print.success)
-  .catch(print.failure);
+    )
+    .then(print.success_update_tab)
+    .catch(print.failure_update_tab);
 }
 
 // ------ COMMAND SEARCH
@@ -118,143 +141,55 @@ export const updateTab = (tabId, changeInfo, tab) => {
 let lastInput = ""; // hack cache to move the whole input to the actuation
 let prevSuggestions = [];
 
-const getCommandPrefix = (ast) => {
-  return (ast && ast.length > 0 ?
-    ast[0].left.command :
-    lastInput.split(' ')[0]
-  );
-}
-
-const getCommandArgs = (ast) => {
-  return (ast && ast.length > 0 ?
-    ast[0].left.args :
-    lastInput.split(' ').slice(1)
-  );
-}
-
-const findNeighborCommands = (ast) => {
-  // https://stackoverflow.com/questions/57026895/get-unique-values-from-array-of-arrays
-  try {
-    let cmd_prefix = Promise.resolve(ast)
-      .then(getCommandPrefix)
-      .catch(print.failure_cmd_prefix);
-
-    // reduces omnibox cmds to a flat array of all unique keywords.
-    return Promise.resolve(
-      [...new Set(
-        Object.keys(cmds)
-        .map((cmd) => cmd.split('_'))
-        .flat(1)
-      )]
-    )
-    .then((keywords) => intersection(cmd_prefix, keywords))
-    .then(print.status_neighbors_intersection)
-    .then((keys) => {
-      // find input keywords used, with possible cmd keywords.
-      // let keys = intersection(cmd_prefix, keywords);
-      // return the command name for a given bag of keywords
-      return Object.values(cmds).filter((cmd) => cmd.content.includes(keys.join('_')));
-    })
-    // .then(print.status_neighbor_keywords)
-    .catch(print.failure_find_neighbor_commands);
-  }
-  catch (err) {
-    console.log(err);
-    return Promise.reject(err);
-  }
-};
-
-export const buildAST = (_input) => {
-  // return _input; // until function is implemented
-
-  // supports | and >
-  // where | is normal pipe operation in unix
-  // where > is unix-like output into a target
-  return Promise.resolve(_input)
-    // TODO: find superstonk | gather > new window
-    .then((_input) => _input.trim().split("|"))
-    .then((parts) => {
-      // break into parts (tokenize), simple linear tokenizer
-      return parts.map((part) => {
-        return part.trim()
-          .split(" ")
-          .map((token) => {
-            return token.trim()
-              // .split(":")
-              // .map((_token) => _token.trim())
-          });
-      });
-    })
-    // ["stash", "window"]
-    // TODO: [["find", "sq"], "|", ["gather"], ">", ["new", "window"]]
-    .then((parts) => {
-      return parts.map((section) => {
-        if (section.length > 0) {// && section[0].length > 0) {
-          return {
-            command: section[0],
-            args: section.slice(1)
-          };
-        } else {
-          // TODO replace with '|' or '>' operations across cmds
-          return {
-            command: null,
-            args: section
-          };
-        }
-      });
-    })
-    .then((parts) => { // build AST
-      let tree = [];
-      let node = {};
-      for (let part of parts) {
-        if (!part.command) { //(part === "|" || part === ">") {
-          node.op = part;
-        } else if (!node.left) {
-          node.left = part;
-        } else if (!node.right) {
-          node.right = part;
-        }
-
-        // hack for left-only case
-        if (node.left) {
-          tree.push(node);
-          node = {};
-        }
+export const renderSuggestions = (_cmds) => {
+  return Promise.resolve(_cmds)
+    // .then((tree) => tree.filter((cmdList, node) => cmdList, {}))
+    .then((cmd) => {
+      let tree = cmd[0];
+      let args = cmd[1];
+      console.log("SUGGESTIONS", tree, args);
+      if (tree.suggestions) {
+        return tree.suggestions(args);
+      } else if (
+        Array.isArray(tree) &&
+        tree.length > 0 &&
+        tree[0].suggestions
+      ) {
+        return tree[0].suggestions(args);
+      } else if (Array.isArray(tree)) {
+        return tree;
+      } else {
+        return [tree].flat(1);
       }
-      return tree;
     })
-    .then(print.success_build_ast)
-    .catch(print.failure_build_ast);
-}
-
-export const renderSuggestions = (ast) => {
-  if (ast.tree && ast.tree.length > 3) {
-    return ast.tree;
-  }
-  // TODO does ast return the expected values?
-  return Promise.resolve(ast)
-    .then((_ast) => Promise.all(_ast.tree ? _ast.tree : []))
-    .then((tree) => {
-      return tree.map((node) => {
-        if (node.suggestions) {
-          console.log("SUGGESTIONS", ast, ast.args);
-          return node.suggestions(ast.args).catch(print.failure_suggestions);
-        } else {
-          return node;
-        }
-      })
-    })
-    .then((results) => results.flat(1))
     .catch(print.failure_render_suggestions);
 }
+
+const findCommands = (_input) => {
+  let parts = _input.toLowerCase().split(" ");
+  let cursor = cmds;
+  let args = null;
+  parts.forEach((part, idx) => {
+    let _cursor = cursor[part];
+    if (_cursor) {
+      cursor = _cursor;
+    } else if (!args) {
+      args = idx; // grab the slice at args, not just the part
+    }
+    // console.log("[CHANGED] cursor:", cursor, args);
+  });
+  args = args ? parts.slice(args) : null;
+  // console.log("[END] cursor:", cursor, args);
+  return [cursor, args];
+};
 
 const omniboxOnInputChanged = async (text, addSuggestions) => {
   // console.log("CHANGED", lastInput, ", BECAME:", text);
   lastInput = text;
   try {
     return Promise.resolve(lastInput)
-      .then(buildAST)
-      .then(print.status_changed_ast)
+      .then(findCommands)
+      // .then(print.status_find_commands)
       .then(renderSuggestions)
       .then(addSuggestions)
       .catch(print.failure_omnibox_changed);
@@ -269,51 +204,26 @@ const omniboxOnInputStarted = async () => {
   console.log("User has started interacting with me.");
   lastInput = "";
   return;
-
-  // return Promise.resolve(
-  //   currentTheme ?
-  //   currentTheme : browser.theme.getCurrent()
-  // )
-  // .then(createOmniboxActivationTheme)
-  // .then((params) => {
-  //   currentTheme = browser.theme.getCurrent();
-  //   return params;
-  // })
-  // .then(setOmniboxTheme)
-  // .catch(print.failure);
 };
 
-export const renderAction = (ast) => {
-  console.log("[ENTERED]", ast);
-
-  return Promise.resolve(ast)
-    .then(findNeighborCommands)
-    .then((neighbors) => ({
-      tree: neighbors,
-      args: getCommandArgs(ast)
-    }))
-    .then(print.status_render_action)
-    .then((_ast) => _ast.tree[0].action(_ast.args))
-    // .then(print.success_render_action)
+export const renderAction = (_input) => {
+  return Promise.resolve(_input)
+    .then(findCommands)
+    // .then(print.status_render_action)
+    .then((_cmds) => _cmds[0].action(_cmds[1]))
     .catch(print.failure_render_action);
 }
 
 const omniboxOnInputEntered = (input, disposition) => {
   console.log("INPUT SUBMITTED", lastInput, '--', input, '--', cmds[input]);
-
-  // return Promise.resolve(currentTheme)
-  //   .then(setOmniboxTheme)
-  //   .catch(print.failure)
-
-    return Promise.resolve(lastInput)
-      .then(buildAST)
-      .then(renderAction)
-      .then(print.success_on_input_entered)
-      .catch(print.failure_omnibox_entered);
+  return Promise.resolve(lastInput)
+    .then(renderAction)
+    .then(print.success_on_input_entered)
+    .catch(print.failure_omnibox_entered);
 };
 
 const omniboxOnInputCancelled = () => {
-  // Promise.resolve(currentTheme).then(setOmniboxTheme).catch(print.failure);
+  resetOmniboxTheme();
 }
 
 

@@ -26,7 +26,7 @@ playlistStore.subscribe((val) => {
   console.log("PLAYLIST UPDATE", val);
 });
 
-let inputFilter = "";
+let inputFilter = null;
 
 // FIXME trigger on update to inputFilter, not just playlistStore
 export const filterList = (_in, key) => {
@@ -53,10 +53,12 @@ export const filterList = (_in, key) => {
 
 
 const updatePlaylistStore = (key) => {
-  return Promise.resolve(storeKey)
-    .then(browser.storage.local.get)
-    .then((result) => result[storeKey])
-    .then(print.status_update_playlist_store)
+  return browser.storage.local.get()
+    .then(print.status_playlist_storage)
+    .then((result) => Object.entries(result.stash).map((entry) => {
+      return entry;
+    }))
+    // .then(print.status_update_playlist_store)
     .then((result) => filterList(result, key))
     .then((tabs) => {
       return playlistStore.update((n) => ({
@@ -73,7 +75,7 @@ const updatePlaylistStore = (key) => {
     })
     .catch(print.failure_stash_playlist_get);
 }
-$: updatePlaylistStore(inputFilter);
+// $: updatePlaylistStore(inputFilter);
 
 
 const openLink = (e) => {
