@@ -33,6 +33,13 @@ export const printFailure = (err) => {
   return err;
 };
 
+// -- system
+
+export const doReloadSystem = (params) => {
+  return browser.runtime.reload().
+    catch(createNotifyFailure);
+}
+
 
 // -- reactive globals
 
@@ -81,6 +88,14 @@ export const _send = async (params) => {
     .then((args) => fetch(args.url, args))
     .then(handleResponse)
     .catch(print.failure_send);
+}
+
+// ------- Storage
+
+export const getAllStorageLocal = (params) => {
+  return Promise.resolve((params && params.length) ? params : undefined)
+    .then(browser.storage.local.get)
+    .catch(print.failure_sync);
 }
 
 // ------- Send composites

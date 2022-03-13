@@ -64,6 +64,7 @@ import {
   createNotifyFailure,
   createNotifySuccess,
   doSelectedCopy,
+  doReloadSystem,
   findInAll,
   getAllTabs,
   getCurrentActiveTab,
@@ -96,7 +97,6 @@ try {
             uri: `/api/pkg/mine/sync`, // TODO enable custom and automatic package names
             body: data
           }))
-          .then(print.status_send_sync)
           .then(_send)
           .then(print.success_send_sync)
           .catch(print.failure_sync);
@@ -487,8 +487,7 @@ try {
       description: "reload plugin",
       action: (params) => {
         console.log("HIT", "reload", params);
-        return browser.runtime.reload().
-          catch(createNotifyFailure);
+        return doReloadSystem();
       }
     },
     search: {

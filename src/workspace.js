@@ -8,7 +8,13 @@
 export let workspaceConfig = {
   loadedAt: new Date(),
   version: '0.0.7-prealpha',
-  config: {},
+  config: {
+    logs: {
+      level: "debug",
+      target: "local",
+    },
+
+  },
   host: {
     name: "localhost",
     uri: "http://localhost:3000",

@@ -96,13 +96,13 @@ let items = [
     click: doSelectedCopy
   },
   {
+    title: 'Reload eLOS',
+    click: doReloadSystem
+  },
+  {
     title: 'Download Video',
     click: doDownloadVideo
   },
-  // {
-  //   title: '',
-  //   click: ''
-  // },
 ]
 onMount(async () => {
   console.log('ActionMenu mounted');

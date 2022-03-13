@@ -12,7 +12,7 @@ then writable calls readable's values for those datasets
 */
 
 import { writable, get } from 'svelte/store';
-import { workspaceConfig } from "../config/parameters.js";
+import { workspaceConfig } from "workspace.js";
 
 export const storageFor = (name, otherwise={}) => {
   return Promise.resolve(`${name}`)

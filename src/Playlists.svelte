@@ -22,6 +22,7 @@ import {
 
 let storeKey = 'stash';
 let playlistStore = writable({});
+// let renderedPlaylistStore = derived(playlistStore, $playlistStore => $playlistStore.map(()))
 playlistStore.subscribe((val) => {
   console.log("PLAYLIST UPDATE", val);
 });
