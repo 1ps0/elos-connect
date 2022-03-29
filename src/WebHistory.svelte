@@ -5,8 +5,7 @@ import { writable, get } from 'svelte/store';
 
 import {
   createNotifySuccess,
-  printSuccess,
-  printFailure
+  print,
 } from "./lib/apis.js";
 import ItemList from "./ItemList.svelte";
 
@@ -54,8 +53,8 @@ const captureCurrent = async () => {
       }
 
     })
-    .then(printSuccess)
-    .catch(printFailure);
+    .then(print.success_capture_current)
+    .catch(print.failure_capture_current);
 
 }
 
@@ -94,7 +93,7 @@ onMount(async () => {
     // maxResults: sessions.MAX_SESSION_RESULTS // 25
   })
     .then(() => {})
-    .catch(printFailure);
+    .catch(print.failure);
 
 });
 

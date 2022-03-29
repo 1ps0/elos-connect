@@ -21,6 +21,7 @@ export let dataSourcePath = null;
 export let dataStore = null;
 export let dataKey = null;
 export let readonly = false;
+export let deletable = false;
 export let transform = (x) => x;
 export let buttons = [];
 
@@ -68,7 +69,7 @@ onMount(async () => {
   if (dataStore) {
     dataStore.subscribe((val) => {
       if (val) {
-        console.log("ItemList update", val);
+        // console.log("ItemList update", val);
         if (dataKey) {
           queue = val[dataKey];
         } else {
@@ -77,8 +78,8 @@ onMount(async () => {
       } else {
         queue = [];
       }
-    })
-    .catch(print.failure_itemlist_datastore_update);
+    });
+    // .catch(print.failure_itemlist_datastore_update);
     console.log("dataStore mounted in ItemList");
   }
 
@@ -101,6 +102,13 @@ onMount(async () => {
   }
 
 });
+
+const squashItem = (title, length) => {
+  let maxTitle = (title || "").slice(0,length);
+  let minTitle = (title || "").slice(length - maxTitle.length - 3, length);
+
+  return maxTitle;
+}
 
 </script>
 
@@ -126,7 +134,7 @@ onMount(async () => {
           on:click={() => didClick(_item)}
         >
           {#if titleKey}
-            <span>{_item[titleKey]}</span>
+            <span>{squashItem(`${_item.tag || ""}${_item.tag ? ": " : " "}${_item[titleKey]}`, 25)}</span>
           {:else if transform}
             <span>{transform(_item)}</span>
           {/if}
@@ -140,7 +148,7 @@ onMount(async () => {
             </div>
           {/each}
 
-          {#if !readonly}
+          {#if deletable}
             <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
           {/if}
         </li>
@@ -189,7 +197,7 @@ ul li {
   padding: 12px;
   list-style-type: none;
   background: #eee;
-  font-size: 16px;
+  font-size: 13px;
   transition: 0.2s;
   width: 100%;
 

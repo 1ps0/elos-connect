@@ -23,60 +23,30 @@ import {
 let storeKey = 'stash';
 let playlistStore = writable({});
 // let renderedPlaylistStore = derived(playlistStore, $playlistStore => $playlistStore.map(()))
-playlistStore.subscribe((val) => {
-  console.log("PLAYLIST UPDATE", val);
-});
+// playlistStore.subscribe((val) => {
+//   console.log("PLAYLIST UPDATE", val);
+// });
 
 let inputFilter = null;
-
-// FIXME trigger on update to inputFilter, not just playlistStore
-export const filterList = (_in, key) => {
-  try {
-    if (key && key.length > 0) {
-      let fit = _in.filter((x) => {
-        return (x.label ? x.label : `${x}`)
-          .toLowerCase()
-          .indexOf(
-            key.toLowerCase()
-          ) != -1
-      });
-      console.log("FILTER LIST", key, fit, _in);
-      return fit;
-    } else {
-      return _in;
-    }
-  } catch (err) {
-    console.log('ERR', err);
-    return _in;
-  }
-};
+$: updatePlaylistStore(inputFilter);
 
 
-
-const updatePlaylistStore = (key) => {
+const updatePlaylistStore = (_inputFilter) => {
   return browser.storage.local.get()
-    .then(print.status_playlist_storage)
-    .then((result) => Object.entries(result.stash).map((entry) => {
-      return entry;
-    }))
-    // .then(print.status_update_playlist_store)
-    .then((result) => filterList(result, key))
-    .then((tabs) => {
-      return playlistStore.update((n) => ({
-        ...n,
-        ...tabs.filter((store, tab) => {
-          if (store[key] && store[key].length)
-            store[key].append(tab)
-          else {
-            store[key] = [tab];
-          }
-          return store;
-        }, {})
-      }))
+    // .then((result) => result.stash)
+    .then((result) => Object.values(result).flat(1))
+    .then((result) => {
+      return result.filter((item) => {
+        if (_inputFilter && _inputFilter.length > 1) {
+          return (item.label ? item.label : "").indexOf(_inputFilter) != -1;
+        } else {
+          return true;
+        }
+      })
     })
+    .then((items) => playlistStore.update((_items) => items))
     .catch(print.failure_stash_playlist_get);
 }
-// $: updatePlaylistStore(inputFilter);
 
 
 const openLink = (e) => {
@@ -107,7 +77,7 @@ const itemButtons = [];
 
 onMount(async () => {
   console.log('Playlists mounted');
-  updatePlaylistStore(inputFilter)
+  updatePlaylistStore();
 });
 
 </script>
@@ -116,6 +86,7 @@ onMount(async () => {
   <p><input bind:value={inputFilter} type="text"/></p>
   <ItemList
     readonly=true
+    deletable=true
     dataStore={playlistStore}
     titleKey="label"
     on:didClick={openLink}

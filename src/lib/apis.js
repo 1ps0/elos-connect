@@ -18,30 +18,13 @@ export const print = new Proxy(() => {}, {
   }
 });
 
-export const printStatus = (params) => {
-  console.log("[LOG][STATUS]", params);
-  return params;
+// -- util
+
+export const pruneMethods = (value) => {
+  return Promise.resolve(value)
+    .then(JSON.parse(JSON.stringify(value)))
+    .catch(print.failure_stores_prune_methods);
 }
-
-export const printSuccess = (result) => {
-  console.log("[SUCCESS]", result);
-  return result;
-};
-
-export const printFailure = (err) => {
-  console.log("[FAILURE]", err);
-  return err;
-};
-
-// -- system
-
-export const doReloadSystem = (params) => {
-  return browser.runtime.reload().
-    catch(createNotifyFailure);
-}
-
-
-// -- reactive globals
 
 // -- primitive functions
 
@@ -90,12 +73,17 @@ export const _send = async (params) => {
     .catch(print.failure_send);
 }
 
-// ------- Storage
+// -- system
 
-export const getAllStorageLocal = (params) => {
-  return Promise.resolve((params && params.length) ? params : undefined)
-    .then(browser.storage.local.get)
-    .catch(print.failure_sync);
+export const doReloadSystem = (params) => {
+  return browser.runtime.reload().
+    catch(print.failure_do_reload_system);
+}
+
+// ------- Processing
+
+export const processLink = (item) => {
+
 }
 
 // ------- Send composites
@@ -345,22 +333,6 @@ export const registerContentScript = (hosts) => {
     .catch(print.failure_content_scripts_register);
 }
 
-export const setupStorage = (params) => {
-  return browser.storage.local.onChanged.addListener((changes) => {
-    Promise.resolve(changes)
-      .then(Object.entries)
-      .then((entries) => {
-        entries.forEach((entry) => {
-          let key = entry[0];
-          let oldValue = entry[1].oldValue;
-          let newValue = entry[1].newValue;
-        })
-      })
-      .catch(print.failure_setup_storage);
-    });
-}
-
-
 const relayRegistry = {};
 export const setupRelay = (params) => {
   // TODO lazy capture incoming ports from external sources:
@@ -449,15 +421,23 @@ export const addRuntimeMessageHook = async (params) => {
   return browser.runtime.onMessage.addListener(params.hook);
 };
 
+
+
 export const sendRuntimeMessage = async (params) => {
-  return browser.runtime.postMessage(params);
+  return Promise.resolve(params)
+    .then(pruneMethods)
+    .then(browser.runtime.postMessage)
+    .catch(print.failure_send_runtime_message);
 };
 
 export const sendToContentScript = async (params) => {
-  return window.postMessage({
-    direction: params.direction,
-    message: params.message
-  }, "*");
+  return Promise.resolve(params)
+    .then((_params) => ({
+      direction: _params.direction,
+      message: _params.message
+    }))
+    .then((args) => window.postMessage(args, "*"))
+    .catch(print.failure_send_to_content_script);
 }
 
 // ------- WINDOW FUNCTIONS
@@ -485,11 +465,53 @@ export const setWindowTitle = (data) => {
     .catch(print.failure_set_window_title);
 };
 
+const addActiveWindowId = (data) => {
+  return browser.windows.getCurrent()
+    .then((_window) => ({
+      ...data,
+      windowId: _window.id
+    }))
+    .catch(print.failure_add_active_window_id)
+}
+const addActiveTabId = (data) => {
+  return browser.tabs.query({ active: true })
+    .then((tabs) => ({
+      ...data,
+      tabId: tabs[0].id
+    }))
+    .catch(print.failure_add_active_tab_id)
+}
+
+const enrichItem = (item) => {
+  return Promise.resolve(item)
+    // .then(addActiveWindowId)
+    // .then(addActiveTabId)
+    .catch(print.failure_enrich_item);
+}
+
+
+export const setTabActive = (data) => {
+  console.log("Setting active tab with data", data);
+  return Promise.resolve(data)
+    .then(enrichItem)
+    .then((_data) => {
+      return browser.tabs.update(data.tabId, { active: true })
+    })
+    .catch(print.failure_set_tab_active);
+};
+
+// TODO allow update but not focus when clicked w/shift or something
 export const setWindowActive = (data) => {
-  console.log("Setting active window with data", data);
-  let status = browser.windows.update(data.windowId, { focused: true });
-  if (status) { return data; }
-  else { return Promise.reject("Failed to update tab", data); }
+  return Promise.resolve(data)
+    .then(print.start_set_window_active)
+    .then(enrichItem)
+    .then((_data) => {
+      return browser.windows.update(
+        _data.windowId,
+        { focused: true }
+      );
+    })
+    .catch(print.failure_set_window_active);
 }
 
 
@@ -522,32 +544,57 @@ export const getCurrentActiveTab = async () => {
   .catch(print.failure_get_current_tab);
 };
 
-export const tabQueries = { // objects: all, window, this
-  here: getCurrentActiveTab,
-  this: getCurrentActiveTab,
-  tab: getCurrentActiveTab,
-  window: getCurrentWindowTabs,
-  all: getAllTabs,
-  clear: () => {
-    browser.storage.local.set({
-      stash:{}
+export const getHighlightedTabs = (newClip) => {
+  return browser.tabs.query({
+      highlighted: true,
+      // active: true,
+      windowId: browser.windows.WINDOW_ID_CURRENT
     })
-    .then(() => {})
-    .catch(print.failure_stash_clear)
-  },
+    .catch(print.failure_get_highlighted_tabs);
 }
 
-// export const reduceToFields = (fields, data) => {
-//   return Promise.resolve(data).then((_data) => fields.map((field), ))
-// }
+export const tabQueries = (arg) => {
+  return {
+    // objects: all, window, this
+    here: getCurrentActiveTab,
+    this: getCurrentActiveTab,
+    tab: getCurrentActiveTab,
+    window: getCurrentWindowTabs,
+    selected: getHighlightedTabs,
+    all: getAllTabs,
+  }[arg]
+};
 
-export const tabIdQueries = {
-  this: tabQueries.this().then((tab) => tab.id).catch(print.failure_tabIdQueries),
-  window: tabQueries.window().then((tabs) => tabs.map((tab) => tab.id)).catch(print.failure_tabIdQueries),
-  all: tabQueries.all().then((tabs) => tabs.map((tab) => tab.id)).catch(print.failure_tabIdQueries),
-}
+export const tabIdQueries = (arg) => {
+  return {
+    this: tabQueries('this')
+      .then((tab) => tab.id)
+      .catch(print.failure_tabIdQueries),
+    window: tabQueries('window')
+      .then((tabs) => tabs.map((tab) => tab.id))
+      .catch(print.failure_tabIdQueries),
+    all: tabQueries('all')
+      .then((tabs) => tabs.map((tab) => tab.id))
+      .catch(print.failure_tabId_QueriesgetCurrentHighlightedTabs)
+  }[arg]
+};
 
-// ------- Location Storage and sync
+
+export const updatePlaying = (store) => {
+  return browser.tabs.query({
+    audible: true
+  })
+  .then(reduceTabs)
+  .then((tabs) => {
+    store.update((knownTabs) => {
+      return Object.values(
+        reducePlaying(tabs, // second
+          reducePlaying(knownTabs, {}) // first
+        )
+      );
+    })
+  }).catch(print.failure_update_playing);
+};
 
 export const saveTab = (params) => {
   // params: tabData, saveKey
@@ -557,13 +604,39 @@ export const loadTab = (params) => {
   // params: tabUri, originKey
 }
 
+
+// ------- Storage
+
+export const getAllStorageLocal = (params) => {
+  return Promise.resolve((params && params.length) ? params : undefined)
+    .then(browser.storage.local.get)
+    .catch(print.failure_sync);
+}
+
+export const setupStorage = (params) => {
+  return browser.storage.local.onChanged.addListener((changes) => {
+    Promise.resolve(changes)
+      .then(Object.entries)
+      .then((entries) => {
+        entries.forEach((entry) => {
+          let key = entry[0];
+          let oldValue = entry[1].oldValue;
+          let newValue = entry[1].newValue;
+        })
+      })
+      .catch(print.failure_setup_storage);
+    });
+}
+
 export const syncStorage = (params) => {
   // params: storageKey, priority:mine|theirs|merge
-  return Promise.resolve(params)
-    // .then((args) => )
-    // .then((keys) => {
-    //   return
-    // })
+  return browser.storage.local.get(params)
+    .then((data) => ({
+      uri: `/api/pkg/mine/sync`, // TODO enable custom and automatic package names
+      body: data
+    }))
+    .then(_send)
+    .catch(print.failure_sync_storage);
 }
 
 export const clearStorageKey = (params) => {
@@ -579,22 +652,6 @@ export const clearStorageKey = (params) => {
 
 // -------
 
-export const hasTabId = (data) => {
-  console.log("checking has tab id", data);
-  if (data.tabId !== undefined) {
-    return data;
-  } else {
-    Promise.reject("tabId not in", data);
-  }
-};
-
-export const setTabActive = (data) => {
-  console.log("Setting active tab with data", data);
-  let status = browser.tabs.update(data.tabId, { active: true });
-  if (status) { return data; }
-  else { return Promise.reject("Failed to update tab", data); }
-};
-
 export const sendToContent = (params) => {
   console.log("[BG][->][CONTENT]", params.tabId, params);
   return Promise.resolve(params)
@@ -606,25 +663,50 @@ export const sendToContent = (params) => {
     .catch(print.failure);
 }
 
+export const sendToggleLoop = (e) => {
+  return Promise.resolve(e)
+    .then((data) => ({ tabId: data.tabId, message:'toggleLoop' }))
+    .then(sendToContent)
+    .catch(print.failure_send_toggle_loop);
+}
+
+export const sendPlayPause = (e) => {
+  return Promise.resolve(e)
+    .then((data) => ({ tabId: data.tabId, message:'playPause' }))
+    .then(sendToContent)
+    .catch(print.failure_send_play_pause);
+};
+
 
 export const updateClipboard = (newClip) => {
   return navigator.clipboard.writeText(newClip)
     .catch(print.failure_update_clipboard);
 };
 
-export const getHighlightedTabs = (newClip) => {
-  return browser.tabs.query({
-      highlighted: true,
-      // active: true,
-      windowId: browser.windows.WINDOW_ID_CURRENT
-    })
-    .then((tabs) => tabs.map((tab) => ({
-      title: tab.title,
-      url: tab.url,
-      tabId: tab.id,
-      windowId: tab.windowId,
-    })))
-    .catch(print.failure);
+
+export const setupMenuSaveText = () => {
+  browser.contextMenus.create({
+    title: 'Add selected to Focus',
+    id: 'add-selected-to-focus',
+    contexts: ['selection'],
+  });
+
+  browser.contextMenus.onClicked.addListener((info) => {
+    if (info.menuItemId === 'add-selected-to-focus') {
+      // clipboard.writeText();
+      browser.storage.local.get("notes")
+        .then((result) => result.notes)
+        .then((_notes) => ({
+
+          notes: [
+            ..._notes,
+            `${info.pageUrl.split('#')[0]}#:~:text=${encodeURIComponent(info.selectionText)}`
+          ]
+        }))
+        .then(browser.storage.local.set)
+        .catch(print.failure_focus_add_selected);
+    }
+  });
 }
 
 export const doSelectedCopy = async (e) => {
@@ -653,21 +735,13 @@ export const doDownloadVideo = (params) => {
 
 export const bringToFront = (e) => {
   return Promise.resolve(e)
-    // .then(tabIdFromdata)
-    // .then(hasTabId, print.failure)
+    .then((_e) => e.detail ? e.detail : e)
+    .then(print.start_bring_to_front)
     .then(setTabActive)
-    // .then(hasWindowId, print.failure)
     .then(setWindowActive)
     .then(print.success)
     .catch(print.failure);
 }
-
-export const getCurrentHighlightedTabs = async () => {
-  return browser.tabs.query({
-    highlighted: true,
-    windowId: browser.windows.WINDOW_ID_CURRENT
-  });
-};
 
 export const updateCurrentWindow = async (params) => {
   return browser.windows.update(
@@ -678,7 +752,7 @@ export const updateCurrentWindow = async (params) => {
 
 
 export const setPinnedTab = async (params) => {
-  return getCurrentHighlightedTabs().then( (tabs) => {
+  return getHighlightedTabs().then( (tabs) => {
     for (const tab of tabs) {
       browser.tabs.update(tab.id, { pinned: true });
     }
@@ -724,6 +798,19 @@ export const walkNodes = (walker) => {
   return nodes;
 }
 
+// ---- reduce
+
+export const reducePlaying = (tabs, obj) => {
+  if (!tabs) { return null; }
+  if (!obj) { obj = {}; }
+  return tabs.reduce((_out, curr) => {
+    if (!_out[curr.name]) {
+      _out[curr.name] = curr;
+    }
+    return _out;
+  }, obj);
+};
+
 export const reduceDocumentText = () => {
   return Promise.resolve(
     document.createTreeWalker(
@@ -739,27 +826,27 @@ export const reduceDocumentText = () => {
   .catch(print.failure)
 }
 
-export const reduceAudibleTabs = (tabs) => {
-  // console.log("rendering audible:", tabs);
+export const reduceTabs = (tabs) => {
   return tabs.map((tab) => {
     return {
-      name: tab.id,
+      uri: tab.url,
+      url: tab.url,
+      label: tab.title,
+      title: tab.title,
       tabId: tab.id,
       windowId: tab.windowId,
       muted: tab.mutedInfo.muted,
       playing: tab.audible,
-      status: tab.audible,
-      title: tab.title,
-      url: tab.url,
-    };
-  });
-};
+      article: tab.isArticle,
+      tag: _tag,
+      timestamp: Date.now(),
+      // icon: tab.favIconUrl, // spammy base64 rendering
+      // language: browser.tabs.detectLanguage(tab.id)
+    }
+  })
+}
 
 // -- content processing
-
-export const reducePage = async (params) => {
-
-};
 
 export const sendPage = async (params) => {
   return Promise.resolve(params.data)

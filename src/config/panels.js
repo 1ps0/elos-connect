@@ -72,6 +72,13 @@ export const panelTypes = {
       showIn: "tab"
     }
   },
+  "panel-focus": {
+    target: "panel-focus",
+    name: "focus",
+    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
+    h: 5,
+    componentName: "focus",
+  },
   "panel-actionmenu": {
     target: "panel-actionmenu",
     name: "actionmenu",

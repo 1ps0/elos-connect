@@ -13,6 +13,7 @@ import SpotifyControls from "./SpotifyControls.svelte";
 import LocationOps from "./LocationOps.svelte";
 import WebPlayers from "./WebPlayers.svelte";
 import Playlists from "./Playlists.svelte";
+import Focus from "./Focus.svelte";
 
 import Chart from "./Chart.svelte";
 import ExpandList from "./ExpandList.svelte";
@@ -39,6 +40,7 @@ export const components = {
     "options": Options,
     "toolbar": Toolbar,
     "commandbar": CommandBar,
+    "focus": Focus,
     "timer": Timer,
     "clock": Clock,
     "profile": Profile,

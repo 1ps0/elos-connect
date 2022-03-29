@@ -37,6 +37,11 @@ export const menuItems = [
     group: "1"
   },
   {
+    name: "panel-focus",
+    value: { icon: "status-pin", highlight: "Focus" },
+    group: "1"
+  },
+  {
     name: "panel-location-ops",
     value: { icon: "view-mode-1", highlight: "Location Tagging" },
     group: "1"

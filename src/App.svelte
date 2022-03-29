@@ -32,7 +32,7 @@ const genId = () => "_" + Math.random().toString(36).substr(2, 9);
 let items = [];
 let objects = {};
 $: items;
-$: console.log("ITEMS", items);
+// $: console.log("ITEMS", items);
 
 function hydrateParams(item) {
   if (!components.hasOwnProperty(item.componentName)) {
@@ -87,20 +87,20 @@ function add(panelTarget, options={}) {
   // TODO render icons into menuItems
   // TODO render source/dataStore props into actual stores
   if (!panelTypes.hasOwnProperty(panelTarget)) {
-    console.log("MISSING PANEL", panelTarget);
+    // console.log("MISSING PANEL", panelTarget);
   }
 
   options = {...panelTypes[panelTarget], ...options};
   let rootItem = _newItem(options);
   items = [...items, rootItem];
-  console.log('ADDING', panelTarget, rootItem);
+  // console.log('ADDING', panelTarget, rootItem);
 
   return true;
 };
 
 
 const onAdd = (val) => {
-  console.log("did onAdd", val);
+  // console.log("did onAdd", val);
   let item = val.detail;
 
   if (item && item.event && item.target in objects) {
@@ -138,22 +138,23 @@ onMount(async () => {
     // "panel-timer",
     // "panel-commandbar",
     // "panel-location-ops",
-    "panel-dashboard",
+    "panel-focus",
     "panel-playlists",
+    // "panel-dashboard",
     "panel-web-players",
     "panel-actionmenu",
     // "panel-locations",
   ].forEach((name) => {
     panels = panels.then((prev) => {
-      console.log("[PANEL][ADD]", name, '--', prev);
+      // console.log("[PANEL][ADD]", name, '--', prev);
       return add(name)
     });
   });
   let result = await panels.catch(print.failure_panels);
-  console.log("FINISHED PANEL ADD", result);
+  // console.log("FINISHED PANEL ADD", result);
   return result;
 });
-// .then((result) => printSuccess(result))
+// .then(print.success_app)
 // .catch(print.failure);
 
 </script>

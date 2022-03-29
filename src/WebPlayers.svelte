@@ -5,14 +5,16 @@ import { writable, get } from 'svelte/store';
 
 import {
   bringToFront,
-  reduceAudibleTabs,
-  sendToContent,
+  updatePlaying,
+  sendPlayPause,
+  sendToggleLoop,
   print
 } from "./lib/apis.js";
 import ItemList from "./ItemList.svelte";
 
 let showType = ['audio', 'video'];
-let tabStore = writable([]); // local to this panel/page only
+const tabStore = writable([]); // local to this panel/page only
+
 /*
 TODO
 
@@ -26,36 +28,9 @@ TODO
 */
 
 
-const reducePlaying = (tabs, obj) => {
-  if (!tabs) { return null; }
-  if (!obj) { obj = {}; }
-  return tabs.reduce((_out, curr) => {
-    if (!_out[curr.name]) {
-      _out[curr.name] = curr;
-    }
-    return _out;
-  }, obj);
-};
-
-const updatePlaying = () => {
-  return browser.tabs.query({
-    audible: true
-  })
-  .then(reduceAudibleTabs)
-  .then((tabs) => {
-    tabStore.update((knownTabs) => {
-      return Object.values(
-        reducePlaying(tabs, // second
-          reducePlaying(knownTabs, {}) // first
-        )
-      );
-    })
-  }).catch(print.failure);
-};
-
 const handlePlayerUpdate = (request, sender, sendResponse) => {
   console.log("Message: ", request, sender);
-  updatePlaying()
+  return updatePlaying(tabStore)
     .then((params) => ({
       params: params,
       response: "Response from WebPlayers"
@@ -75,33 +50,18 @@ ADD FUNCTION BUTTONS:
 3. download
 */
 
-export const sendToggleLoop = (e) => {
-  return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message:'toggleLoop' }))
-    .then(sendToContent)
-    .catch(print.failure);
-}
-
-export const sendPlayPause = (e) => {
-  return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message:'playPause' }))
-    .then(sendToContent)
-    .catch(print.failure);
-};
-
-
 const buttonProps = [
   {
     name: 'show',
     description: '',
-    icon: () => '👁',
+    icon: () => 'Show',
     action: bringToFront
   },
   {
     name: 'playPause',
     description: '',
     icon: (obj) => {
-      return obj.playing ? '⏸' : '▶️';
+      return obj.playing ? 'Pause' : 'Play';
     },
     action: sendPlayPause
   },
@@ -109,7 +69,7 @@ const buttonProps = [
     name: 'toggleLoop',
     description: '',
     icon: (obj) => {
-      return obj.loop ? '✅🔁' : '❌🔁';
+      return obj.loop ? 'LOOPING' : 'SINGLE';
     },
     action: sendToggleLoop
   }
@@ -118,7 +78,7 @@ const buttonProps = [
 onMount(async () => {
   console.log('WebPlayers mounted');
   browser.runtime.onMessage.addListener(handlePlayerUpdate);
-  updatePlaying();
+  updatePlaying(tabStore);
 });
 
 </script>
@@ -127,6 +87,8 @@ onMount(async () => {
   <ItemList
     readonly=true
     dataStore={tabStore}
+
+    on:didClick={bringToFront}
     titleKey="title"
     buttons={buttonProps}
   />

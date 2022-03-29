@@ -59,21 +59,22 @@
 // import { stores } from "./lib/stores.js";
 console.log("LOAD///omnibox");
 import {
-  _fetch,
-  _send,
-  createNotifyFailure,
-  createNotifySuccess,
   doSelectedCopy,
   doReloadSystem,
+  reduceTabs,
   findInAll,
   getAllTabs,
   getCurrentActiveTab,
-  getCurrentHighlightedTabs,
-  print,
+  getHighlightedTabs,
   setWindowTitle,
   tabQueries,
   updateCurrentWindow,
   updateClipboard,
+  _fetch,
+  _send,
+  createNotifyFailure,
+  createNotifySuccess,
+  print,
 } from "./apis.js";
 import { stores } from "./stores.js";
 
@@ -92,35 +93,10 @@ try {
       action: (params) => {
         console.log("HIT sync", params);
         return Promise.resolve((params && params.length) ? params : undefined)
-          .then(browser.storage.local.get)
-          .then((data) => ({
-            uri: `/api/pkg/mine/sync`, // TODO enable custom and automatic package names
-            body: data
-          }))
-          .then(_send)
+          .then(syncStorage)
           .then(print.success_send_sync)
           .catch(print.failure_sync);
-      }
-    },
-    select: {
-      content: "select",
-      description: "select specified tabs",
-      action: (params) => {
-        console.log("SELECT HIT", params);
-        if (params[0] === 'all') {
-          browser.tabs.query({currentWindow: true }) // or windowId: windows.WINDOW_ID_CURRENT
-            .then(print.status_select_tabs)
-            .then((tabs) => {
-              return Promise.all(
-                tabs.map((tab) => browser.tabs.update(
-                  tab.id, { highlighted: true }
-                ))
-              )
-            })
-            .then(print.success)
-            .catch(print.failure);
-        }
-      }
+      },
     },
     window: {
       content: "window",
@@ -216,6 +192,26 @@ try {
           .catch(print.failure_gather);
       }
     },
+    select: {
+      content: "select",
+      description: "select specified tabs",
+      action: (params) => {
+        console.log("SELECT HIT", params);
+        if (params[0] === 'all') {
+          browser.tabs.query({currentWindow: true }) // or windowId: windows.WINDOW_ID_CURRENT
+            .then(print.status_select_tabs)
+            .then((tabs) => {
+              return Promise.all(
+                tabs.map((tab) => browser.tabs.update(
+                  tab.id, { highlighted: true }
+                ))
+              )
+            })
+            .then(print.success)
+            .catch(print.failure);
+        }
+      }
+    },
     popout: {
       content: "popout",
       description: "popout current tab (default to left half",
@@ -299,28 +295,25 @@ try {
           // }]);
       },
       action: (params) => {
-        console.log("HIT", "stash", params, tabQueries);
+        console.log("HIT", "stash", params);
         // params: null, "this", "window", "all"
         let _tag = params.length > 1 ? params[1] : 'unsorted';
         let _tabs = Promise.resolve(params)
           .then((_params) => _params.length ? _params[0] : 'this')
-          .then((keyword) => tabQueries[keyword])
+          .then(tabQueries) // keyword
           // .then(print.status_tab_query)
           .then((tabQuery) => tabQuery())
+          .then(reduceTabs)
           .then((tabs) => {
-            return tabs.map((tab) => {
-              return {
-                tabId: tab.id,
-                uri: tab.url,
-                label: tab.title,
-                tag: _tag,
-                icon: tab.favIconUrl,
-                audible: tab.audible,
-                article: tab.isArticle,
-                // language: browser.tabs.detectLanguage(tab.id)
-              }
-            })
-          });
+            return tabs.map((tab) => ({
+              ...tab,
+              tag: _tag,
+              timestamp: Date.now(),
+              // language: browser.tabs.detectLanguage(tab.id)
+            }));
+          })
+          .catch(print.failure_stash_tabs);
+
         return browser.storage.local.get("stash")
           .then((result) => result.stash)
           .then((_stash) => _stash ? _stash : {})
@@ -345,6 +338,24 @@ try {
               .catch(print.failure_stash_tabs_remove)
           })
           .catch(print.failure_stash)
+      },
+      clear: {
+        content: "",
+        description: "",
+        action: (params) => {
+          const paramsFilter = {
+            all: () => {
+              return browser.storage.local.set({
+                stash:{}
+              })
+              // .then(() => {})
+              .catch(print.failure_stash_clear)
+            },
+            last: (_params) => {},
+            on_sync: (_params) => {},
+          };
+          paramsFilter[params[0]]();
+        }
       }
     },
     playlist: {
@@ -637,7 +648,7 @@ try {
       action: (params) => {
         console.log("HIT ", "split", params);
         // elos split selected tile column,
-        return getCurrentHighlightedTabs()
+        return getHighlightedTabs()
           .then((tabs) => {
             let screen_width = 768 * 2;
             let _width = Math.floor(screen_width / (tabs.length+1)) - 2;
@@ -734,7 +745,10 @@ try {
       last: {
         content: "history_last",
         description: "history_last",
-        action: (params) => { console.log("HIT ", "history_last_actions", params)},
+        action: (params) => {
+          console.log("HIT ", "history_last_actions", params);
+
+        },
       },
       undo: {
         content: "history_undo",

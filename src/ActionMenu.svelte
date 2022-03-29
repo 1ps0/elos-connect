@@ -7,6 +7,7 @@ import {
   getCurrentActiveTab,
   doSelectedCopy,
   doDownloadVideo,
+  doReloadSystem,
   createNotifySuccess,
   print
 } from "./lib/apis.js"
@@ -92,12 +93,16 @@ const extractReaderText = (e) => {
 
 let items = [
   {
-    title: 'Copy Selected Tabs',
-    click: doSelectedCopy
+    title: 'Extract Text',
+    click: extractReaderText,
   },
   {
     title: 'Reload eLOS',
     click: doReloadSystem
+  },
+  {
+    title: 'Copy Selected Tabs',
+    click: doSelectedCopy
   },
   {
     title: 'Download Video',

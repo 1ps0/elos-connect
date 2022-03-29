@@ -179,6 +179,7 @@ function getContent(ranges) {
   return contexts;
 }
 
+
 function handleMessage(request, sender, sendResponse) {
   console.log("[CONTENT] Message from the page script:", request, sender, sendResponse);
   if (request.message === 'playPause') {
@@ -191,7 +192,7 @@ function handleMessage(request, sender, sendResponse) {
   } else if (request.message === 'find') {
     return Promise.resolve(request)
       .then(getContent)
-      .then(print.find_status)
+      .then(print.status_find)
       .then((findObj) => {
         return findObj;
       })

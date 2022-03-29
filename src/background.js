@@ -147,7 +147,6 @@ export const renderSuggestions = (_cmds) => {
     .then((cmd) => {
       let tree = cmd[0];
       let args = cmd[1];
-      console.log("SUGGESTIONS", tree, args);
       if (tree.suggestions) {
         return tree.suggestions(args);
       } else if (
@@ -161,6 +160,30 @@ export const renderSuggestions = (_cmds) => {
       } else {
         return [tree].flat(1);
       }
+    })
+    .then((suggestions) => {
+      return suggestions.reduce((result, item) => {
+        let _content = item.content;
+        if (_content) {
+          console.log("FORMAT ITEM", item, result,);
+          result.push({
+            content: _content,
+            description: item.description,
+          });
+        }
+        const entryKeys = ['content','description','action','suggestions'];
+        Object.entries(item).forEach((_entry) => {
+          if (entryKeys.indexOf(_entry[0]) != -1) {
+            return
+          }
+          console.log("FORMAT ENTRY", _entry, result,);
+          result.push({
+            content: _entry[1].content,
+            description: _entry[1].description
+          })
+        })
+        return result;
+      }, []);
     })
     .catch(print.failure_render_suggestions);
 }
@@ -189,8 +212,8 @@ const omniboxOnInputChanged = async (text, addSuggestions) => {
   try {
     return Promise.resolve(lastInput)
       .then(findCommands)
-      // .then(print.status_find_commands)
       .then(renderSuggestions)
+      // .then(print.status_render_suggestions)
       .then(addSuggestions)
       .catch(print.failure_omnibox_changed);
   }
@@ -206,10 +229,17 @@ const omniboxOnInputStarted = async () => {
   return;
 };
 
+export const registerHistory = (event) => {
+  // passthrough
+  stores.history.update((n) => [...n, event])
+    .catch(print.failure_register_history);
+  return event;
+};
+
 export const renderAction = (_input) => {
   return Promise.resolve(_input)
     .then(findCommands)
-    // .then(print.status_render_action)
+    .then(print.status_render_action)
     .then((_cmds) => _cmds[0].action(_cmds[1]))
     .catch(print.failure_render_action);
 }
@@ -218,7 +248,7 @@ const omniboxOnInputEntered = (input, disposition) => {
   console.log("INPUT SUBMITTED", lastInput, '--', input, '--', cmds[input]);
   return Promise.resolve(lastInput)
     .then(renderAction)
-    .then(print.success_on_input_entered)
+    // .then(print.success_on_input_entered)
     .catch(print.failure_omnibox_entered);
 };
 
@@ -244,9 +274,9 @@ try {
     // tabId: tabId
   });
 
-  // browser.omnibox.setDefaultSuggestion({
-  //   description: "this is a limited eLOS preview; v0.0.6-prealpha"
-  // });
+  browser.omnibox.setDefaultSuggestion({
+    description: "this is a limited eLOS preview; v0.0.6-prealpha"
+  });
 
   browser.omnibox.onInputStarted.addListener(omniboxOnInputStarted);
   browser.omnibox.onInputChanged.addListener(omniboxOnInputChanged);

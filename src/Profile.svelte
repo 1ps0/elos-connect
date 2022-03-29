@@ -23,7 +23,7 @@ WHOAMI
 import { onMount } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
-import { profileEdit } from "./lib/profileEdit.js";
+// import { profileEdit } from "./lib/profileEdit.js";
 
 export let settings = {
     'default': 0,
@@ -40,8 +40,8 @@ onMount(async () => {
 </script>
 
 <section class="title">
-  <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
-</section>
+<!--   <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
+ --></section>
 
 <style>
 

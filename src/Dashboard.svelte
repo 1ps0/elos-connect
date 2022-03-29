@@ -8,7 +8,7 @@ import { loadSites, loadHistory, loadCommands } from "./lib/apis.js";
 import { cmds } from "./lib/omnibox.js";
 
 // import { commandLine } from "./lib/commandLine.js";
-import { profileEdit } from "./lib/profileEdit.js";
+// import { profileEdit } from "./lib/profileEdit.js";
 // import { clockTimer, clockStore } from "./lib/clock.js";
 
 const dashboardContext = getContext("dashboard");
@@ -48,7 +48,7 @@ const getCommands = (params) => {
 
 const resetCommand = async (params) => {
   return browser.commands.reset(params.name)
-    .catch(printFailure);
+    .catch(print.failure);
 };
 
 const updateCommand = async (params) => {
@@ -58,7 +58,7 @@ const updateCommand = async (params) => {
     shortcut: params.parent.input.value
   })
   .then(createNotifySuccess)
-  .catch(printFailure);
+  .catch(print.failure);
 };
 
 const bucketHistory = async (results) => {
@@ -117,7 +117,7 @@ const browserStats = async (params) => {
           per_is_article: data.filter((tab) => tab.isArticle).length / data.length,
         }
       })
-      .catch(printFailure);
+      .catch(print.failure);
 
 }
 
@@ -135,8 +135,8 @@ onMount(async () => {
     <span>eLOS Dashboard</span>
     <span use:clockTimer class="datetime"></span>
   </span>-->
-  <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
-
+<!--   <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
+ -->
   <p>
 <!--     <h3>System Info</h3>
     <ul>
@@ -186,10 +186,16 @@ onMount(async () => {
 
     <h3>List of Commands</h3>
       <div id="item-list">
-
+<!--
         {#each Object.keys(cmds) as cmd}
-        <p><a on:click|preventDefault={cmds[cmd].action}>{cmd}</a> : {cmds[cmd].description}</p>
-        {/each}
+          {#each Object.keys(cmd) as subCmd}
+            {#if cmds[cmd][subCmd] && cmds[cmd][subCmd].description}
+              <p><a on:click|preventDefault={cmds[cmd][subCmd].action}>{subCmd}</a> : {cmds[cmd][subCmd].description}</p>
+            {:else}
+              <p><a on:click|preventDefault={cmds[cmd].action}>{cmd}</a> : {cmds[cmd].description}</p>
+            {/if}
+          {/each}
+        {/each} -->
       </div>
     <br>
 

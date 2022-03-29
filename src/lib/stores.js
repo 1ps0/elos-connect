@@ -12,7 +12,8 @@ then writable calls readable's values for those datasets
 */
 
 import { writable, get } from 'svelte/store';
-import { workspaceConfig } from "workspace.js";
+import { workspaceConfig } from "../workspace.js";
+
 
 export const storageFor = (name, otherwise={}) => {
   return Promise.resolve(`${name}`)
@@ -83,6 +84,7 @@ for (let name in stores) {
     if (val !== undefined && val !== "undefined") {
       return Promise.resolve({ name: val })
         .then(print.status_storage)
+        // .then(pruneMethods)
         .then(browser.storage.local.set)
         .catch(print.failure_status_store);
     }
