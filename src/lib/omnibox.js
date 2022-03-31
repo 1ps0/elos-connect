@@ -127,8 +127,8 @@ try {
           return updateCurrentWindow({
             top: 0,
             left: 0,
-            width: 768,
-            height: 1024
+            width: window.screen.availWidth / 2,
+            height: window.screen.availHeight,
           })
           .then(createNotifySuccess)
           .catch(createNotifyFailure);
@@ -140,9 +140,9 @@ try {
         action: (params) => {
           return updateCurrentWindow({
             top: 0,
-            left: 768,
-            width: 768,
-            height: 1024
+            left: window.screen.availWidth / 2,
+            width: window.screen.availWidth / 2,
+            height: window.screen.availHeight,
           })
           .then(createNotifySuccess)
           .catch(createNotifyFailure);
@@ -155,8 +155,8 @@ try {
           return updateCurrentWindow({
             top: 0,
             left: 0,
-            width: 768 * 2,
-            height: 1024
+            width: window.screen.availWidth,
+            height: window.screen.availHeight,
           })
           .then(createNotifySuccess)
           .catch(createNotifyFailure);
@@ -207,8 +207,8 @@ try {
                 ))
               )
             })
-            .then(print.success)
-            .catch(print.failure);
+            .then(print.success_select)
+            .catch(print.failure_select);
         }
       }
     },
@@ -222,8 +222,8 @@ try {
               tabId: tab.id,
               top: 0,
               left: 0,
-              width: 768,
-              height: 1024
+              width: window.screen.availWidth / 2,
+              height: window.screen.availHeight
             }
           })
           .then(browser.windows.create)
@@ -232,7 +232,7 @@ try {
     },
     goto: {
       content: "goto",
-      description: "goto a given tab",
+      description: "goto a given tab (TBD), playing, last, tagged",
       // suggestions: (params) => {
         // how to replace, augment, or otherwise stand by firefox suggestions
         // push/pop last tab
@@ -340,8 +340,8 @@ try {
           .catch(print.failure_stash)
       },
       clear: {
-        content: "",
-        description: "",
+        content: "clear",
+        description: "clear",
         action: (params) => {
           const paramsFilter = {
             all: () => {
@@ -356,23 +356,6 @@ try {
           };
           paramsFilter[params[0]]();
         }
-      }
-    },
-    playlist: {
-      content: "playlist",
-      description: "playlist",
-      action: (params) => {
-        console.log("HIT", "playlist", params);
-        // get
-        return Promise.resolve(params)
-          .catch(print.failure);
-      }
-    },
-    save_link: {
-      content: "save link",
-      description: "save link this tab's location with a given tag (or not)",
-      action: (params) => {
-        return sendLink(params ? params : 'unsorted');
       }
     },
     save: {
@@ -424,6 +407,13 @@ try {
             .then(createNotifySuccess)
             .catch(createNotifyFailure);
         },
+      },
+      link: {
+        content: "save link",
+        description: "save link this tab's location with a given tag (or not)",
+        action: (params) => {
+          return sendLink(params ? params : 'unsorted');
+        }
       },
     },
     copy: {
@@ -633,12 +623,10 @@ try {
     },
     close: {
       content: "close",
-      description: `close:`,
+      description: `Close all sidebars, tagged group, tabs with url / domain / partial match`,
       action: (params) => {
-        // Close all sidebars
-        // tagged group
+        // Close all sidebars, tagged group, tabs with url / domain / partial match
         // incognito window(s)
-        // tabs with url / domain / partial match
         return params;
       }
     },
@@ -650,9 +638,10 @@ try {
         // elos split selected tile column,
         return getHighlightedTabs()
           .then((tabs) => {
-            let screen_width = 768 * 2;
-            let _width = Math.floor(screen_width / (tabs.length+1)) - 2;
-            let _height = 1024;
+            const screen_width = window.screen.availWidth;
+            const count = max(3, tabs.length + 1);
+            const _width = Math.floor(screen_width / count);
+            const _height = window.screen.availHeight;
             tabs.forEach((tab, idx) => {
               browser.windows.create({
                   tabId: tab.id,
@@ -709,11 +698,6 @@ try {
         description: "timer_lap",
         action: (params) => { console.log("HIT ", "timer_lap", params)},
       },
-    },
-    options: {
-      content: "options",
-      description: "options",
-      action: (params) => { console.log("HIT ", "options", params)},
     },
     help: {
       content: "help",

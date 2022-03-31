@@ -26,6 +26,8 @@ export const pruneMethods = (value) => {
     .catch(print.failure_stores_prune_methods);
 }
 
+// TODO window right / laft / full args
+
 // -- primitive functions
 
 export const handleResponse = async (response) => {
@@ -838,7 +840,6 @@ export const reduceTabs = (tabs) => {
       muted: tab.mutedInfo.muted,
       playing: tab.audible,
       article: tab.isArticle,
-      tag: _tag,
       timestamp: Date.now(),
       // icon: tab.favIconUrl, // spammy base64 rendering
       // language: browser.tabs.detectLanguage(tab.id)

@@ -165,7 +165,6 @@ export const renderSuggestions = (_cmds) => {
       return suggestions.reduce((result, item) => {
         let _content = item.content;
         if (_content) {
-          console.log("FORMAT ITEM", item, result,);
           result.push({
             content: _content,
             description: item.description,
@@ -176,7 +175,6 @@ export const renderSuggestions = (_cmds) => {
           if (entryKeys.indexOf(_entry[0]) != -1) {
             return
           }
-          console.log("FORMAT ENTRY", _entry, result,);
           result.push({
             content: _entry[1].content,
             description: _entry[1].description
@@ -275,7 +273,7 @@ try {
   });
 
   browser.omnibox.setDefaultSuggestion({
-    description: "this is a limited eLOS preview; v0.0.6-prealpha"
+    description: "this is a limited eLOS preview; v0.0.8-prealpha"
   });
 
   browser.omnibox.onInputStarted.addListener(omniboxOnInputStarted);
