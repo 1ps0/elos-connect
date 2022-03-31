@@ -63,6 +63,7 @@ import {
   doReloadSystem,
   reduceTabs,
   findInAll,
+  filterTabs,
   getAllTabs,
   getCurrentActiveTab,
   getHighlightedTabs,
@@ -168,27 +169,17 @@ try {
       description: "move input|all tabs to current|new window",
       action: (params) => {
         console.log("HIT", "gather", params);
-
-        // let windows = browser.windows.getAll().then((windows) => {
-        //     return windows.filter((_window) => _window.type === "normal")
-        //   })
         // params in ('all', '<domain>', <tag>, ilike <title>, type: video, audio, article)
-        let _tabs = getAllTabs()
-          .then((tabs) => tabs.filter((tab) => new RegExp(params[0]).test(tab.url)))
-          .then((tabs) => tabs.map((tab) => tab.id))
-          .catch(print.failure_gather_tabs)
-
-        return Promise.resolve({})
+        return Promise.resolve(params)
+          .then(filterTabs)
+          .then((tabs) => ({
+            tabId: tabs.map((tab) => tab.id),
+            top: 0,
+            left: 0,
+            width: window.screen.availWidth,
+            height: window.screen.availHeight,
+          }))
           .then(browser.windows.create)
-          .then((windowInfo) => windowInfo.id)
-          .then(async (_windowId) => {
-            // TODO if _tabs not rejected
-            console.log("TABS", _tabs);
-            return browser.tabs.move(await _tabs, {
-              index: -1, // param reverse: 0 to reverse, -1 to stay same
-              windowId: _windowId
-            })
-          })
           .catch(print.failure_gather);
       }
     },

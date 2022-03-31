@@ -20,6 +20,9 @@ export const print = new Proxy(() => {}, {
 
 // -- util
 
+// attempt to fix the DataCloneError error,
+// where sendMessage of some kind includes
+// methods in an object, so they need to be pruned
 export const pruneMethods = (value) => {
   return Promise.resolve(value)
     .then(JSON.parse(JSON.stringify(value)))
@@ -85,7 +88,11 @@ export const doReloadSystem = (params) => {
 // ------- Processing
 
 export const processLink = (item) => {
-
+  // given a url, hydrated by a Tab,
+  // isArticle, or audible, then isolate the content element(s)
+  // readermode, or video or audio player, etc.
+  // save to remote if possible,
+  // process for NLP triage if possible,
 }
 
 // ------- Send composites
@@ -124,7 +131,7 @@ export const sendLink = async (tagName) => {
   })
   .then(_send)
   .then(createNotifySuccess)
-  .catch(print.failure)
+  .catch(print.failure_send_link)
 }
 
 export const sendSidebar = async (params) => {
@@ -149,6 +156,7 @@ export const getContexts = (results) => {
         }).catch(print.failure_send_message_context)
       })
     })
+    .catch(print.failure_get_contexts);
 }
 
 // -------- Find composites
@@ -206,7 +214,7 @@ export const loadTags = async () => {
   return Promise.resolve({ uri:'api/analysis/tag'})
     .then(_fetch)
     .then((results) => results.names.map((tag) => tag[1]))
-    .catch(print.failure);
+    .catch(print.failure_load_tabs);
 };
 
 export const loadSites = async () => {
@@ -226,7 +234,7 @@ export const loadSites = async () => {
         sites: sites,
       }
     })
-    .catch(print.failure);
+    .catch(print.failure_load_sites);
 }
 
 export const loadSessions = async () => {
@@ -237,12 +245,12 @@ export const loadSessions = async () => {
       }))
     })
     .then(print.success)
-    .catch(print.failure);
+    .catch(print.failure_load_sessions);
 }
 
 export const loadVisits = async (params) => {
   return browser.history.getVisits(params)
-    .catch(print.failure);
+    .catch(print.failure_load_visits);
 }
 
 export const loadHistory = async (params) => {
@@ -262,7 +270,7 @@ export const loadHistory = async (params) => {
         typedCount: item.typedCount // navigated to this page by typing in the address.
       }));
     })
-    .catch(print.failure);
+    .catch(print.failure_load_history);
 }
 
 export const loadCommands = async (params) => {
@@ -274,7 +282,7 @@ export const loadCommands = async (params) => {
         shortcut: cmd.shortcut
       }))
     })
-    .catch(print.failure);
+    .catch(print.failure_load_commands);
 }
 
 // ---------- Actions
@@ -290,14 +298,28 @@ export const restoreSession = async (_sessions) => {
     .then((sessions) => {
       sessions.forEach((session) => {
         if (session.tab) {
-          browser.sessions.restore(session.tab.sessionId);
+          browser.sessions.restore(session.tab.sessionId)
+            .catch(print.failure_restore_tab);
         } else {
-          browser.sessions.restore(session.window.sessionId);
+          browser.sessions.restore(session.window.sessionId)
+            .catch(print.failure_restore_window);
         }
       })
       return sessions;
     })
-    .catch(print.failure);
+    .catch(print.failure_restore_session);
+}
+
+
+export const moveTab = (tab) => {
+  return Promise.resolve(tab)
+  .then((tab) => {
+    return browser.tabs.move(tab.id, {
+      index: -1, // param reverse: 0 to reverse, -1 to stay same
+      windowId: tab.windowId
+    })
+  })
+  .catch(print.failure_move_tab);
 }
 
 // -- messaging
@@ -404,7 +426,7 @@ export const setupRelay = (params) => {
 
 export const sendTabMessage = async (params) => {
   return browser.tabs.sendMessage(params.tabId)
-    .catch(print.failure);
+    .catch(print.failure_send_tab_message);
 };
 
 export const sendMessageToTabs = async (tabs) => {
@@ -412,18 +434,15 @@ export const sendMessageToTabs = async (tabs) => {
     return browser.tabs.sendMessage(
       tab.id,
       {greeting: "Hi from background script"}
-    ).then(response => {
-      console.log("Message from the content script:");
-      console.log(response.response);
-    }).catch(print.failure);
-  }));
-};
+    )
+    .then(print.status_send_message_to_tabs_response)
+    .catch(print.failure_send_message_to_tabs_response)
+  }))
+}
 
 export const addRuntimeMessageHook = async (params) => {
   return browser.runtime.onMessage.addListener(params.hook);
 };
-
-
 
 export const sendRuntimeMessage = async (params) => {
   return Promise.resolve(params)
@@ -564,7 +583,7 @@ export const tabQueries = (arg) => {
     window: getCurrentWindowTabs,
     selected: getHighlightedTabs,
     all: getAllTabs,
-  }[arg]
+  }[arg];
 };
 
 export const tabIdQueries = (arg) => {
@@ -662,7 +681,7 @@ export const sendToContent = (params) => {
       return data;
     })
     .then(createNotifySuccess)
-    .catch(print.failure);
+    .catch(print.failure_send_to_content);
 }
 
 export const sendToggleLoop = (e) => {
@@ -691,7 +710,8 @@ export const setupMenuSaveText = () => {
     title: 'Add selected to Focus',
     id: 'add-selected-to-focus',
     contexts: ['selection'],
-  });
+  })
+  .catch(print.failure_create_context_menu);
 
   browser.contextMenus.onClicked.addListener((info) => {
     if (info.menuItemId === 'add-selected-to-focus') {
@@ -699,7 +719,6 @@ export const setupMenuSaveText = () => {
       browser.storage.local.get("notes")
         .then((result) => result.notes)
         .then((_notes) => ({
-
           notes: [
             ..._notes,
             `${info.pageUrl.split('#')[0]}#:~:text=${encodeURIComponent(info.selectionText)}`
@@ -719,7 +738,7 @@ export const doSelectedCopy = async (e) => {
     })
     .then(updateClipboard)
     .then(createNotifySuccess)
-    .catch(print.failure);
+    .catch(print.failure_selected_copy);
 }
 
 export const doDownloadVideo = (params) => {
@@ -732,7 +751,7 @@ export const doDownloadVideo = (params) => {
     }))
     .then(_send)
     .then(createNotifySuccess)
-    .catch(print.failure);
+    .catch(print.failure_download_video);
 }
 
 export const bringToFront = (e) => {
@@ -742,32 +761,35 @@ export const bringToFront = (e) => {
     .then(setTabActive)
     .then(setWindowActive)
     .then(print.success)
-    .catch(print.failure);
+    .catch(print.failure_bring_to_front);
 }
 
 export const updateCurrentWindow = async (params) => {
   return browser.windows.update(
     browser.windows.WINDOW_ID_CURRENT,
     params
-  );
+  ).catch(print.failure_update_current_window);
 };
 
 
 export const setPinnedTab = async (params) => {
   return getHighlightedTabs().then( (tabs) => {
     for (const tab of tabs) {
-      browser.tabs.update(tab.id, { pinned: true });
+      browser.tabs.update(tab.id, { pinned: true })
+        .catch(print.failure_update_tab_pinned);
     }
   });
 };
 
 export const getBrowserInfo = async () => {
-  return browser.runtime.getBrowserInfo().then((_b) => {
+  return browser.runtime.getBrowserInfo()
+  .then((_b) => {
     return {
       name: _b.name,
       version: _b.version
     }
-  });
+  })
+  .catch(print.failure_get_browser_info);
 };
 
 // --- browser impl
@@ -798,6 +820,15 @@ export const walkNodes = (walker) => {
     nodes.push([node.name, node.data]);
   }
   return nodes;
+}
+
+// ---- filter
+
+export const filterTabs = (params) => {
+  return getAllTabs()
+    .then((tabs) => tabs.filter((tab) => new RegExp(params[0]).test(tab.url)))
+    .then((tabs) => tabs.map((tab) => tab.id))
+    .catch(print.failure_filter_tabs)
 }
 
 // ---- reduce
