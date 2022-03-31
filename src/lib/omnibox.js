@@ -69,6 +69,7 @@ import {
   getHighlightedTabs,
   setWindowTitle,
   tabQueries,
+  syncStorage,
   updateCurrentWindow,
   updateClipboard,
   _fetch,
