@@ -12,7 +12,6 @@ TODO -
 
 import { createEventDispatcher, onMount } from 'svelte';
 import { writable, get } from 'svelte/store';
-import { linker } from "./lib/linker.js";
 import { _fetch, print } from "./lib/apis.js";
 
 const dispatch = createEventDispatcher();
@@ -133,11 +132,13 @@ const squashItem = (title, length) => {
           class="item"
           on:click={() => didClick(_item)}
         >
+          <span>
           {#if titleKey}
-            <span>{squashItem(`${_item.tag || ""}${_item.tag ? ": " : " "}${_item[titleKey]}`, 25)}</span>
+            {squashItem(`${_item.tag || ""}${_item.tag ? ": " : " "}${_item[titleKey]}`, 50)}
           {:else if transform}
-            <span>{transform(_item)}</span>
+            {transform(_item)}
           {/if}
+          </span>
 
           {#each buttons as prop (prop)}
             <div

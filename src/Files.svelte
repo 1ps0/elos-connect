@@ -5,11 +5,10 @@ import { writable, derived } from "svelte/store";
 
 import ItemList from "./ItemList.svelte";
 
-// stores.files, stores.history, stores.layoutItems
+// stores.files, stores.actionHistory, stores.layoutItems
 import { stores } from "./lib/stores.js";
 import { fileList, openFile } from "./lib/apis.js";
 
-import { linker } from "./lib/linker.js";
 
 const dispatch = createEventDispatcher();
 

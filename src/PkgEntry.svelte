@@ -1,6 +1,5 @@
 <script>
 import { onMount } from 'svelte';
-import Editor from "./Editor.svelte";
 
 export let pkg = {};
 $: console.log('PkgEntry: ', pkg);
@@ -46,7 +45,6 @@ function package_type() {
   </div>
   <div class="editor">
     <!-- {editor} -->
-    <!-- <Editor bind:data={pkg} /> -->
   </div>
 </div>
 

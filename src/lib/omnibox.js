@@ -64,11 +64,13 @@ import {
   reduceTabs,
   findInAll,
   filterTabs,
-  moveTab,
+  moveTabs,
   getAllTabs,
   getCurrentActiveTab,
   getHighlightedTabs,
   setWindowTitle,
+  setTabActive,
+  getQueriedTabs,
   tabQueries,
   syncStorage,
   sendRestart,
@@ -87,6 +89,13 @@ import { stores } from "./stores.js";
 let _cmds = {};
 try {
   _cmds = {
+    reload: {
+      content: "reload",
+      description: "reload plugin",
+      action: (params) => doReloadSystem()
+        .then(apis.createNotifySuccess)
+        .catch(apis.createNotifyFailure)
+    },
     sync: {
       content: "sync",
       description: "sync current state with remote.",
@@ -96,6 +105,7 @@ try {
       //     description: "send mine and prefer it for value conflicts"
       //   }
       // }),
+      // TODO sync push, sync pull, set default to which?
       action: (params) => {
         console.log("HIT sync", params);
         return Promise.resolve((params && params.length) ? params : undefined)
@@ -104,27 +114,65 @@ try {
           .catch(print.failure_sync);
       },
     },
+    stash: {
+      content: "stash",
+      description: "PARAMS: this, window, all | [tag_name]; Capture essential content in each of the selected tabs, and store with stash.",
+      suggestions: (params) => {
+        console.log("SUGGESTIONS", params);
+        return browser.storage.local.get("stash")
+          .then((result) => result.stash)
+          .then((result) => Object.values(result))
+          .then((_stash) => {
+            return _stash.map((item) => ({
+              content: item.uri,
+              description: item.label
+            }))
+          })
+          .catch(print.failure_stash_suggestions)
+          .then(() => [{
+            content: "No stash found.",
+            description: "No stash found.",
+          }]);
+      },
+      action: (params) => {
+        console.log("HIT", "stash", params);
+        // params: null, "this", "window", "all"
+        let _tag = params.length > 1 ? params.slice(1) : 'unsorted';
+        let _tabs = getQueriedTabs(params);
+
+        return browser.storage.local.get("stash")
+          .then((result) => result.stash)
+          .then((_stash) => _stash ? _stash : [])
+          .then((_stash) => {
+            return Promise.all([_tabs])
+              .then((__tabs) => __tabs.flat(1))
+              .then((tabs) => {
+                tabs.forEach((tab) => {
+                  if (!tab.tag || tab.tag === "unsorted") {
+                    tab.tag = _tag;
+                  }
+                  _stash.push(item);
+                })
+                return _stash;
+              })
+              .catch(print.failure_stash_tabs)
+          })
+          .then(browser.storage.local.set)
+          .then(() => {
+            return Promise.resolve(_tabs)
+              .then((_tabData) => _tabData.map((_tab) => _tab.tabId))
+              .then(browser.tabs.remove)
+              .catch(print.failure_stash_tabs_remove)
+          })
+          .then(createNotifySuccess)
+          .catch(print.failure_stash)
+      },
+    },
     window: {
       content: "window",
       description: "window",
       action: (_params) => {
         console.log("HIT", "window", _params);
-        return Promise.resolve(_params)
-          .then((params) => {
-            // TODO get selected identity or default container (like for elos)
-            return params;
-          })
-          .then((params) => {
-            return browser.windows.create({
-              url: params && params[0] ? params[0] : "about:blank",
-              ...(params ? params : {})
-            })
-          })
-          .then((_window) => {
-            // browser. // set container?
-            return _window;
-          })
-          .catch(print.failure);
       },
       left: {
         content: "window_left",
@@ -133,8 +181,8 @@ try {
           return updateCurrentWindow({
             top: 0,
             left: 0,
-            width: window.screen.availWidth / 2,
-            height: window.screen.availHeight,
+            width: window.screen.width / 2,
+            height: window.screen.height,
           })
           .then(createNotifySuccess)
           .catch(createNotifyFailure);
@@ -146,9 +194,9 @@ try {
         action: (params) => {
           return updateCurrentWindow({
             top: 0,
-            left: window.screen.availWidth / 2,
-            width: window.screen.availWidth / 2,
-            height: window.screen.availHeight,
+            left: window.screen.width / 2,
+            width: window.screen.width / 2,
+            height: window.screen.height,
           })
           .then(createNotifySuccess)
           .catch(createNotifyFailure);
@@ -161,8 +209,8 @@ try {
           return updateCurrentWindow({
             top: 0,
             left: 0,
-            width: window.screen.availWidth,
-            height: window.screen.availHeight,
+            width: window.screen.width,
+            height: window.screen.height,
           })
           .then(createNotifySuccess)
           .catch(createNotifyFailure);
@@ -172,27 +220,23 @@ try {
     gather: {
       content: "gather",
       description: "move input|all tabs to current|new window",
-      action: (params) => {
+      action: async (params) => {
         console.log("HIT", "gather", params);
         // params in ('all', '<domain>', <tag>, ilike <title>, type: video, audio, article)
         let tabs = Promise.resolve(params)
           .then(filterTabs)
           .then((tabs) => tabs.map((tab) => tab.id))
-          // .then((tabIds) =>{})
           .catch(print.failure_get_filtered_tabs)
 
         return Promise.resolve({
           top: 0,
           left: 0,
-          width: window.screen.availWidth,
-          height: window.screen.availHeight,
+          width: window.screen.width / 2,
+          height: window.screen.height,
         })
         .then(browser.windows.create)
         .then((_window) => {
-          return Promise.all(tabs.map((tab) => {
-            return moveTab(tab, _window)
-          }))
-          .catch(print.failure_move_tabs)
+          return moveTabs(tabs, _window)
         })
         .catch(print.failure_gather)
       }
@@ -202,7 +246,11 @@ try {
       description: "select specified tabs",
       action: (params) => {
         console.log("SELECT HIT", params);
-        if (params[0] === 'all') {
+      },
+      all: {
+        content: "all",
+        description: "select all tabs in this window",
+        action: (params) => {
           browser.tabs.query({currentWindow: true }) // or windowId: windows.WINDOW_ID_CURRENT
             .then(print.status_select_tabs)
             .then((tabs) => {
@@ -213,7 +261,7 @@ try {
               )
             })
             .then(createNotifySuccess)
-            .catch(print.failure_select);
+            .catch(print.failure_select_all);
         }
       }
     },
@@ -221,18 +269,16 @@ try {
       content: "popout",
       description: "popout current tab (default to left half",
       action: (params) => {
-        let _window = Promise.resolve({
-          top: 0,
-          left: 0,
-          width: window.screen.availWidth,
-          height: window.screen.availHeight,
-        })
-        .then(browser.windows.create)
-        .catch(print.failure_popout_create_window);
-
         return getCurrentActiveTab()
-          .then(async (tab) => moveTab(tab[0], (await _window)))
-          .catch(print.failure_popout_move_tab)
+          .then((tab) => ({
+            tabId: tab[0].id,
+            top: 0,
+            left: 0,
+            width: window.screen.width / 2,
+            height: window.screen.height,
+          }))
+          .then(browser.windows.create)
+          .catch(print.failure_gather)
       }
     },
     goto: {
@@ -245,9 +291,11 @@ try {
         return Promise.resolve(params)
           .then(filterTabs)
           .then((tabs) => {
-            return tabs.map((tab) => ({
-              content: tab.url,
-              description: tab.title
+            return tabs.map((tab) => {
+              return {
+                content: tab.url,
+                description: tab.title
+              }
             })
           })
           .catch(print.failure_goto_suggestions)
@@ -274,95 +322,14 @@ try {
         }
       }
     },
-    sidebar: {
-      content: "sidebar",
-      description: "PARAMS: open, close, ...?; Manage the sidebar state.",
-      suggestions: (params) => {},
-      action: (params) => {
-        console.log("HIT", "sidebar", params);
-        let arg = params && params.length ? params[0] : 'open';
-        switch(arg) {
-          case 'open':
-          case 'close':
-          default:
-            console.log("[CMD][sidebar]", arg);
-        }
-      }
-    },
-    stash: {
-      content: "stash",
-      description: "PARAMS: this, window, all | [tag_name]; Capture essential content in each of the selected tabs, and store with stash.",
-      suggestions: (params) => {
-        console.log("SUGGESTIONS", params);
-        return browser.storage.local.get("stash")
-          .then((result) => result.stash)
-          .then((_stash) => {
-            return ((_stash && _stash[params[1]]) ? _stash[params[1]] : [])
-              .map((item) => {
-                return {
-                  content: item.uri,
-                  description: item.label,
-                  tag: params[0],
-                  ...item,
-                }
-              })
-          })
-          .catch(print.failure_stash_suggestions)
-          // .then(() => [{
-          //   content: "No stash found.",
-          //   description: "No stash found.",
-          // }]);
-      },
-      action: (params) => {
-        console.log("HIT", "stash", params);
-        // params: null, "this", "window", "all"
-        let _tag = params.length > 1 ? params.slice(1) : 'unsorted';
-        let _tabs = Promise.resolve(params)
-          .then((_params) => _params.length ? _params[0] : 'this')
-          .then(tabQueries) // keyword
-          // .then(print.status_tab_query)
-          .then((tabQuery) => tabQuery())
-          .then(reduceTabs)
-          .then((tabs) => {
-            return tabs.map((tab) => ({
-              ...tab,
-              tag: [_tag].flat(1),
-              timestamp: Date.now(),
-              // language: browser.tabs.detectLanguage(tab.id)
-            }));
-          })
-          .catch(print.failure_stash_tabs);
-
-        return browser.storage.local.get("stash")
-          .then((result) => result.stash)
-          .then((_stash) => _stash ? _stash : {})
-          .then(async (_stash) => {
-            if (!(_tag in _stash)) {
-              _stash[_tag] = [];
-            }
-            (await _tabs).forEach((item) => {
-              if (!item.tag || item.tag === "unsorted") {
-                item.tag = _tag;
-              }
-              _stash[_tag].push(item);
-              console.log("PUSHING", _tag, item, _stash);
-            });
-            return _stash;
-          })
-          .then(browser.storage.local.set)
-          .then(() => {
-            return Promise.resolve(_tabs)
-              .then((_tabData) => _tabData.map((_tab) => _tab.tabId))
-              .then(browser.tabs.remove)
-              .catch(print.failure_stash_tabs_remove)
-          })
-          .then(createNotifySuccess)
-          .catch(print.failure_stash)
-      },
-      clear: {
-        content: "clear",
-        description: "clear",
+    clear: {
+      content: "clear",
+      description: "clear",
+      stash: {
+        content: "stash",
+        description: "stash",
         action: (params) => {
+          console.log("HIT clear history")
           const paramsFilter = {
             all: () => {
               return browser.storage.local.set({
@@ -376,7 +343,39 @@ try {
           };
           paramsFilter[params[0]]();
         }
-      }
+      },
+      history: {
+        content: "history",
+        description: "clear history given params: tab, window, session, by domain, by timestamp",
+        action: (params) => {
+          console.log("HIT clear history")
+          return stores.actionHistory.update((n) => [])
+            .then(createNotifySuccess)
+            .catch(print.failure_clear_log)
+        }
+      },
+      log: {
+        content: "log",
+        description: "clear eventLog",
+        action: (params) => {
+          console.log("HIT clear log")
+          return stores.eventLog.update((n) => [])
+            .then(createNotifySuccess)
+            .catch(print.failure_clear_log)
+        }
+      },
+      store: {
+        content: "store",
+        description: "clear storage type by name",
+        action: (params) => {
+          console.log("HIT clear store")
+          return Promise.resolve(params)
+            .then((_params) => _params[0])
+            .then((_param) => stores[_param].update((n) => []))
+            .then(createNotifySuccess)
+            .catch(print.failure_clear_log);
+        }
+      },
     },
     save: {
       content: "save",
@@ -470,7 +469,6 @@ try {
         },
       },
     },
-    // what constitutes an 'action', and a 'subcommand'
     control: {
       content: "control current context",
       description: "",
@@ -482,6 +480,7 @@ try {
           return sendPlayPause()
             .then(createNotifySuccess)
             .catch(createNotifyFailure)
+        }
       },
       pause: {
         content: "pause",
@@ -491,6 +490,7 @@ try {
           return sendPlayPause()
             .then(createNotifySuccess)
             .catch(createNotifyFailure)
+        }
       },
       restart: {
         content: "restart",
@@ -500,6 +500,7 @@ try {
           return sendRestart()
             .then(createNotifySuccess)
             .catch(createNotifyFailure)
+        }
       },
       loop: {
         content: "loop",
@@ -508,6 +509,7 @@ try {
           return sendToggleLoop()
             .then(createNotifySuccess)
             .catch(createNotifyFailure)
+        }
       },
       mute: {
         content: "mute",
@@ -519,13 +521,6 @@ try {
           // playing | all
         }
       },
-    },
-    reload: {
-      content: "reload",
-      description: "reload plugin",
-      action: (params) => doReloadSystem()
-        .then(createNotifySuccess)
-        .catch(createNotifyFailure)
     },
     search: {
       content: "search",
@@ -559,11 +554,11 @@ try {
       },
       action: (params) => {
         console.log("HIT ", "search", params);
-        browser.tabs.create({
-            active: true,
-            url: params.url
-          })
-          .catch(print.failure_search_open)
+        return browser.tabs.create({
+          active: true,
+          url: params.url
+        })
+        .catch(print.failure_search_open)
       }
     },
     find: {
@@ -613,9 +608,9 @@ try {
         // return sendLink(params ? params : 'unsorted');
         return getCurrentActiveTab()
           .then((tab) => {
-            let tag = (params && params.length > 0) ? params[1] : 'unsorted'; // TODO make this default the calendar day or something
-            let store = stores[tag];
-            stores[params[1]]
+            // let tag = (params && params.length > 0) ? params[1] : 'unsorted'; // TODO make this default the calendar day or something
+            // let store = stores[tag];
+            // stores[params[1]]
           })
           .catch(print.failure_tag);
       }
@@ -635,26 +630,57 @@ try {
     },
     open: {
       content: "open",
-      description: "Opens a panel or tagged group of links",
+      description: "Opens something [root] (TODO show default action)",
       action: (params) => {
         console.log("HIT ", "open", params)
-        if (!params && params.length == 0) { return; }
-        if (params[0] === 'options') {
+        // TODO console, options, sidebar, set default in config
+        /*
+        package: index, current, mark_as_completed, next, reset
+        */
+      },
+      options: {
+        content: "options",
+        description: "open the plugin options as a tab",
+        action: (params) => {
           return browser.runtime.openOptionsPage()
             .catch(print.failure_open_options);
-        } else if (params[0] === 'sidebar') {
+        }
+      },
+      sidebar: {
+        content: "sidebar",
+        description: "open the plugin sidebar as a tab",
+        action: (params) => {
+          // TODO sidebar: all, timer, actionmenu
           return browser.sidebarAction.open()
             .catch(print.failure_open_sidebar);
-        } else {
-          return browser.windows.create({ url: params.url });
         }
-        /*
-        group:
-        package: index, current, mark_as_completed, next, reset
-        sidebar: all, timer, actionmenu
-        panel: // TODO tie in data stores for autocomplete suggestions
-        options:
-        */
+      },
+      group: {
+        // TODO tie in data stores for autocomplete suggestions
+        content: "panel",
+        description: "open a group of tabs, tagged with param(s)",
+        action: (params) => {
+          // return browser.runtime.
+        }
+      },
+      panel: {
+        // TODO tie in data stores for autocomplete suggestions
+        content: "panel",
+        description: "open a panel (and TODO move to top?) in the sidebar for this window",
+        action: (params) => {
+          // return browser.runtime.
+        }
+      },
+      console: {
+        content: "console",
+        description: "open the plugin console as a tab",
+        action: (params) => {
+          return browser.tabs.create({
+            url: `about:devtools-toolbox?id=${browser.runtime.id}%40temporary-addon&type=extension`,
+            active: true,
+            title: "console |"
+          })
+        }
       },
     },
     close: {
@@ -664,7 +690,16 @@ try {
         // Close all sidebars, tagged group, tabs with url / domain / partial match
         // incognito window(s)
         return params;
-      }
+      },
+      sidebar: {
+        content: "sidebar",
+        description: "Close the sidebar.",
+        action: (params) => {
+          // TODO sidebar: all, timer, actionmenu
+          return browser.sidebarAction.close()
+            .catch(print.failure_close_sidebar);
+        }
+      },
     },
     split: {
       content: "split",
@@ -674,10 +709,10 @@ try {
         // elos split selected tile column,
         return getHighlightedTabs()
           .then((tabs) => {
-            const screen_width = window.screen.availWidth;
+            const screen_width = window.screen.width;
             const count = max(3, tabs.length + 1);
             const _width = Math.floor(screen_width / count);
-            const _height = window.screen.availHeight;
+            const _height = window.screen.height;
             tabs.forEach((tab, idx) => {
               browser.windows.create({
                   tabId: tab.id,
@@ -717,15 +752,15 @@ try {
       suggestions: (params) => {
         console.log("HIT ", "timer", params);
         return Promise.resolve(params)
-          .then((_params) => {
-            return Promise.all(stores.timers.map((timer) => {
-              let _timer = get(timer);
-              return {
-                content: `${_timer.name}`,
-                description: `${_timer.name} (${_timer.currentTime()})`,
-              }
-            }))
-          })
+          // .then((_params) => {
+          //   return Promise.all(stores.timers.map((timer) => {
+          //     let _timer = get(timer);
+          //     return {
+          //       content: `${_timer.name}`,
+          //       description: `${_timer.name} (${_timer.currentTime()})`,
+          //     }
+          //   }))
+          // })
           .catch(print.failure_timer)
       },
       action: (params) => {
@@ -796,11 +831,6 @@ try {
         content: "history_undo",
         description: "history_undo",
         action: (params) => { console.log("HIT ", "history_undo_close", params)},
-      },
-      clear: {
-        content: "history_clear",
-        description: "clear history given params: tab, window, session, by domain, by timestamp",
-        action: (params) => { console.log("HIT ", "history_clear", params)},
       },
     },
     convert: {

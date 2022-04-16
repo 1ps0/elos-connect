@@ -21,7 +21,7 @@ import { components } from "./components.js";
 import { panelTypes, layoutConfig } from "./config/panels.js";
 console.log("PANEL TYPES", panelTypes);
 
-import { updateFiletype, openFile, print } from "./lib/apis.js";
+import { print } from "./lib/apis.js";
 import { stores } from "./lib/stores.js"
 
 import LayoutGrid from "./LayoutGrid.svelte";
@@ -54,9 +54,7 @@ function hydrateParams(item) {
   // hydrate events
   if (item.event !== undefined) {
     switch(item.event.callback) {
-      case "updateFiletype": item.event.callback = updateFiletype; break;
       case "togglePanel": item.event.callback = togglePanel; break;
-      case "openFile": item.event.callback = openFile; break;
     }
     if (item && item.target && item.target in objects && objects[item.target] !== null) {
       objects[item.target].$on(item.event.name, item.event.callback);
@@ -132,19 +130,20 @@ function _togglePanel(itemName) {
 onMount(async () => {
   console.log('App mounted');
 
+  let defaults = browser.runtime.getManifest().panels.default;
   let panels = Promise.resolve([]);
-  [
+  (defaults || [
     "panel-mainmenu",
+    "panel-focus",
+    "panel-playlists",
+    "panel-web-players",
+    "panel-actionmenu",
+    // "panel-dashboard",
     // "panel-timer",
     // "panel-commandbar",
     // "panel-location-ops",
-    "panel-focus",
-    "panel-playlists",
-    // "panel-dashboard",
-    "panel-web-players",
-    "panel-actionmenu",
     // "panel-locations",
-  ].forEach((name) => {
+  ]).forEach((name) => {
     panels = panels.then((prev) => {
       // console.log("[PANEL][ADD]", name, '--', prev);
       return add(name)

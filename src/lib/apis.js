@@ -20,6 +20,47 @@ export const print = new Proxy(() => {}, {
 
 // -- util
 
+function zip(keys, vals) {
+  return keys.reduce((m, key, index) => {
+    m[key] = vals[index];
+    return m;
+  }, {});
+}
+
+
+export const resolvePath = (path, obj, separator='.') => {
+  var properties = Array.isArray(path) ? path : path.split(separator);
+  return properties.reduce((prev, curr) => prev && prev[curr], obj);
+}
+
+export const intersection = (sA, sB) => {
+  return Promise.resolve(sA)
+    .then((_sA) => new Set([_sA].flat(1)))
+    .then(print.status_intersection_sA)
+    .then((_sA) => {
+      const result = new Set();
+      for (let elem of sB) {
+        if (_sA.has(elem)) {
+          console.log("[INTERSECTION]", elem)
+          result.add(elem);
+        }
+      }
+      console.log("[DONE]", result)
+      return [...result];
+    })
+    .catch(print.failure_intersection);
+};
+
+
+export const union = (sA, sB) => {
+  const _keys = new Set(sA);
+  for (let elem of sB) {
+    _keys.add(elem);
+  }
+  return [..._keys];
+};
+
+
 // attempt to fix the DataCloneError error,
 // where sendMessage of some kind includes
 // methods in an object, so they need to be pruned
@@ -311,8 +352,9 @@ export const restoreSession = async (_sessions) => {
 }
 
 
-export const moveTab = (tab, _window) => {
-  return browser.tabs.move(tab.id, {
+export const moveTabs = async (tabs, _window) => {
+  console.log("MOVE TAB", tabs, _window);
+  return browser.tabs.move((await tabs), {
       index: -1, // param reverse: 0 to reverse, -1 to stay same
       windowId: _window.id
     })
@@ -571,6 +613,11 @@ export const getHighlightedTabs = (newClip) => {
     .catch(print.failure_get_highlighted_tabs);
 }
 
+export const getPlayingTabs = (params) => {
+  return browser.tabs.query({ audible: true })
+    .catch(print.failure_get_playing_tabs);
+}
+
 export const tabQueries = (arg) => {
   return {
     // objects: all, window, this
@@ -580,23 +627,32 @@ export const tabQueries = (arg) => {
     window: getCurrentWindowTabs,
     selected: getHighlightedTabs,
     all: getAllTabs,
+    playing: getPlayingTabs,
   }[arg];
 };
 
 export const tabIdQueries = (arg) => {
   return {
-    this: tabQueries('this')
+    single: tabQueries('this')
       .then((tab) => tab.id)
-      .catch(print.failure_tabIdQueries),
-    window: tabQueries('window')
+      .catch(print.failure_tab_id_single),
+    plural: tabQueries('window')
       .then((tabs) => tabs.map((tab) => tab.id))
-      .catch(print.failure_tabIdQueries),
-    all: tabQueries('all')
-      .then((tabs) => tabs.map((tab) => tab.id))
-      .catch(print.failure_tabId_QueriesgetCurrentHighlightedTabs)
+      .catch(print.failure_tab_id_plural),
   }[arg]
 };
 
+
+export const validateFilter = (params) => {};
+
+export const filterBy = (params) => {
+  return {
+    url: (tabs) => tabs.filter((tab) => new RegExp(params[1]).test(tab.url)),
+    playing: (tabs) => { tabs },
+    last: (tabs) => { tabs },
+    tag: (tabs) => { tabs },
+  }[params[0]]
+}
 
 export const updatePlaying = (store) => {
   return browser.tabs.query({
@@ -624,6 +680,26 @@ export const loadTab = (params) => {
 
 
 // ------- Storage
+
+
+export const getQueriedTabs = (params) => {
+  return Promise.resolve(params)
+    .then((_params) => _params.length ? _params[0] : 'this')
+    .then(tabQueries) // keyword
+    // .then(print.status_tab_query)
+    .then((tabQuery) => tabQuery())
+    .then(reduceTabs)
+    .then((tabs) => {
+      return tabs.map((tab) => ({
+        ...tab,
+        tag: [_tag].flat(1),
+        timestamp: Date.now(),
+        // language: browser.tabs.detectLanguage(tab.id)
+      }));
+    })
+    .catch(print.failure_stash_tabs);
+
+}
 
 export const getAllStorageLocal = (params) => {
   return Promise.resolve((params && params.length) ? params : undefined)
@@ -668,11 +744,11 @@ export const clearStorageKey = (params) => {
 
 }
 
-// -------
+// ------- Send to webpage content_inject.js
 
 export const sendToContent = (params) => {
-  console.log("[BG][->][CONTENT]", params.tabId, params);
   return Promise.resolve(params)
+    .then(print.status_send_to_content)
     .then((data) => {
       browser.tabs.sendMessage(data.tabId, data);
       return data;
@@ -827,6 +903,10 @@ export const walkNodes = (walker) => {
 
 // ---- filter
 
+export const filter = () => {
+
+};
+
 export const filterTabs = (params) => {
   return getAllTabs()
     .then((tabs) => tabs.filter((tab) => new RegExp(params[0]).test(tab.url)))
@@ -905,7 +985,7 @@ export const createNotify = async (params) => {
 };
 
 
-export const createNotifySuccess = async (params) => {
+export const createNotifySuccess = (params) => {
   console.log("[SUCCESS][NOTIFIED]", params);
   return createNotify({
     title: "Success!",
@@ -913,24 +993,24 @@ export const createNotifySuccess = async (params) => {
   })
 }
 
-export const createNotifyFailure = async (params) => {
+export const createNotifyFailure = (params) => {
   console.log("[FAILURE][NOTIFIED]", params);
   return createNotify({
     title: "Error",
-    message: `For ${params.title}`
+    message: `For ${params ? params.title : 'your action.'}`
   })
 }
 
-export const setStore = async (params) => {
+export const setStore = (params) => {
   return stores[params.name];
 };
 
 
-export const checkKeymap = async (params) => {};
-export const updateKeymap = async (params) => {};
-export const undoKeymap = async (params) => {};
-// export const _ = async (params) => {};
-// export const _ = async (params) => {};
+export const checkKeymap = (params) => {};
+export const updateKeymap = (params) => {};
+export const undoKeymap = (params) => {};
+// export const _ = (params) => {};
+// export const _ = (params) => {};
 
 // -- ensemble / client / api functions
 
@@ -943,54 +1023,6 @@ export const fileList = async (params) => {
   // }).catch ((err) => {
   //   console.log("failed to update filelist", err, params);
   // })
-};
-
-let dbURIs = {
-  profile: "/api/db/profile",
-};
-
-export const linkList = async (params) => {
-  // # keywords = request.args.get("keywords", "")
-  // # tags = request.args.get("tags", [])
-  // # order = request.args.get("order", "DESC")
-  // limit = request.args.get("limit", 10)
-  // offset = request.args.get("offset", 0)
-  let data = await _fetch("/api/location/search", params);
-  stores.links.update(n => ({...n, ...data, dirty: false}));
-  console.log("updated linklist", data, params);
-};
-
-export const sendProfileUpdate = async (tableName, val) => {
-  let values = Object.values(val);
-  let columns = Object.keys(values[0]);
-  let row_data = values.map((x) => Object.values(x));
-  let params = [{
-    table_name: tableName,
-    columns: columns.slice(0,4),
-    rows: row_data.map((x) => x.slice(0,4))
-  }];
-
-  for (let row in row_data) {
-    if (row.at.length > 0) { // what if row.at doesnt exist or isnt an array?
-      let at_set = row.at.map((x) => x[0] );
-      let rows_set = at_set.map( x => ({
-        action_id: row.id,
-        session_id: val.session_id,
-        at: x
-      }));
-      params.push({
-        table_name: 'log',
-        columns: ['action_id', 'session_id', 'at'],
-        row_data: row_set
-      });
-    }
-  }
-
-  console.log("SENDING UPDATE", tableName, val, params);
-  let data = await _send(dbURIs.profile, params);
-
-  console.log("updated remote log", val, params, data);
-  return data;
 };
 
 // -- filters
@@ -1080,7 +1112,7 @@ export function _openFile(data) {
     };
     console.log("data for open file", options);
 
-    // stores.history.update(n => [...(n || []), data]);
+    // stores.actionHistory.update(n => [...(n || []), data]);
 
     // TODO take a step back here. this is potentially circular with add() and
     // should be rolled into its own find/add/remove/toggle system for specific
@@ -1096,67 +1128,30 @@ export function _openFile(data) {
 
 
 export function _updateLog(val) {
-  // console.log("_UPDATE LOG", val);
   const date = dateStringFromDate(new Date());
-  const fmtDate = clockFormatter.format(new Date());
-  // warning: this could get bloated
-  let _event = { ...val, at: [] };
-  stores.log.update((n) => {
-    let name = _event.name;
-    if (name && !n[name]) {
-      n[name] = _event;
-    }
-    n[name].at.push([Math.floor(Date.now() / 1000), date, fmtDate]);
-    return n;
-  });
+  return Promise.resolve(val)
+    .then((_val) => ({
+      ...val,
+      at: Math.floor(Date.now() / 1000),
+      timestamp: date
+    }))
+    .then((_val) => {
+      stores.eventLog.update((n) => [...(n.length ? n : (n ? [n] : [])), _val])
+    })
+    .catch(print.failure__update_log);
 }
+
 export function updateLog(e) {
-  // console.log("UPDATE LOG", e);
-  let val = e.detail;
-  _updateLog(val);
+  return Promise.resolve(e)
+    .then((_e) => _e.detail)
+    .then(_updateLog)
+    .catch(print.failure_update_log)
 }
-
-export function _updateHistory(val) {
-  // console.log("_UPDATE HISTORY", val);
-  const date = dateStringFromDate(new Date());
-  const fmtDate = clockFormatter.format(new Date());
-  // warning: this could get bloated
-  let _event = { ...val, at: [date, fmtDate] };
-  stores.history.update((n) => [...(n || []), _event]);
-}
-export function updateHistory(e) {
-  // console.log("UPDATE HISTORY", e);
-  let val = e.detail;
-  _updateHistory(val);
-}
-
-
-export function updateLocation(e) {
-  let typeName = e.detail.name;
-  if (!typeName) return;
-
-  stores.links.update((obj) => {
-    obj.filetype = typeName;
-    return obj;
-  });
-};
-
-export function updateFiletype(e) {
-  let typeName = e.detail.name;
-  _updateFiletype(typeName);
-};
-export function _updateFiletype(typeName) {
-  // if (!typeName) return;
-
-  // stores.files.update((obj) => {
-  //   obj.filetype = typeName;
-  //   return obj;
-  // });
-};
 
 // -- playlist controls 1
 
-const start = (playlist) => {
+
+export function startPlaylist(name) {
   /*
   1. get profile data
   2. update profile data with playlist cursor
@@ -1169,13 +1164,9 @@ const start = (playlist) => {
   9. suggestion functions based on next, and past history items
   10. operations for the current playlist item, the current cursor location
   11. location is by object, as location is over time and object resulting from action
-  12.
   */
-}
-
-export function startPlaylist(name) {
-  return Promise.resolve(name)
-    .then(browser.storage.local.get)
+  return browser.storage.local.get('stash')
+    .then((_stash) => _stash.stash)
     .then((data) => data[name])
     .then((playlist) => {
       return playlist.reduce((sum, item) => {
@@ -1194,57 +1185,17 @@ stores.layoutItems.subscribe(val => {
   console.log("[update] stores.layoutItems update", val)
 });
 
-stores.files.subscribe(val => {
-  console.log("[update] stores.files update", val);
-  // /*
-  // OPTIONS:
-  // - cache and load different data for api calls and params
-
-  // */
-  // if (val && val !== "undefined" && val.dirty) {
-  //   // FIXME this could have a race condition buried
-  //   fileList((({ files, dirty, ...rest }) => rest)(val));
-  // }
-});
-
 stores.config.subscribe((val) => {
   console.log("[update] stores.workspace update", val);
-  //JSON.parse(localStorage.getItem(item));
 });
 
-stores.log.subscribe((val) => {
-  console.log("[update] stores.log update", val, Object.keys(val).length);
-  // if (val && Object.keys(val).length > 0) {
-  //   sendProfileUpdate('action', val);
-  // }
-});
+// stores.eventLog.subscribe((val) => {
+//   console.log("[update] stores.eventLog update", val);
+//   // if (val && Object.keys(val).length > 0) {
+//   //   sendProfileUpdate('action', val);
+//   // }
+// });
 
-
-stores.history.subscribe((val) => {
-  console.log("[update] stores.history update", val);
-  /*
-  OPTIONS:
-  - store to json
-  - apply to event queues
-  - use as local updates for registered actions or events
-  */
-});
-
-stores.profile.subscribe((val) => {
-  console.log("[update] stores.profile update", val);
-  /*
-  OPTIONS:
-  - sync with remote.
-  - handle login/logout user switching, export, saves, validations, etc.
-  */
-});
-
-stores.actions.subscribe((val) => {
-  console.log("[update] registeredActions update", val);
-  /*
-  OPTIONS:
-  - build lists of subscribers for events/updates
-  -
-  */
-});
-
+// stores.actionHistory.subscribe((val) => {
+//   console.log("[update] stores.actionHistory update", val);
+// });

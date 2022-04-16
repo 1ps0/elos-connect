@@ -6,7 +6,6 @@ TODO -
 // import HorizontalBar from "svelte-chartjs/src/HorizontalBar.svelte";
 import { Chart } from "chart.js";
 import { createEventDispatcher, onMount } from 'svelte';
-import { linker } from "./lib/linker.js";
 
 const dispatch = createEventDispatcher();
 

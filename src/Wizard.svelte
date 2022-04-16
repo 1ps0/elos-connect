@@ -1,7 +1,6 @@
 <script>
 
 import { onMount } from 'svelte';
-import Editor from "./Editor.svelte";
 import ItemList from "./ItemList.svelte";
 import Files from "./Files.svelte"
 
@@ -122,7 +121,6 @@ templates/processing actions:
   </div>
 
   <div class="tab">
-    <Editor bind:fileset_selected={selected_files} />
   </div>
 
   <div class="tab">

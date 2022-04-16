@@ -1,6 +1,6 @@
 
 // import browser from "webextension-polyfill";
-// import { writable, get } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import { cmds } from "./lib/omnibox.js";
 import { stores } from "./lib/stores.js";
 import {
@@ -27,40 +27,6 @@ $: {
   }
 };
 
-
-// ------ HANDLERS
-
-export const resolve = (path, obj, separator='.') => {
-  var properties = Array.isArray(path) ? path : path.split(separator);
-  return properties.reduce((prev, curr) => prev && prev[curr], obj);
-}
-
-export const intersection = (sA, sB) => {
-  return Promise.resolve(sA)
-    .then((_sA) => new Set([_sA].flat(1)))
-    .then(print.status_intersection_sA)
-    .then((_sA) => {
-      const result = new Set();
-      for (let elem of sB) {
-        if (_sA.has(elem)) {
-          console.log("[INTERSECTION]", elem)
-          result.add(elem);
-        }
-      }
-      console.log("[DONE]", result)
-      return [...result];
-    })
-    .catch(print.failure_intersection);
-};
-
-
-export const union = (sA, sB) => {
-  const _keys = new Set(sA);
-  for (let elem of sB) {
-    _keys.add(elem);
-  }
-  return [..._keys];
-};
 
 
 // ------ THEME
@@ -204,7 +170,7 @@ const findCommands = (_input) => {
   return [cursor, args];
 };
 
-const omniboxOnInputChanged = async (text, addSuggestions) => {
+const omniboxOnInputChanged = (text, addSuggestions) => {
   // console.log("CHANGED", lastInput, ", BECAME:", text);
   lastInput = text;
   try {
@@ -221,23 +187,30 @@ const omniboxOnInputChanged = async (text, addSuggestions) => {
   }
 };
 
-const omniboxOnInputStarted = async () => {
-  console.log("User has started interacting with me.");
+const omniboxOnInputStarted = (params) => {
+  console.log("User has started interacting with me.", params);
   lastInput = "";
-  return;
 };
 
 export const registerHistory = (event) => {
-  // passthrough
-  stores.history.update((n) => [...n, event])
-    .catch(print.failure_register_history);
-  return event;
+  console.log("register history:", stores.actionHistory, event, get(stores.actionHistory));
+  return stores.actionHistory.update((n) => {
+    console.log("_____", n);
+    return n;
+  }).catch(print.failure_register_history);
+    // ...(n.length ? n : (n ? [n] : [])), {
+    // ...(n ? (n.length ? n : [n]) : []), {
+    //   event: event,
+    //   timestamp: new Date(),
+    // }])
+    // .catch(print.failure_register_history)
+    // .finally((_) => event); // function param passthrough
 };
 
 export const renderAction = (_input) => {
   return Promise.resolve(_input)
     .then(findCommands)
-    .then(print.status_render_action)
+    // .then(print.status_render_action)
     .then((_cmds) => _cmds[0].action(_cmds[1]))
     .catch(print.failure_render_action);
 }
@@ -245,6 +218,7 @@ export const renderAction = (_input) => {
 const omniboxOnInputEntered = (input, disposition) => {
   console.log("INPUT SUBMITTED", lastInput, '--', input, '--', cmds[input]);
   return Promise.resolve(lastInput)
+    // .then(registerHistory)
     .then(renderAction)
     // .then(print.success_on_input_entered)
     .catch(print.failure_omnibox_entered);
@@ -273,7 +247,7 @@ try {
   });
 
   browser.omnibox.setDefaultSuggestion({
-    description: "this is a limited eLOS preview; v0.0.8-prealpha"
+    description: "this is a limited eLOS preview; v0.0.9-prealpha"
   });
 
   browser.omnibox.onInputStarted.addListener(omniboxOnInputStarted);

@@ -11,7 +11,6 @@ TODO -
 */
 
 import { createEventDispatcher, onMount } from 'svelte';
-import { linker } from "./lib/linker.js";
 
 const dispatch = createEventDispatcher();
 

@@ -3,7 +3,7 @@ import { createEventDispatcher } from 'svelte';
 import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
-import { historyWritable, filesWritable, registeredActions} from "./lib/stores.js"
+import { stores } from "./lib/stores.js"
 ;
 export let selectedFiles = [];
 export const fileSelect = (node, params) => {
@@ -19,8 +19,7 @@ export const fileSelect = (node, params) => {
 
 export function fileList(node, file) {
   const dispatch = createEventDispatcher();
-  // const historyWritable = getContext("eventHistory");
-
+  // const actionHistoryWritable = getContext("eventHistory");
   // const registeredActions = getContext("registeredActions");
   // const fileTypeWritable = getContext("filetypes");
   // const filesWritable = getContext("files");
@@ -38,10 +37,10 @@ export function fileList(node, file) {
 
   // console.log("fileList found", node, file);
 
-  filetypeWritable.subscribe( (val) => {
-    console.log("sub:fileset:filetypes", val, metadata);
-    fetchFileList({ ...metadata, filetype: val });
-  });
+  // filetypeWritable.subscribe( (val) => {
+  //   console.log("sub:fileset:filetypes", val, metadata);
+  //   fetchFileList({ ...metadata, filetype: val });
+  // });
 
   return {
     update(newFile) {

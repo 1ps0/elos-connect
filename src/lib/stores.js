@@ -11,7 +11,7 @@ so readable(value) internally updates
 then writable calls readable's values for those datasets
 */
 
-import { writable, get } from 'svelte/store';
+import { writable } from 'svelte/store';
 import { workspaceConfig } from "../workspace.js";
 
 
@@ -22,65 +22,25 @@ export const storageFor = (name, otherwise={}) => {
     .then(_ => otherwise)
 };
 
-export const configWritable = writable(workspaceConfig);
-
-export const historyWritable = writable(storageFor("history", []));
-
-export const trackedWritable = writable(storageFor("tracked", {}));
-
-export const logWritable = writable(storageFor("log", {}));
-
-export const filesWritable = writable(storageFor("files"));
-export const layoutItemsWritable = writable(storageFor("layoutItems", { items: [], add: [] }));
-
-export const contentWritable = writable(storageFor("content"));
-export const profileWritable = writable(storageFor("profile"));
-export const todoWritable = writable(storageFor("todo", []));
-export const pollsWritable = writable(storageFor("polls", []));
-
-export const registeredActions = writable({});
-
-export const commandOptionsWritable = writable({
-  polls: () => storageFor("polls"),
-  todo: () => storageFor("todo"),
-  workspace: () => storageFor("workspace"),
-  history: () => storageFor("history"),
-  tracked: () => storageFor("tracked"),
-  log: () => storageFor("log"),
-  layoutItems: () => storageFor("layoutItems"),
-  profile: () => storageFor("profile"),
-  actions: () => registeredActions,
-  links: () => writable({}),
-  files: () => storageFor("files", {
-    files: [],
-    filetype: "md",
-    keywords: "",
-    pageNum: 1,
-    pageSize: 10,
-    dirty: false
-  }),
-})
+const configWritable = writable(workspaceConfig);
+const actionHistoryWritable = writable(storageFor("actionHistory", []));
+const eventLogWritable = writable(storageFor("eventLog", []));
+const layoutItemsWritable = writable(storageFor("layoutItems", { items: [], add: [] }));
+const todoWritable = writable(storageFor("todo", []));
+const filesWritable = writable(storageFor("files"));
 
 export const stores = {
-  // tmp data
-  todo: todoWritable,
-  polls: pollsWritable,
-  history: historyWritable,
-  tracked: trackedWritable,
-  log: logWritable,
-  content: contentWritable,
-  layoutItems: layoutItemsWritable,
-  // config data
   config: configWritable,
-  // api data
+  todo: todoWritable,
+  actionHistory: actionHistoryWritable,
+  eventLog: eventLogWritable,
+  layoutItems: layoutItemsWritable,
   files: filesWritable,
-  profile: profileWritable,
-  // local actions
-  actions: registeredActions,
-  commandOptions: commandOptionsWritable,
 };
-for (let name in stores) {
-  stores[name].subscribe((val) => {
+Object.entries(stores).forEach((entry) => {
+  const name = entry[0];
+  const store = entry[1];
+  store.subscribe((val) => {
     if (val !== undefined && val !== "undefined") {
       return Promise.resolve({ name: val })
         .then(print.status_storage)
@@ -89,16 +49,4 @@ for (let name in stores) {
         .catch(print.failure_status_store);
     }
   });
-}
-
-export const syncLocal = () => {};
-export const syncRemote = () => {};
-
-
-
-
-
-
-
-
-
+});

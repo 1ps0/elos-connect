@@ -2,7 +2,6 @@
 
 import Wizard from "./Wizard.svelte";
 import Files from "./Files.svelte";
-import Editor from "./Editor.svelte";
 import ItemList from "./ItemList.svelte";
 
 import { onMount } from 'svelte';
@@ -17,9 +16,7 @@ onMount(() => {
 </script>
 
 <div class="main">
-    <Wizard >
-        <!-- <Editor bind:fileset_selected={selected_files} /> -->
-    </Wizard>
+    <Wizard />
 </div>
 
 <style>
