@@ -34,8 +34,8 @@ try {
       content: "reload",
       description: "reload plugin",
       action: (params) => doReloadSystem()
-        .then(notify.success)
-        .catch(notify.failure)
+        .then(notify.success_reload)
+        .catch(notify.failure_reload)
     },
     sync: {
       content: "sync",
@@ -51,7 +51,7 @@ try {
         console.log("HIT sync", params);
         return Promise.resolve((params && params.length) ? params : undefined)
           .then(syncStorage)
-          .then(notify.success)
+          .then(notify.success_sync)
           .catch(print.failure_sync);
       },
     },
@@ -105,7 +105,7 @@ try {
               .then(browser.tabs.remove)
               .catch(print.failure_stash_tabs_remove)
           })
-          .then(notify.success)
+          .then(notify.success_stash)
           .catch(print.failure_stash)
       },
     },
@@ -125,8 +125,8 @@ try {
             width: window.screen.width / 2,
             height: window.screen.height,
           })
-          .then(notify.success)
-          .catch(notify.failure);
+          .then(notify.success_window_left)
+          .catch(notify.failure_window_left);
         },
       },
       right: {
@@ -139,8 +139,8 @@ try {
             width: window.screen.width / 2,
             height: window.screen.height,
           })
-          .then(notify.success)
-          .catch(notify.failure);
+          .then(notify.success_window_right)
+          .catch(notify.failure_window_right);
         },
       },
       full: {
@@ -153,9 +153,22 @@ try {
             width: window.screen.width,
             height: window.screen.height,
           })
-          .then(notify.success)
-          .catch(notify.failure);
+          .then(notify.success_window_full)
+          .catch(notify.failure_window_full);
         },
+      },
+      title: {
+        content: "title",
+        description: "set the title of the window/tab",
+        action: (params) => {
+          console.log("HIT", "title", params);
+          if (params.length) {
+            return Promise.resolve(params)
+              .then(setWindowTitle)
+              .then(notify.success_window_title)
+              .catch(print.failure_set_window_title);
+          }
+        }
       },
     },
     gather: {
@@ -201,7 +214,7 @@ try {
                 ))
               )
             })
-            .then(notify.success)
+            .then(notify.success_select_all)
             .catch(print.failure_select_all);
         }
       }
@@ -250,19 +263,6 @@ try {
           .catch(print.failure_goto)
       }
     },
-    title: {
-      content: "title",
-      description: "set the title of the window/tab",
-      action: (params) => {
-        console.log("HIT", "title", params);
-        if (params.length) {
-          return Promise.resolve(params)
-            .then(setWindowTitle)
-            .then(notify.success)
-            .catch(print.failure_set_window_title);
-        }
-      }
-    },
     clear: {
       content: "clear",
       description: "clear",
@@ -291,8 +291,8 @@ try {
         action: (params) => {
           console.log("HIT clear history")
           return stores.actionHistory.update((n) => [])
-            .then(notify.success)
-            .catch(print.failure_clear_log)
+            .then(notify.success_clear_history)
+            .catch(print.failure_clear_history)
         }
       },
       log: {
@@ -301,7 +301,7 @@ try {
         action: (params) => {
           console.log("HIT clear log")
           return stores.eventLog.update((n) => [])
-            .then(notify.success)
+            .then(notify.success_clear_log)
             .catch(print.failure_clear_log)
         }
       },
@@ -313,8 +313,8 @@ try {
           return Promise.resolve(params)
             .then((_params) => _params[0])
             .then((_param) => stores[_param].update((n) => []))
-            .then(notify.success)
-            .catch(print.failure_clear_log);
+            .then(notify.success_clear_store)
+            .catch(print.failure_clear_store);
         }
       },
     },
@@ -345,8 +345,8 @@ try {
               }
             }))
             .then(_send)
-            .then(notify.success)
-            .catch(notify.failure)
+            .then(notify.success_save_video)
+            .catch(notify.failure_save_video)
         },
       },
       song: {
@@ -364,8 +364,8 @@ try {
               }
             }))
             .then(_send)
-            .then(notify.success)
-            .catch(notify.failure);
+            .then(notify.success_save_song)
+            .catch(notify.failure_save_song);
         },
       },
       link: {
@@ -419,8 +419,8 @@ try {
         suggestions: (params) => {},
         action: (params) => {
           return sendPlayPause()
-            .then(notify.success)
-            .catch(notify.failure)
+            .then(notify.success_control_play)
+            .catch(notify.failure_control_play)
         }
       },
       pause: {
@@ -429,8 +429,8 @@ try {
         suggestions: (params) => {},
         action: (params) => {
           return sendPlayPause()
-            .then(notify.success)
-            .catch(notify.failure)
+            .then(notify.success_control_pause)
+            .catch(notify.failure_control_pause)
         }
       },
       restart: {
@@ -439,8 +439,8 @@ try {
         suggestions: (params) => {},
         action: (params) => {
           return sendRestart()
-            .then(notify.success)
-            .catch(notify.failure)
+            .then(notify.success_control_restart)
+            .catch(notify.failure_control_restart)
         }
       },
       loop: {
@@ -448,8 +448,8 @@ try {
         description: "Toggles the current playing media to loop.",
         action: (params) => {
           return sendToggleLoop()
-            .then(notify.success)
-            .catch(notify.failure)
+            .then(notify.success_control_loop)
+            .catch(notify.failure_control_loop)
         }
       },
       mute: {
@@ -538,8 +538,8 @@ try {
               // stores.config.update((n) => {...n, remote: args[1]})
             ];
           })
-          .then(notify.success)
-          .catch(notify.failure)
+          .then(notify.success_config)
+          .catch(notify.failure_config)
       },
     },
     tag: {
@@ -674,7 +674,7 @@ try {
                 .catch(print.failure_split_tabs);
             })
           })
-          .catch(notify.failure)
+          .catch(notify.failure_split)
       },
     },
     track: {

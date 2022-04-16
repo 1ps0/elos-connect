@@ -1,10 +1,6 @@
 // 2nd order
-console.log("LOAD///apis");
-import { writable, get } from 'svelte/store';
-
-import { clockFormatter, dateStringFromDate } from "./clock.js";
+import { get } from 'svelte/store';
 import { stores } from "./stores.js";
-import { openWith } from "../config/open.js";
 
 // -- feedback via print or notify
 
@@ -17,10 +13,12 @@ export const print = new Proxy(() => {}, {
     }
   }
 });
+print.load_apis();
 
 export const notify = new Proxy(() => {}, {
   get(target, name) {
     let _name = name.toUpperCase().split('_');
+    console.log("NOTIFYING", name);
     return (args) => {
       const state = _name[0];
       return browser.notifications.create({
@@ -34,6 +32,7 @@ export const notify = new Proxy(() => {}, {
     }
   }
 });
+// notify.load_apis();
 
 // export const notify.success = (params) => {
 //   console.log("[SUCCESS][NOTIFIED]", params);
@@ -159,16 +158,6 @@ export const doReloadSystem = (params) => {
     catch(print.failure_do_reload_system);
 }
 
-// ------- Processing
-
-export const processLink = (item) => {
-  // given a url, hydrated by a Tab,
-  // isArticle, or audible, then isolate the content element(s)
-  // readermode, or video or audio player, etc.
-  // save to remote if possible,
-  // process for NLP triage if possible,
-}
-
 // ------- Send composites
 
 export const sendTag = async (params) => {
@@ -190,9 +179,7 @@ export const sendTag = async (params) => {
 }
 
 export const sendLink = async (tagName) => {
-  return browser.tabs.query({
-    currentWindow: true, active: true
-  })
+  return getCurrentActiveTab()
   .then((tabs) => {
     return {
       uri: "api/location/add",

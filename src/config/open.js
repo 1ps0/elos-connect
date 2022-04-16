@@ -5,4 +5,3 @@ export const openWith = {
   "panel-gallery": ["jpg", "gif", "png"],
   // "panel-": [],
 };
-
