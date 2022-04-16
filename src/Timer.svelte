@@ -34,7 +34,7 @@ let timerArgs = {
 };
 
 onMount(async () => {
-  console.log('Timer mounted');
+  print.success_Timer_mounted();
 });
 
 

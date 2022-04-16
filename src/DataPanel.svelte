@@ -9,7 +9,6 @@ import TextboxCell from './cell/textbox-cell.svelte';
 import SelectCell from './cell/select-cell.svelte';
 import CheckboxCell from './cell/checkbox-cell.svelte';
 
-import Select from "./Select.svelte";
 
 import { _fetch, _send } from "./lib/apis.js";
 import { stores } from "./lib/stores.js"
@@ -150,7 +149,7 @@ let selectWatcher = writable({ // Select value interface
 });
 
 onMount(async () => {
-  console.log("DataGrid mounted");
+  print.success_DataGrid_mounted();
 
   // await updateData();
   // addNewRow();

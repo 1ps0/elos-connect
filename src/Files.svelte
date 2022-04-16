@@ -41,7 +41,7 @@ function incrementPage(e) {
 }
 
 onMount(() => {
-  console.log('Files mounted');
+  print.success_Files_mounted();
 
   stores.files.subscribe((val) => {
     if (val && !val.dirty) {

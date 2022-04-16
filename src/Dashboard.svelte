@@ -123,7 +123,7 @@ const browserStats = async (params) => {
 
 
 onMount(async () => {
-  console.log('Dashboard mounted');
+  print.success_Dashboard_mounted();
   // browser.commands.onCommand.addListener(updateCommand);
 });
 

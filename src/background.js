@@ -230,7 +230,7 @@ const omniboxOnInputCancelled = () => {
 
 
 try {
-  console.log('background.js mounted');
+  print.success_background_js_mounted();
 
   // let params = {
   //   name: `sidebar-${browser.windows.getCurrent().id}`,

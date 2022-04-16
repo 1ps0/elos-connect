@@ -69,7 +69,7 @@ const buttonProps = [
   },
 ];
 onMount(async () => {
-  console.log('Focus mounted');
+  print.success_Focus_mounted();
   // groupMode = "window";
   /*
     autotag. a note in the toolbar that auto generates based on content being viewed.

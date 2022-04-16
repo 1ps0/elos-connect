@@ -14,7 +14,7 @@ and send that event through config structure to the target component
 import { onMount, createEventDispatcher } from 'svelte';
 
 import { icons } from "./lib/icons.js";
-import { _fetch } from "./lib/apis.js";
+import { _fetch, print } from "./lib/apis.js";
 import { stores } from "./lib/stores.js"
 
 const dispatch = createEventDispatcher();
@@ -31,7 +31,7 @@ export let items = [];
 const updateFromSource = async (source) => {
   if (source !== null) {
     let response = await _fetch({ uri: source});
-    console.log('getting data from', source, response);
+    // console.log('getting data from', source, response);
     items = response.data;
   }
 };
@@ -54,7 +54,7 @@ function toggleActive(item) {
 function sendEvent(e) {}
 
 function _sendEvent(item) {
-  console.log('clicked sendEvent --', eventName, item);
+  // console.log('clicked sendEvent --', eventName, item);
   if (eventName === "filterType") {
     // stores.files.update((n) => ({
     //   ...n,
@@ -70,7 +70,7 @@ function _sendEvent(item) {
 }
 
 onMount(async () => {
-  console.log('SelectList mounted', data);
+  print.success_SelectList_mounted();
 
   updateFromSource(source);
   dispatch("didMount", data);

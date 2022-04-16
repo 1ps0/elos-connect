@@ -696,6 +696,7 @@ try {
         description: "Close the sidebar.",
         action: (params) => {
           // TODO sidebar: all, timer, actionmenu
+          // FIXME "sidebarAction.close may only be called from a user input handler"
           return browser.sidebarAction.close()
             .catch(print.failure_close_sidebar);
         }
@@ -709,18 +710,26 @@ try {
         // elos split selected tile column,
         return getHighlightedTabs()
           .then((tabs) => {
-            const screen_width = window.screen.width;
-            const count = max(3, tabs.length + 1);
-            const _width = Math.floor(screen_width / count);
-            const _height = window.screen.height;
-            tabs.forEach((tab, idx) => {
-              browser.windows.create({
-                  tabId: tab.id,
-                  height: _height,
-                  width: _width,
-                  left: _width * idx,
-                  top: 0
-                })
+            return {
+              width: Math.floor(
+                window.screen.width /
+                max(3, tabs.length + 1)
+              ),
+              tabs: tabs,
+            }
+          })
+          .then((data) => {
+            return data.tabs.map((tab) => ({
+              top: 0,
+              left: data.width * idx,
+              width: data.width,
+              height: window.screen.height,
+              tabId: tab.id,
+            }))
+          })
+          .then((data) => {
+            data.forEach((tab) => {
+              browser.windows.create(data)
                 .catch(print.failure_split_tabs);
             })
           })

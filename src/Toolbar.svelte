@@ -32,7 +32,7 @@ const interpret_item = (item) => {
 };
 
 onMount(async () => {
-  console.log("Toolbar mounted");
+  print.success_Toolbar_mounted();
 
   // addNewRow();
 });

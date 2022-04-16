@@ -11,8 +11,6 @@ TODO
 import { onMount, createEventDispatcher, getContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
-import Select from "./Select.svelte";
-import { dateStringNow } from "./lib/clock.js";
 // import { _fetch } from "./lib/api.js";
 import { pollTypes, fieldTypes } from "./config/polls.js";
 
@@ -62,7 +60,7 @@ let formWatcher = writable({
 });
 
 onMount(async () => {
-  console.log('EntryForm mounted');
+  print.success_EntryForm_mounted();
   if (formWatcher) {
     formWatcher.subscribe((val) => {
       console.log("selectedForm updated", val);
@@ -76,7 +74,7 @@ onMount(async () => {
 <section>
 <!-- using stopprop works, but stops all dragging -->
 <div class="container" on:pointerdown|stopPropagation>
-  <Select bind:watcher={formWatcher}/>
+  <!-- <Select bind:watcher={formWatcher}/> -->
   <form id="entryform" on:submit|stopPropagation|preventDefault={doSubmit}>
     {#if selectedForm}
       <label for="{selectedForm.name}">{selectedForm.title}</label>

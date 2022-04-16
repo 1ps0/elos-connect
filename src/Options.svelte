@@ -18,7 +18,7 @@ export let config = {};
 
 
 onMount(async () => {
-  console.log('Options mounted');
+  print.success_Options_mounted();
 });
 
 </script>

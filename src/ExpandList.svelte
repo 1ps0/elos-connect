@@ -50,10 +50,10 @@ function close(e) {
 }
 
 onMount(async () => {
-  console.log('ExpandList mounted');
+  print.success_ExpandList_mounted();
 
   if (dataStore) {
-    // console.log("dataStore mounted in ExpandList");
+    // print.success_dataStore_mounted(); in ExpandList");
     dataStore.subscribe((val) => {
       if (val) {
         console.log("ExpandList update", dataKey, val);

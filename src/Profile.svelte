@@ -33,7 +33,7 @@ export let settings = {
 }
 
 onMount(async () => {
-  console.log('Profile mounted');
+  print.success_Profile_mounted();
 });
 
 

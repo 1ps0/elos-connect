@@ -16,28 +16,6 @@ import { renderJSON } from "./lib/render.js";
 // let savePDFButton = document.querySelector('#save-pdf');
 // let courseDataElement = document.querySelector('#active-course-data');
 
-function readerSelectors() {
-  let contentData = document.querySelectorAll('.page')
-  return {
-    // body: document.querySelector('.container'),
-    title: document.querySelector('.reader-title h1').value,
-    link: document.querySelector('.reader-domain a').href,
-    readerTime: document.querySelector('.reader-estimated-time').value,
-    contentBody: contentData
-  };
-}
-
-async function addMetric() {
-  let elements = document.getElementById('metrics').elements;
-  let entry = elements.map((x) => {
-
-  });
-  await _send("api/db/files", ({
-    table_name: 'metric',
-  }));
-}
-
-
 let enabledCourseSites = [
   "coursera.org",
   "edx.org",
@@ -45,48 +23,28 @@ let enabledCourseSites = [
   "khanacademy.org"
 ];
 
-let registered = null;
-async function registerScript(message) {
-  let hosts = message.hosts;
-  let code = message.code;
-
-  if (registered) {
-    registered.unregister();
-  }
-
-  registered = await browser.contentScripts.register({
-    matches: hosts,
-    js: [{code}],
-    runAt: "document_idle"
-  });
-
-}
 
 const extractReaderText = (e) => {
-  browser.runtime.onMessage.addListener(registerScript);
-  // let tabs = await browser.tabs.query({
-  //   currentWindow: true,
-  //   active: true
-  // });
-  let pageData = renderJSON(document);
-  console.log('doing reader text:', pageData);
-  if (tabs.isArticle && !tabs.isInReaderMode) {
-    browser.tabs.toggleReaderMode()
-      .then((_) => ({
-        uri: "api/analysis/data",
-        body: pageData
-      }))
-      .then(_send)
-      .then((_) => ({}))
-      // .then(browser.tabs.saveAsPDF) // toFileName
-      .then(browser.tabs.toggleReaderMode)
-      .catch(print.failure_extract_reader_text);
-  } else {
-    // await browser.tabs.toggleReaderMode();
-      browser.tabs.saveAsPDF({})
-        .catch(print.failure_save_as_pdf) // toFileName
-    // await browser.tabs.toggleReaderMode();
-  }
+  // browser.runtime.onMessage.addListener(registerScript);
+  return getCurrentActiveTab()
+    .then((tabs) => {
+      return tabs.filter((tab) => tabs.isArticle)[0];
+    })
+    .then((tab) => {
+        !tab.isInReaderMode ? browser.tabs.toggleReaderMode() : false;
+        return tab.id;
+    })
+    .then((tabId) => ({
+      tabId: tabId,
+      message:'extractReaderText'
+    }))
+    .then(sendToContent)
+    .then((pageData) => ({
+      uri: "api/analysis/data",
+      body: pageData,
+    }))
+    .then(_send)
+    .catch(print.failure_extract_reader_text);
 }
 
 
@@ -110,7 +68,7 @@ let items = [
   },
 ]
 onMount(async () => {
-  console.log('ActionMenu mounted');
+  print.success_ActionMenu_mounted();
 });
 </script>
 

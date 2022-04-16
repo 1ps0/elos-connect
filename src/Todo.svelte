@@ -75,7 +75,7 @@ function clearLog(e) {}
 
 
 onMount(async () => {
-  console.log('Todo mounted');
+  print.success_Todo_mounted();
 
   dataStore.update(n => [...(n.length > 0 ? n : todoItems)]);
 });

@@ -106,10 +106,10 @@ function createChart() {
 }
 
 onMount(async () => {
-  console.log('ItemList mounted');
+  print.success_ItemList_mounted();
 
   if (dataStore) {
-    console.log("dataStore mounted in ItemList");
+    print.success_dataStore_mounted();
     dataStore.subscribe((val) => {
       if (val) {
         console.log("ItemList update", val);

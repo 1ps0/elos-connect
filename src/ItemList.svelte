@@ -26,7 +26,7 @@ export let buttons = [];
 
 let dataSource = null;
 let queue = [];
-$: console.log('queue -->', queue, dataStore);
+// $: console.log('queue -->', queue, dataStore);
 
 // TODO make this part of the toolbar
 // TODO make 'add' trigger a writable
@@ -63,7 +63,7 @@ function close(e) {
 }
 
 onMount(async () => {
-  console.log('ItemList mounted');
+  print.success_ItemList_mounted();
 
   if (dataStore) {
     dataStore.subscribe((val) => {
@@ -79,7 +79,7 @@ onMount(async () => {
       }
     });
     // .catch(print.failure_itemlist_datastore_update);
-    console.log("dataStore mounted in ItemList");
+    print.success_dataStore_mounted();
   }
 
   if (dataSourcePath) {

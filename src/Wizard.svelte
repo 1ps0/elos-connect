@@ -60,18 +60,9 @@ function fixStepIndicator(n) {
   x[n].className += " active";
 }
 
-let editor = null;
-let editor_editor;
-$: editor_editor = editor ? editor.editor : null;
-
 onMount(() => {
-  console.log('Wizard mounted');
+  print.success_Wizard_mounted();
   showTab(1); // Display the current tab
-
-  if(editor_editor != null) {
-    console.log(editor_editor);
-    editor_editor.layout();
-  }
 });
 
 

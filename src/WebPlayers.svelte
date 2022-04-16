@@ -76,7 +76,7 @@ const buttonProps = [
 ];
 
 onMount(async () => {
-  console.log('WebPlayers mounted');
+  print.success_WebPlayers_mounted()
   browser.runtime.onMessage.addListener(handlePlayerUpdate);
   updatePlaying(tabStore);
 });

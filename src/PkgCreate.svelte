@@ -10,7 +10,7 @@ let selected_files;
 $: selected_files;
 
 onMount(() => {
-  console.log('PkgCreate mounted');
+  print.success_PkgCreate_mounted();
 });
 
 </script>

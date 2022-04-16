@@ -83,7 +83,7 @@ capture
 
 
 onMount(async () => {
-  console.log('WebHistory mounted');
+  print.success_WebHistory_mounted();
 
   // browser.sessions.restore(
   //   sessionId             // string

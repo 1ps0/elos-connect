@@ -7,7 +7,7 @@ import { writable, readable, derived, get } from "svelte/store";
 const dispatch = createEventDispatcher();
 
 onMount(async () => {
-  console.log('SelectList mounted', item);
+  print.success_SelectList_mounted()
   // console.log('selectlist', items, eventName, visibleItems);
 
   dispatch("didMount", item);

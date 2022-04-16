@@ -744,6 +744,23 @@ export const clearStorageKey = (params) => {
 
 }
 
+// ------- Register content script
+
+export const _unregisterScript = (subPointer) => {
+  return subPointer.unregister();
+}
+
+export const _registerScript = (message) => {
+  let hosts = message.hosts;
+  let code = message.code;
+
+  return browser.contentScripts.register({
+    matches: hosts,
+    js: [{code}],
+    runAt: "document_idle"
+  });
+}
+
 // ------- Send to webpage content_inject.js
 
 export const sendToContent = (params) => {

@@ -64,7 +64,7 @@ const _sendTag = async (params) => {
 };
 
 onMount(async () => {
-  console.log('LocationOps mounted');
+  print.success_LocationOps_mounted();
 
   loadTags()
     .then((tags) => {

@@ -76,7 +76,7 @@ const itemButtons = [];
     // buttons={itemButtons}
 
 onMount(async () => {
-  console.log('Playlists mounted');
+  print.success_Playlists_mounted();
   updatePlaylistStore();
 });
 

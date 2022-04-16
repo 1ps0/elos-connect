@@ -5,7 +5,7 @@ import { clockAction, clockStore } from "./lib/clock.js";
 
 
 onMount(async () => {
-  console.log('Clock mounted');
+  print.success_Clock_mounted();
 });
 
 </script>

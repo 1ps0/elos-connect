@@ -191,6 +191,14 @@ function getContent(ranges) {
   return contexts;
 }
 
+function extractReaderText() {
+  return {
+    title: document.querySelector('.reader-title h1').value,
+    link: document.querySelector('.reader-domain a').href,
+    readerTime: document.querySelector('.reader-estimated-time').value,
+    contentBody: document.querySelectorAll('.page')
+  };
+}
 
 function handleMessage(request, sender, sendResponse) {
   console.log("[CONTENT] Message from the page script:", request, sender, sendResponse);
@@ -222,12 +230,15 @@ function handleMessage(request, sender, sendResponse) {
       .then(renderPlayingStatus)
       .then(sendResponse)
       .catch(print.failure_handle_message_restart);
-
+  } else if (request.message = "extractReaderText") {
+    return extractReaderText()
+      .then(sendResponse)
+      .catch(print.failure_handle_message_extract_reader_text);
   }
 }
 
 try {
-  console.log('content_inject.js mounted');
+  print.success_content_inject.js_mounted();
   browser.runtime.onMessage.addListener(handleMessage);
   console.log("content_inject.js finished mounting")
 } catch (e) {

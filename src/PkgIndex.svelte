@@ -23,7 +23,7 @@ async function fetch_pkg_index() {
 }
 
 onMount(() => {
-  console.log("PkgIndex mounted");
+  print.success_PkgIndex_mounted();
   fetch_pkg_index();
 });
 

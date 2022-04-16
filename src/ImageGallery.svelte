@@ -23,7 +23,7 @@ function scale(percent=25) {
 }
 
 onMount(async () => {
-  console.log("ImageGallery mounted", $$props, $$restProps);
+  print.success_ImageGallery_mounted();
   if (dataStore !== undefined) {
     dataStore.subscribe((val) => {
       if (val === undefined) {

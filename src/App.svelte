@@ -128,7 +128,7 @@ function _togglePanel(itemName) {
 
 
 onMount(async () => {
-  console.log('App mounted');
+  print.success_App_mounted();
 
   let defaults = browser.runtime.getManifest().panels.default;
   let panels = Promise.resolve([]);

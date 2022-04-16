@@ -43,7 +43,7 @@ Object.entries(stores).forEach((entry) => {
   store.subscribe((val) => {
     if (val !== undefined && val !== "undefined") {
       return Promise.resolve({ name: val })
-        .then(print.status_storage)
+        // .then(print.status_storage)
         // .then(pruneMethods)
         .then(browser.storage.local.set)
         .catch(print.failure_status_store);

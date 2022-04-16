@@ -214,7 +214,7 @@ function getMatchElements(input) {
                 label: matchTag,
                 search: matchTag.replace(RegExp(regExpEscape(value.toLowerCase()), 'i'), "<strong>$&</strong>")
             }
-        });;
+        })();
 
     if (onlyUnique === true) {
         matchs = matchs.filter(tag => !tags.includes(tag.label));
