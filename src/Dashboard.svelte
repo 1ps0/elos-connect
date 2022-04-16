@@ -4,7 +4,7 @@ import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
 import { stores } from "./lib/stores.js";
-import { loadSites, loadHistory, loadCommands } from "./lib/apis.js";
+import { loadSites, loadHistory, loadCommands, notify, print } from "./lib/apis.js";
 import { cmds } from "./lib/omnibox.js";
 
 // import { commandLine } from "./lib/commandLine.js";
@@ -57,7 +57,7 @@ const updateCommand = async (params) => {
     name: params.name,
     shortcut: params.parent.input.value
   })
-  .then(createNotifySuccess)
+  .then(notify.success)
   .catch(print.failure);
 };
 

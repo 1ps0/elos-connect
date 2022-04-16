@@ -8,8 +8,7 @@ import { _fetch,
   sendTag,
   sendLink,
   loadTags,
-  createNotifySuccess,
-  createNotifyFailure,
+  notify,
   print
 } from "./lib/apis.js"
 import { stores } from "./lib/stores.js";
@@ -70,7 +69,7 @@ onMount(async () => {
     .then((tags) => {
       return (tags ? tags : []).forEach((tag) => renderTag(tag))
     })
-    .catch(createNotifyFailure)
+    .catch(notify.failure)
 });
 </script>
 

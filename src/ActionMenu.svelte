@@ -5,10 +5,11 @@ import {
   _fetch,
   _send,
   getCurrentActiveTab,
+  sendToContent,
   doSelectedCopy,
   doDownloadVideo,
   doReloadSystem,
-  createNotifySuccess,
+  notify,
   print
 } from "./lib/apis.js"
 import { renderJSON } from "./lib/render.js";

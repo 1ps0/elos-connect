@@ -4,7 +4,7 @@ import { onMount } from 'svelte';
 import { writable, get } from 'svelte/store';
 
 import {
-  createNotifySuccess,
+  notify,
   print,
 } from "./lib/apis.js";
 import ItemList from "./ItemList.svelte";

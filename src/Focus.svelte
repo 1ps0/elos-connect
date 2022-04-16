@@ -21,7 +21,7 @@ import {
   getCurrentActiveTab,
   getAllTabs,
   bringToFront,
-  createNotifySuccess,
+  notify,
   print
 } from "./lib/apis.js";
 import ItemList from "./ItemList.svelte";

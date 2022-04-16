@@ -1,63 +1,3 @@
-
-/*
-- (DONE) 'stash' a window or select group of tabs,
-    label the group in a panel,
-    reopen one or all
-
-- elos stash all
-- elos stash <selected> (implied)
-- elos stash window
-
-- elos load window config-1 // fullscreen or minimize, resize if possible, domains to fullscreen
-
-- 'pin' panel across windows
-- enable remote server
-
-- add top/bottom bar for panels
-
-- elos popout <selected> // extract selected tags to new window
-- elos tagas tagName <selected>
-- elos select all
-- elos stashas tagName
-
-- elos ??? // move a panel from sidebar to page
-
-// input actions determine later function shapes
-
-- macros defined by in-plugin editors
-- macros have comment showing a dump of `vars()` equivalent, and other available functions
-
-// define: macro is use of a deifned external api to structure and execute high level actions
-
-- last suggestions loaded on bar select
-- set elos as default?
-
-- rulegen: put tag of tagName in folder /Volumes/FATBOY/pictures/tagName
-
-- window_manager: count of windows, count of tabs, hungriest tabs, force browser GC?
-*/
-
-/* findNeighborCommands
-  GOAL: find a pool of suggestion-format objects from a given lastInput | cmds
-  set keywords as:
-    unique union cmd in cmds as:
-      cmd.split('_')
-  set parts = lastInput.split(' ')
-  set keys = unique union parts and keywords
-  set args = parts - keys
-  set values = cmds[keys]
-  set results = values(args)
-  set result = results {
-    suggestionCount: int,
-    priority: int,
-    type: operation | network,
-    content: [result]
-  }
-  show ephemeral panel in sidebar with the results from hovered menu item
-*/
-
-// import { stores } from "./lib/stores.js";
-console.log("LOAD///omnibox");
 import {
   doSelectedCopy,
   doReloadSystem,
@@ -80,11 +20,12 @@ import {
   updateClipboard,
   _fetch,
   _send,
-  createNotifyFailure,
-  createNotifySuccess,
+  notify,
   print,
 } from "./apis.js";
 import { stores } from "./stores.js";
+
+print.load_omnibox();
 
 let _cmds = {};
 try {
@@ -93,8 +34,8 @@ try {
       content: "reload",
       description: "reload plugin",
       action: (params) => doReloadSystem()
-        .then(apis.createNotifySuccess)
-        .catch(apis.createNotifyFailure)
+        .then(notify.success)
+        .catch(notify.failure)
     },
     sync: {
       content: "sync",
@@ -110,7 +51,7 @@ try {
         console.log("HIT sync", params);
         return Promise.resolve((params && params.length) ? params : undefined)
           .then(syncStorage)
-          .then(createNotifySuccess)
+          .then(notify.success)
           .catch(print.failure_sync);
       },
     },
@@ -164,7 +105,7 @@ try {
               .then(browser.tabs.remove)
               .catch(print.failure_stash_tabs_remove)
           })
-          .then(createNotifySuccess)
+          .then(notify.success)
           .catch(print.failure_stash)
       },
     },
@@ -184,8 +125,8 @@ try {
             width: window.screen.width / 2,
             height: window.screen.height,
           })
-          .then(createNotifySuccess)
-          .catch(createNotifyFailure);
+          .then(notify.success)
+          .catch(notify.failure);
         },
       },
       right: {
@@ -198,8 +139,8 @@ try {
             width: window.screen.width / 2,
             height: window.screen.height,
           })
-          .then(createNotifySuccess)
-          .catch(createNotifyFailure);
+          .then(notify.success)
+          .catch(notify.failure);
         },
       },
       full: {
@@ -212,8 +153,8 @@ try {
             width: window.screen.width,
             height: window.screen.height,
           })
-          .then(createNotifySuccess)
-          .catch(createNotifyFailure);
+          .then(notify.success)
+          .catch(notify.failure);
         },
       },
     },
@@ -260,7 +201,7 @@ try {
                 ))
               )
             })
-            .then(createNotifySuccess)
+            .then(notify.success)
             .catch(print.failure_select_all);
         }
       }
@@ -317,7 +258,7 @@ try {
         if (params.length) {
           return Promise.resolve(params)
             .then(setWindowTitle)
-            .then(createNotifySuccess)
+            .then(notify.success)
             .catch(print.failure_set_window_title);
         }
       }
@@ -350,7 +291,7 @@ try {
         action: (params) => {
           console.log("HIT clear history")
           return stores.actionHistory.update((n) => [])
-            .then(createNotifySuccess)
+            .then(notify.success)
             .catch(print.failure_clear_log)
         }
       },
@@ -360,7 +301,7 @@ try {
         action: (params) => {
           console.log("HIT clear log")
           return stores.eventLog.update((n) => [])
-            .then(createNotifySuccess)
+            .then(notify.success)
             .catch(print.failure_clear_log)
         }
       },
@@ -372,7 +313,7 @@ try {
           return Promise.resolve(params)
             .then((_params) => _params[0])
             .then((_param) => stores[_param].update((n) => []))
-            .then(createNotifySuccess)
+            .then(notify.success)
             .catch(print.failure_clear_log);
         }
       },
@@ -404,8 +345,8 @@ try {
               }
             }))
             .then(_send)
-            .then(createNotifySuccess)
-            .catch(createNotifyFailure)
+            .then(notify.success)
+            .catch(notify.failure)
         },
       },
       song: {
@@ -423,8 +364,8 @@ try {
               }
             }))
             .then(_send)
-            .then(createNotifySuccess)
-            .catch(createNotifyFailure);
+            .then(notify.success)
+            .catch(notify.failure);
         },
       },
       link: {
@@ -445,7 +386,7 @@ try {
           console.log("HIT ", "copy_tabs", params)
           return Promise.resolve({})
             .then(doSelectedCopy)
-            .then(createNotifySuccess, createNotifyFailure)
+            .then(notify, notify.failure)
             .catch(print.failure_copy_tabs)
         },
       },
@@ -478,8 +419,8 @@ try {
         suggestions: (params) => {},
         action: (params) => {
           return sendPlayPause()
-            .then(createNotifySuccess)
-            .catch(createNotifyFailure)
+            .then(notify.success)
+            .catch(notify.failure)
         }
       },
       pause: {
@@ -488,8 +429,8 @@ try {
         suggestions: (params) => {},
         action: (params) => {
           return sendPlayPause()
-            .then(createNotifySuccess)
-            .catch(createNotifyFailure)
+            .then(notify.success)
+            .catch(notify.failure)
         }
       },
       restart: {
@@ -498,8 +439,8 @@ try {
         suggestions: (params) => {},
         action: (params) => {
           return sendRestart()
-            .then(createNotifySuccess)
-            .catch(createNotifyFailure)
+            .then(notify.success)
+            .catch(notify.failure)
         }
       },
       loop: {
@@ -507,8 +448,8 @@ try {
         description: "Toggles the current playing media to loop.",
         action: (params) => {
           return sendToggleLoop()
-            .then(createNotifySuccess)
-            .catch(createNotifyFailure)
+            .then(notify.success)
+            .catch(notify.failure)
         }
       },
       mute: {
@@ -597,8 +538,8 @@ try {
               // stores.config.update((n) => {...n, remote: args[1]})
             ];
           })
-          .then(createNotifySuccess)
-          .catch(createNotifyFailure)
+          .then(notify.success)
+          .catch(notify.failure)
       },
     },
     tag: {
@@ -733,7 +674,7 @@ try {
                 .catch(print.failure_split_tabs);
             })
           })
-          .catch(createNotifyFailure)
+          .catch(notify.failure)
       },
     },
     track: {

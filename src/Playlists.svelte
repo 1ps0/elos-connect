@@ -15,7 +15,7 @@ import { writable, get, derived } from 'svelte/store';
 
 import ItemList from "./ItemList.svelte";
 import {
-  createNotifySuccess,
+  notify,
   print,
 } from "./lib/apis.js";
 

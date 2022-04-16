@@ -5,7 +5,6 @@ import { cmds } from "./lib/omnibox.js";
 import { stores } from "./lib/stores.js";
 import {
   _fetch,
-  createNotifyFailure,
   setupRelay,
   print
 } from "./lib/apis.js";
@@ -22,7 +21,7 @@ $: {
       message: err.message
       // buttons: ['retry', 'close']
     })
-    .then(createNotifyFailure)
+    .then(notify.failure)
     .catch(print.failure);
   }
 };

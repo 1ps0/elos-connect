@@ -1,12 +1,12 @@
 // 2nd order
-console.log("LOAD///omnibox");
+console.log("LOAD///apis");
 import { writable, get } from 'svelte/store';
 
 import { clockFormatter, dateStringFromDate } from "./clock.js";
 import { stores } from "./stores.js";
 import { openWith } from "../config/open.js";
 
-// -- global logging
+// -- feedback via print or notify
 
 export const print = new Proxy(() => {}, {
   get(target, name) {
@@ -17,6 +17,39 @@ export const print = new Proxy(() => {}, {
     }
   }
 });
+
+export const notify = new Proxy(() => {}, {
+  get(target, name) {
+    let _name = name.toUpperCase().split('_');
+    return (args) => {
+      const state = _name[0];
+      return browser.notifications.create({
+        type: "basic",
+        title: _name[0],
+        message: _name.slice(1).join('_'),
+        // buttons: params.buttons || []
+      })
+      .catch(print.failure_notify)
+      .finally(() => args);
+    }
+  }
+});
+
+// export const notify.success = (params) => {
+//   console.log("[SUCCESS][NOTIFIED]", params);
+//   return notify({
+//     title: "Success!",
+//     message: `For ${params ? params.title : 'your action.' }`
+//   })
+// }
+
+// export const notify.failure = (params) => {
+//   console.log("[FAILURE][NOTIFIED]", params);
+//   return notify({
+//     title: "Error",
+//     message: `For ${params ? params.title : 'your action.'}`
+//   })
+// }
 
 // -- util
 
@@ -171,7 +204,7 @@ export const sendLink = async (tagName) => {
     }
   })
   .then(_send)
-  .then(createNotifySuccess)
+  .then(notify.success)
   .catch(print.failure_send_link)
 }
 
@@ -770,7 +803,7 @@ export const sendToContent = (params) => {
       browser.tabs.sendMessage(data.tabId, data);
       return data;
     })
-    .then(createNotifySuccess)
+    .then(notify.success)
     .catch(print.failure_send_to_content);
 }
 
@@ -833,7 +866,7 @@ export const doSelectedCopy = async (e) => {
       return tabs.map((tab) => `${tab.title},${tab.url}`).join('\n');
     })
     .then(updateClipboard)
-    .then(createNotifySuccess)
+    .then(notify.success)
     .catch(print.failure_selected_copy);
 }
 
@@ -846,7 +879,7 @@ export const doDownloadVideo = (params) => {
       }
     }))
     .then(_send)
-    .then(createNotifySuccess)
+    .then(notify.success)
     .catch(print.failure_download_video);
 }
 
@@ -989,34 +1022,6 @@ export const sendPage = async (params) => {
     })
     .catch(print.failure);
 };
-
-// -- feedback via print or notify
-
-export const createNotify = async (params) => {
-  return browser.notifications.create({
-    type: "basic",
-    title: params.title,
-    message: params.message,
-    // buttons: params.buttons || []
-  }).catch(print.failure);
-};
-
-
-export const createNotifySuccess = (params) => {
-  console.log("[SUCCESS][NOTIFIED]", params);
-  return createNotify({
-    title: "Success!",
-    message: `For ${params ? params.title : 'your action.' }`
-  })
-}
-
-export const createNotifyFailure = (params) => {
-  console.log("[FAILURE][NOTIFIED]", params);
-  return createNotify({
-    title: "Error",
-    message: `For ${params ? params.title : 'your action.'}`
-  })
-}
 
 export const setStore = (params) => {
   return stores[params.name];
