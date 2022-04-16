@@ -16,6 +16,7 @@ export const print = new Proxy(() => {}, {
 print.load_apis();
 
 export const notify = new Proxy(() => {}, {
+  // TODO set alert level filtering based on _name[0]
   get(target, name) {
     let _name = name.toUpperCase().split('_');
     console.log("NOTIFYING", name);
@@ -32,23 +33,7 @@ export const notify = new Proxy(() => {}, {
     }
   }
 });
-// notify.load_apis();
 
-// export const notify.success = (params) => {
-//   console.log("[SUCCESS][NOTIFIED]", params);
-//   return notify({
-//     title: "Success!",
-//     message: `For ${params ? params.title : 'your action.' }`
-//   })
-// }
-
-// export const notify.failure = (params) => {
-//   console.log("[FAILURE][NOTIFIED]", params);
-//   return notify({
-//     title: "Error",
-//     message: `For ${params ? params.title : 'your action.'}`
-//   })
-// }
 
 // -- util
 

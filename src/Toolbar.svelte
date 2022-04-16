@@ -4,10 +4,6 @@
 
 <section>
 
-{#each option as opt}
-
-{/each}
-
 </section>
 <script>
 

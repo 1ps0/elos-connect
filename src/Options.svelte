@@ -25,7 +25,7 @@ onMount(async () => {
 
 <div id="nav" class="sidenav">
   {#each Object.entries(config) as opt (opt[0])}
-    <a href="#" class="tag">
+    <a href="{opt.url}" target="_blank" class="tag">
       <div use:_layoutAction={opt}>
         {#if opt.icon}
           <svelte:component this={icons[opt.icon]} />

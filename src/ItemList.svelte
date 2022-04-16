@@ -219,27 +219,6 @@ ul li:hover {
   background: #ddd;
 }
 
-/* When clicked on, add a background color and strike out text */
-ul li.checked {
-  background: #888;
-  color: #fff;
-  text-decoration: line-through;
-}
-
-/* Add a "checked" mark when clicked on */
-ul li.checked::before {
-  content: '';
-  position: relative;
-  border-color: #fff;
-  border-style: solid;
-  border-width: 0 2px 2px 0;
-  top: 10px;
-  left: 16px;
-  transform: rotate(45deg);
-  height: 15px;
-  width: 7px;
-}
-
 /* Style the close button */
 .close {
   position: relative;
@@ -252,32 +231,6 @@ ul li.checked::before {
 .close:hover {
   background-color: #f44336;
   color: white;
-}
-
-/* Style the input */
-#task-input input {
-  margin: 0;
-  border: none;
-  border-radius: 0;
-  padding: 5px;
-  float: left;
-  font-size: 14px;
-}
-
-/* Style the "Add" button */
-#add-btn span {
-  padding: 5px;
-  width: 90%;
-  background: #d9d9d9;
-  color: #555;
-  text-align: center;
-  font-size: 16px;
-  transition: 0.3s;
-  border-radius: 0;
-}
-
-#add-btn:hover span {
-  background-color: #bbb;
 }
 
 </style>

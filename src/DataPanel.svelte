@@ -193,7 +193,7 @@ function add(x, y) {
 <section class="grid-wrap">
   <button on:click={addNewRow}>Add</button>
   <button on:click={pushValues}>Save</button>
-  <Select bind:watcher={selectWatcher}/>
+  <!-- <Select bind:watcher={selectWatcher}/> -->
   {#if selectedTable}
     <DataGrid
       bind:this={grid}

@@ -100,10 +100,6 @@ ul {
   display: inline-block;
 }
 
-.tag {
-  display: block;
-}
-
 .panel li {
   display: block;
 }

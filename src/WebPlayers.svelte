@@ -96,10 +96,4 @@ onMount(async () => {
 
 <style>
 
-.player {
-  border:  1px;
-  padding:  0;
-  margin:  0;
-}
-
 </style>

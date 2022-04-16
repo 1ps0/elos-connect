@@ -12,7 +12,6 @@ import {
   notify,
   print
 } from "./lib/apis.js"
-import { renderJSON } from "./lib/render.js";
 
 // let savePDFButton = document.querySelector('#save-pdf');
 // let courseDataElement = document.querySelector('#active-course-data');
@@ -29,7 +28,7 @@ const extractReaderText = (e) => {
   // browser.runtime.onMessage.addListener(registerScript);
   return getCurrentActiveTab()
     .then((tabs) => {
-      return tabs.filter((tab) => tabs.isArticle)[0];
+      return tabs.filter((tab) => tab.isArticle)[0];
     })
     .then((tab) => {
         !tab.isInReaderMode ? browser.tabs.toggleReaderMode() : false;
@@ -40,6 +39,7 @@ const extractReaderText = (e) => {
       message:'extractReaderText'
     }))
     .then(sendToContent)
+    .then(print.status_content_response_reader_text)
     .then((pageData) => ({
       uri: "api/analysis/data",
       body: pageData,

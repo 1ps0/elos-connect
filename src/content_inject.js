@@ -1,56 +1,10 @@
 
-console.log("LOADING ELOS CONNECT - content_inject.js");
-
-/*
-GOALS
-
-1. identify sites that match a BS strategy
-2. retrieve state of tabs with identified sites
-3. enable control of identified tabs through identified strategy
-
-extras:
-- infer dark mode
-- extract article text
--
-
-*/
-
-/*
-## PLAYABLE-ness
-
-```
-{
-  baseURI:str
-  muted:bool, volume:float
-  playbackRate:int
-  currentTime:float, duration:float
-  loop:bool, ended:bool, autoplay:bool, paused:bool
-  play:(), pause:(),
-}
-```
-
-> BS interface:
-```
-version
-displayName
-accepts: { method:None, format: "%K LIKE *site*", args: ["URL"] }
-isPlaying
-toggle
-previous
-next
-pause
-favorite
-trackInfo: { image, track, artist, progress, favorited }
-```
-*/
-
-// import { Readability } from '@mozilla/readability';
-
 import {
   setupRelay,
   _fetch,
   print
 } from "./lib/apis.js";
+print.load_elos_connect_content_inject();
 
 // ----- Util
 
@@ -209,15 +163,6 @@ function handleMessage(request, sender, sendResponse) {
       .then(sendResponse)
       .catch(print.failure_handle_message_playpause);
 
-  } else if (request.message === 'find') {
-    return Promise.resolve(request)
-      .then(getContent)
-      .then(print.status_find)
-      .then((findObj) => {
-        return findObj;
-      })
-      .then(sendResponse)
-      .catch(print.failure_handle_message_find);
   } else if (request.message === 'toggleLoop') {
     return toggleLoop()
       .then(getPlayingInfo)
@@ -230,6 +175,15 @@ function handleMessage(request, sender, sendResponse) {
       .then(renderPlayingStatus)
       .then(sendResponse)
       .catch(print.failure_handle_message_restart);
+  } else if (request.message === 'find') {
+    return Promise.resolve(request)
+      .then(getContent)
+      .then(print.status_find)
+      .then((findObj) => {
+        return findObj;
+      })
+      .then(sendResponse)
+      .catch(print.failure_handle_message_find);
   } else if (request.message = "extractReaderText") {
     return extractReaderText()
       .then(sendResponse)

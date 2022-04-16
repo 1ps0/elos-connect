@@ -77,7 +77,7 @@ onMount(async () => {
   <!-- <Select bind:watcher={formWatcher}/> -->
   <form id="entryform" on:submit|stopPropagation|preventDefault={doSubmit}>
     {#if selectedForm}
-      <label for="{selectedForm.name}">{selectedForm.title}</label>
+      <!-- <label for="{selectedForm.name}">{selectedForm.title}</label> -->
       <label name="sub-title">
         {#if selectedForm.message}
           <span>{selectedForm.message}</span>

@@ -162,12 +162,10 @@ try {
         description: "set the title of the window/tab",
         action: (params) => {
           console.log("HIT", "title", params);
-          if (params.length) {
-            return Promise.resolve(params)
-              .then(setWindowTitle)
-              .then(notify.success_window_title)
-              .catch(print.failure_set_window_title);
-          }
+          return Promise.resolve(params)
+            .then(setWindowTitle)
+            .then(notify.success_window_title)
+            .catch(print.failure_set_window_title);
         }
       },
     },

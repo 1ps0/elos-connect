@@ -46,7 +46,7 @@ onMount(async () => {
     <div class="column">
       {#each imageLinks as image}
         <p>{image}</p>
-        <img src="{image}"/>
+        <img src="{image}" alt=""/>
       {:else}
         No Data
       {/each}

@@ -12,7 +12,7 @@ const dispatch = createEventDispatcher();
 export let dataStore = null;
 export let dataKey = null;
 export let readonly = false;
-export let transform = (x) => x;
+//export let transform = (x) => x;
 
 export let buttonName = null;
 export let inputEvent = null;

@@ -17,20 +17,12 @@ WHOAMI
 13. passive backlog (stash)
 14. package/playlist builder
 15. sync options
-16,
 
 */
 import { onMount } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
 // import { profileEdit } from "./lib/profileEdit.js";
-
-export let settings = {
-    'default': 0,
-    'persona_name': 'random',
-    'learning_method': 'text-only',
-
-}
 
 onMount(async () => {
   print.success_Profile_mounted();
@@ -53,13 +45,5 @@ onMount(async () => {
   width: 100%;
   border: none;
   outline: none;
-}
-
-.avatar {
-  vertical-align: middle;
-  width: 30px;
-  height: 30px;
-  /*float: right;*/
-  border-radius: 50%;
 }
 </style>

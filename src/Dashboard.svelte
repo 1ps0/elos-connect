@@ -172,7 +172,7 @@ onMount(async () => {
       <div id="item-list">
         {#each commands as cmd}
         <p>
-          <label>{cmd.name}</label>
+          <span>{cmd.name}</span>
           <input type="text" id="shortcut" value={cmd.shortcut}>
           <button id="update" name={cmd.name} on:click={updateCommand}>Update</button>
           <button id="reset" name={cmd.name} on:click={resetCommand}>Reset</button>
@@ -244,59 +244,9 @@ onMount(async () => {
     <h3>Explore Store</h3>
     <br>
 
-    <h3></h3>
-    <br>
-    <h3></h3>
-    <br>
-    <h3></h3>
-    <br>
-    <h3></h3>
-    <br>
-    <h3></h3>
-    <br>
-    <h3></h3>
-    <br>
-  <!-- </p> -->
 </section>
 
 
 <style>
 
-.title {
-  background-color: #ccc;
-  color: #444;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  outline: none;
-}
-
- /* Style the search box */
-#search {
-  width: 50%;
-  font-size: 18px;
-  padding: 11px;
-  border: 1px solid #ddd;
-  float: left;
-}
-
-.header {
-  text-align: left;
-  border: 1px solid black;
-  padding: 5px 20px 10px 10px;
-}
-
-.datetime {
-  font-size: 20px;
-  padding: 10px;
-}
-
-.avatar {
-  vertical-align: middle;
-  width: 30px;
-  height: 30px;
-  /*float: right;*/
-  border-radius: 50%;
-}
 </style>
