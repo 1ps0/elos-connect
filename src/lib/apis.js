@@ -311,15 +311,12 @@ export const restoreSession = async (_sessions) => {
 }
 
 
-export const moveTab = (tab) => {
-  return Promise.resolve(tab)
-  .then((tab) => {
-    return browser.tabs.move(tab.id, {
+export const moveTab = (tab, _window) => {
+  return browser.tabs.move(tab.id, {
       index: -1, // param reverse: 0 to reverse, -1 to stay same
-      windowId: tab.windowId
+      windowId: _window.id
     })
-  })
-  .catch(print.failure_move_tab);
+    .catch(print.failure_move_tab)
 }
 
 // -- messaging
@@ -557,7 +554,7 @@ export const getCurrentWindowTabs = () => {
   .catch(print.failure_get_current_window_tabs);
 }
 
-export const getCurrentActiveTab = async () => {
+export const getCurrentActiveTab = () => {
   return browser.tabs.query({
     active: true,
     windowId: browser.windows.WINDOW_ID_CURRENT
@@ -698,6 +695,12 @@ export const sendPlayPause = (e) => {
     .catch(print.failure_send_play_pause);
 };
 
+export const sendRestart = (e) => {
+  return Promise.resolve(e)
+    .then((data) => ({ tabId: data.tabId, message:'restart' }))
+    .then(sendToContent)
+    .catch(print.failure_send_restart);
+};
 
 export const updateClipboard = (newClip) => {
   return navigator.clipboard.writeText(newClip)
@@ -827,7 +830,6 @@ export const walkNodes = (walker) => {
 export const filterTabs = (params) => {
   return getAllTabs()
     .then((tabs) => tabs.filter((tab) => new RegExp(params[0]).test(tab.url)))
-    .then((tabs) => tabs.map((tab) => tab.id))
     .catch(print.failure_filter_tabs)
 }
 
@@ -854,7 +856,6 @@ export const reduceDocumentText = () => {
     )
   )
   .then(walkNodes)
-
   .then(print.success)
   .catch(print.failure)
 }

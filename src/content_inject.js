@@ -110,6 +110,18 @@ const playPause = () => {
     .catch(print.failure_play_pause);
 };
 
+
+const restart = () => {
+  return getPlayable().then((playing) => {
+      console.log("Restarting", playing);
+      playing.forEach((item) => {
+        item.currentTime = 0;
+      });
+      return playing;
+    })
+    .catch(print.failure_play_pause);
+};
+
 const getPlayingInfo = (playing) => {
   return playing.map((obj) => {
     return {
@@ -204,6 +216,13 @@ function handleMessage(request, sender, sendResponse) {
       .then(renderPlayingStatus)
       .then(sendResponse)
       .catch(print.failure_handle_message_toggleloop);
+  } else if (request.message === 'restart') {
+    return restart()
+      .then(getPlayingInfo)
+      .then(renderPlayingStatus)
+      .then(sendResponse)
+      .catch(print.failure_handle_message_restart);
+
   }
 }
 

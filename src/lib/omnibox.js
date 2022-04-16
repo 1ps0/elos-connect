@@ -64,12 +64,16 @@ import {
   reduceTabs,
   findInAll,
   filterTabs,
+  moveTab,
   getAllTabs,
   getCurrentActiveTab,
   getHighlightedTabs,
   setWindowTitle,
   tabQueries,
   syncStorage,
+  sendRestart,
+  sendToggleLoop,
+  sendPlayPause,
   updateCurrentWindow,
   updateClipboard,
   _fetch,
@@ -96,7 +100,7 @@ try {
         console.log("HIT sync", params);
         return Promise.resolve((params && params.length) ? params : undefined)
           .then(syncStorage)
-          .then(print.success_send_sync)
+          .then(createNotifySuccess)
           .catch(print.failure_sync);
       },
     },
@@ -171,17 +175,26 @@ try {
       action: (params) => {
         console.log("HIT", "gather", params);
         // params in ('all', '<domain>', <tag>, ilike <title>, type: video, audio, article)
-        return Promise.resolve(params)
+        let tabs = Promise.resolve(params)
           .then(filterTabs)
-          .then((tabs) => ({
-            tabId: tabs.map((tab) => tab.id),
-            top: 0,
-            left: 0,
-            width: window.screen.availWidth,
-            height: window.screen.availHeight,
+          .then((tabs) => tabs.map((tab) => tab.id))
+          // .then((tabIds) =>{})
+          .catch(print.failure_get_filtered_tabs)
+
+        return Promise.resolve({
+          top: 0,
+          left: 0,
+          width: window.screen.availWidth,
+          height: window.screen.availHeight,
+        })
+        .then(browser.windows.create)
+        .then((_window) => {
+          return Promise.all(tabs.map((tab) => {
+            return moveTab(tab, _window)
           }))
-          .then(browser.windows.create)
-          .catch(print.failure_gather);
+          .catch(print.failure_move_tabs)
+        })
+        .catch(print.failure_gather)
       }
     },
     select: {
@@ -199,7 +212,7 @@ try {
                 ))
               )
             })
-            .then(print.success_select)
+            .then(createNotifySuccess)
             .catch(print.failure_select);
         }
       }
@@ -208,31 +221,44 @@ try {
       content: "popout",
       description: "popout current tab (default to left half",
       action: (params) => {
+        let _window = Promise.resolve({
+          top: 0,
+          left: 0,
+          width: window.screen.availWidth,
+          height: window.screen.availHeight,
+        })
+        .then(browser.windows.create)
+        .catch(print.failure_popout_create_window);
+
         return getCurrentActiveTab()
-          .then((tab) => {
-            return {
-              tabId: tab.id,
-              top: 0,
-              left: 0,
-              width: window.screen.availWidth / 2,
-              height: window.screen.availHeight
-            }
-          })
-          .then(browser.windows.create)
-          .catch(print.failure_popout);
+          .then(async (tab) => moveTab(tab[0], (await _window)))
+          .catch(print.failure_popout_move_tab)
       }
     },
     goto: {
       content: "goto",
       description: "goto a given tab (TBD), playing, last, tagged",
-      // suggestions: (params) => {
+      suggestions: (params) => {
         // how to replace, augment, or otherwise stand by firefox suggestions
         // push/pop last tab
         // numbered keys for popular sites
-        //
-      // },
+        return Promise.resolve(params)
+          .then(filterTabs)
+          .then((tabs) => {
+            return tabs.map((tab) => ({
+              content: tab.url,
+              description: tab.title
+            })
+          })
+          .catch(print.failure_goto_suggestions)
+      },
       action: (params) => {
-
+        return Promise.resolve(params)
+          .then(filterTabs)
+          .then((tabs) => tabs[0])
+          .then((tab) => ({tabId: tab.id, active: true}))
+          .then(browser.tabs.update)
+          .catch(print.failure_goto)
       }
     },
     title: {
@@ -243,6 +269,7 @@ try {
         if (params.length) {
           return Promise.resolve(params)
             .then(setWindowTitle)
+            .then(createNotifySuccess)
             .catch(print.failure_set_window_title);
         }
       }
@@ -289,7 +316,7 @@ try {
       action: (params) => {
         console.log("HIT", "stash", params);
         // params: null, "this", "window", "all"
-        let _tag = params.length > 1 ? params[1] : 'unsorted';
+        let _tag = params.length > 1 ? params.slice(1) : 'unsorted';
         let _tabs = Promise.resolve(params)
           .then((_params) => _params.length ? _params[0] : 'this')
           .then(tabQueries) // keyword
@@ -299,7 +326,7 @@ try {
           .then((tabs) => {
             return tabs.map((tab) => ({
               ...tab,
-              tag: _tag,
+              tag: [_tag].flat(1),
               timestamp: Date.now(),
               // language: browser.tabs.detectLanguage(tab.id)
             }));
@@ -329,6 +356,7 @@ try {
               .then(browser.tabs.remove)
               .catch(print.failure_stash_tabs_remove)
           })
+          .then(createNotifySuccess)
           .catch(print.failure_stash)
       },
       clear: {
@@ -450,19 +478,36 @@ try {
         content: "play",
         description: "Play current content",
         suggestions: (params) => {},
-        action: (params) => {}
+        action: (params) => {
+          return sendPlayPause()
+            .then(createNotifySuccess)
+            .catch(createNotifyFailure)
       },
       pause: {
         content: "pause",
         description: "Pause current content",
         suggestions: (params) => {},
-        action: (params) => {}
+        action: (params) => {
+          return sendPlayPause()
+            .then(createNotifySuccess)
+            .catch(createNotifyFailure)
       },
       restart: {
         content: "restart",
         description: "Restart current content",
         suggestions: (params) => {},
-        action: (params) => {}
+        action: (params) => {
+          return sendRestart()
+            .then(createNotifySuccess)
+            .catch(createNotifyFailure)
+      },
+      loop: {
+        content: "loop",
+        description: "Toggles the current playing media to loop.",
+        action: (params) => {
+          return sendToggleLoop()
+            .then(createNotifySuccess)
+            .catch(createNotifyFailure)
       },
       mute: {
         content: "mute",
@@ -478,10 +523,9 @@ try {
     reload: {
       content: "reload",
       description: "reload plugin",
-      action: (params) => {
-        console.log("HIT", "reload", params);
-        return doReloadSystem();
-      }
+      action: (params) => doReloadSystem()
+        .then(createNotifySuccess)
+        .catch(createNotifyFailure)
     },
     search: {
       content: "search",
@@ -670,6 +714,28 @@ try {
     timer: {
       content: "timer",
       description: "timer",
+      suggestions: (params) => {
+        console.log("HIT ", "timer", params);
+        return Promise.resolve(params)
+          .then((_params) => {
+            return Promise.all(stores.timers.map((timer) => {
+              let _timer = get(timer);
+              return {
+                content: `${_timer.name}`,
+                description: `${_timer.name} (${_timer.currentTime()})`,
+              }
+            }))
+          })
+          .catch(print.failure_timer)
+      },
+      action: (params) => {
+        console.log("HIT ", "timer", params);
+        return Promise.resolve(params)
+          .then((_params) => {
+            // stores.timers.map((timer) => {})
+          })
+          .catch(print.failure_timer)
+      },
       start: {
         content: "timer_start",
         description: "timer_start",
