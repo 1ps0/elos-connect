@@ -585,6 +585,14 @@ try {
             .catch(print.failure_open_options);
         }
       },
+      tab: {
+        content: "tab",
+        description: "open the plugin tab as a tab",
+        action: (params) => {
+          return browser.tabs.create({"url": "/index.html"})
+            .catch(print.failure_open_options);
+        }
+      },
       sidebar: {
         content: "sidebar",
         description: "open the plugin sidebar as a tab",
