@@ -27,14 +27,15 @@ let playlistStore = writable({});
 //   console.log("PLAYLIST UPDATE", val);
 // });
 
-let inputFilter = null;
+let inputFilter;
 $: updatePlaylistStore(inputFilter);
 
 
 const updatePlaylistStore = (_inputFilter) => {
-  return browser.storage.local.get()
-    // .then((result) => result.stash)
-    .then((result) => Object.values(result).flat(1))
+  return browser.storage.local.get('stash')
+    .then((result) => result.stash || [])
+    .then(print.status_playlist_stash)
+    .then((result) => (result || []).flat(1))
     .then((result) => {
       return result.filter((item) => {
         if (_inputFilter && _inputFilter.length > 1) {
@@ -44,6 +45,7 @@ const updatePlaylistStore = (_inputFilter) => {
         }
       })
     })
+    .then(print.status_playlist_items)
     .then((items) => playlistStore.update((_items) => items))
     .catch(print.failure_stash_playlist_get);
 }
@@ -58,8 +60,9 @@ const openLink = (e) => {
     }))
     .then(browser.tabs.create)
     .catch(print.failure_playlists_open_link)
-
 };
+
+const handleDelete = (params) => {};
 
 const itemButtons = [];
 //   {
@@ -87,8 +90,10 @@ onMount(async () => {
   <ItemList
     readonly=true
     deletable=true
+    removed={handleDelete}
     dataStore={playlistStore}
     titleKey="label"
+    dataKey="stash"
     on:didClick={openLink}
   />
 </section>

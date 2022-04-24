@@ -45,15 +45,6 @@ function didClick(e) {
   dispatch("didClick", e );
 }
 
-// below code borrowed from https://www.w3schools.com/howto/howto_js_todolist.asp
-
-const stash = (item) => {
-  stashStack.push(item);
-}
-const pop = () => {
-  let item = stashStack.pop();
-  return queue.push(item);
-}
 
 function close(e) {
   // TODO remove from queue
@@ -62,7 +53,7 @@ function close(e) {
   dispatch('removed', e);
 }
 
-onMount(async () => {
+onMount(() => {
   print.success_ItemList_mounted();
 
   if (dataStore) {
@@ -126,8 +117,6 @@ const squashItem = (title, length) => {
         </li>
       {/if}
       {#each queue as _item (_item) }
-          <!-- use:linker={queue}
-          class:checked={_item.checked}-->
         <li
           class="item"
           on:click={() => didClick(_item)}
@@ -139,7 +128,7 @@ const squashItem = (title, length) => {
             {transform(_item)}
           {/if}
           </span>
-
+          <!-- FIXME, breaks for buttons input
           {#each buttons as prop (prop)}
             <div
               class="item-button"
@@ -147,7 +136,7 @@ const squashItem = (title, length) => {
             >
               {prop.icon(_item)}
             </div>
-          {/each}
+          {/each} -->
 
           {#if deletable}
             <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>

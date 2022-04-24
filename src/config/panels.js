@@ -19,6 +19,7 @@ export const layoutConfig = {
   columnMultiplier: 6,
   columnCount: 100,
   rowHeight: 65,
+  mode: "full-width", // default, full-width, full-height, full-screen
 };
 
 
@@ -33,11 +34,15 @@ export const optionTypes = {
   // }
 };
 
+const columnForConfig = (config, columns) => {
+  return config.mode === "full-width" ? config.columnCount : columns;
+}
+
 export const panelTypes = {
   "panel-mainmenu": {
     target: "panel-mainmenu",
     name: "mainmenu",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*11,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*11,),
     h: 2,
     componentName: "selectlist",
     event: { name: 'menuToggle', callback: "togglePanel" },
@@ -51,7 +56,7 @@ export const panelTypes = {
   "panel-layout": {
     target: "panel-layout",
     name: "layout",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*11,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*11,),
     h: 2,
     componentName: "selectlist",
     event: { name: 'layoutAction', callback: "alighPanel" },
@@ -65,7 +70,7 @@ export const panelTypes = {
   "panel-dashboard": {
     target: "panel-dashboard",
     name: "dashboard",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*4,),
     h: 5,
     componentName: "dashboard",
     props: {
@@ -75,21 +80,21 @@ export const panelTypes = {
   "panel-focus": {
     target: "panel-focus",
     name: "focus",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*4,),
     h: 5,
     componentName: "focus",
   },
   "panel-actionmenu": {
     target: "panel-actionmenu",
     name: "actionmenu",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*4,),
     h: 3,
     componentName: "actionmenu",
   },
   "panel-web-players": {
     target: "panel-web-players",
     name: "web_players",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier * 6,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 6,),
     h: 5,
     componentName: "web_players",
     event: {
@@ -104,7 +109,7 @@ export const panelTypes = {
   "panel-playlists": {
     target: "panel-playlists",
     name: "playlists",
-    w: layoutConfig.columnCount,
+    w: columnForConfig(layoutConfig),
     h: 5,
     componentName: "playlists",
     // props: {
@@ -114,20 +119,20 @@ export const panelTypes = {
   "panel-timer": {
     target: "panel-timer",
     name: "timer",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier * 2,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 2,),
     h: 4,
     componentName: "timer",
   },
   "panel-todo": {
     target: "panel-todo",
     name: "todo",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*3,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*3,),
     componentName: "todo",
   },
   "panel-entryform": {
     target: "panel-entryform",
     name: "entryform",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*6,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*6,),
     h: 8,
     componentName: "entryform",
     props: {
@@ -137,7 +142,7 @@ export const panelTypes = {
   "panel-eventlog": {
     target: "panel-eventlog",
     name: "eventlog",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*2,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*2,),
     componentName: "itemlist",
     props: {
       readonly: true,
@@ -152,7 +157,7 @@ export const panelTypes = {
   "panel-actionhistory": {
     target: "panel-actionhistory",
     name: "actionhistory",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*8,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*8,),
     componentName: "chart",
     props: {
       readonly: true,
@@ -162,7 +167,7 @@ export const panelTypes = {
   "panel-journal": {
     target: "panel-journal",
     name: "journal",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*6,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*6,),
     componentName: "expandlist",
     props: {
       readonly: true,
@@ -175,7 +180,7 @@ export const panelTypes = {
   "panel-gallery": {
     target: "panel-gallery",
     name: "gallery",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*5,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*5,),
     componentName: "imagegallery",
     props: {
       dataStore: "files",
@@ -185,7 +190,7 @@ export const panelTypes = {
   "panel-drop": {
     target: "panel-drop",
     name: "drop",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*4,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*4,),
     h: 8,
     componentName: "drop",
     props: {
@@ -195,7 +200,7 @@ export const panelTypes = {
   "panel-pkgindex": {
     target: "panel-pkgindex",
     name: "pkgindex",
-    w: layoutConfig.columnCount, //layoutConfig.columnMultiplier*8,
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*8,),
     componentName: "pkgindex",
   },
 };

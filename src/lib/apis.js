@@ -697,7 +697,7 @@ export const getQueriedTabs = (params) => {
     .then((tabs) => {
       return tabs.map((tab) => ({
         ...tab,
-        tag: [_tag].flat(1),
+        tag: [params.slice(1)].flat(1),
         timestamp: Date.now(),
         // language: browser.tabs.detectLanguage(tab.id)
       }));

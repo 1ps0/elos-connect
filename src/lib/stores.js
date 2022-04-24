@@ -37,6 +37,7 @@ export const stores = {
   layoutItems: layoutItemsWritable,
   files: filesWritable,
 };
+
 Object.entries(stores).forEach((entry) => {
   const name = entry[0];
   const store = entry[1];

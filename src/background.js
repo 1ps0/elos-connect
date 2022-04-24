@@ -209,6 +209,9 @@ export const registerHistory = (event) => {
 export const renderAction = (_input) => {
   return Promise.resolve(_input)
     .then(findCommands)
+    // FIXME if _input is partial (like "syn", down arrow, enter)
+    //       then check if results are OKAY,
+    //       else process from input, not lastInput
     // .then(print.status_render_action)
     .then((_cmds) => _cmds[0].action(_cmds[1]))
     .catch(print.failure_render_action);

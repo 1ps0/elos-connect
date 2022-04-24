@@ -78,12 +78,12 @@ try {
       action: (params) => {
         console.log("HIT", "stash", params);
         // params: null, "this", "window", "all"
-        let _tag = params.length > 1 ? params.slice(1) : 'unsorted';
-        let _tabs = getQueriedTabs(params);
+        let _tag = params.length > 1 ? params.slice(1) : ['unsorted'];
+        let _tabs = getQueriedTabs([...params, ..._tag]);
 
         return browser.storage.local.get("stash")
           .then((result) => result.stash)
-          .then((_stash) => _stash ? _stash : [])
+          .then((_stash) => _stash || [])
           .then((_stash) => {
             return Promise.all([_tabs])
               .then((__tabs) => __tabs.flat(1))
@@ -92,9 +92,10 @@ try {
                   if (!tab.tag || tab.tag === "unsorted") {
                     tab.tag = _tag;
                   }
-                  _stash.push(item);
+                  _stash.push(tab);
                 })
-                return _stash;
+                console.log("___STASH", _stash);
+                return { stash: _stash };
               })
               .catch(print.failure_stash_tabs)
           })
@@ -487,7 +488,6 @@ try {
               };
             });
           })
-          // .then(print.fetch_response)
           .catch(print.failure_search)
           // .then(err => suggestionsOnEmptyResults);
       },

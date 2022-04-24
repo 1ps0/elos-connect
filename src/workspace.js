@@ -7,7 +7,7 @@
 
 export let workspaceConfig = {
   loadedAt: new Date(),
-  version: '0.0.7-prealpha',
+  version: '0.0.9-prealpha',
   config: {
     logs: {
       level: "debug",
@@ -17,7 +17,9 @@ export let workspaceConfig = {
   },
   host: {
     name: "localhost",
-    uri: "http://localhost:3000",
+    // uri: "http://localhost:3000",
+    uri: "http://192.168.99.156:3000",
+    search: "/api/search",
   },
   activePlaylist: {
     notes: {},
