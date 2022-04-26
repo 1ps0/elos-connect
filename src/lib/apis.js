@@ -102,7 +102,7 @@ export const handleResponse = async (response) => {
 
 export const _fetch = async (params) => {
   // let baseUrl = "http://localhost:3000";
-  let baseUrl = get(stores.config).host.uri;
+  let baseUrl = get(stores.config).hosts.local.uri;
   return Promise.resolve(new URL(params.uri, baseUrl))
     .then((url) => {
       for (let arg in params.args) {
@@ -117,7 +117,7 @@ export const _fetch = async (params) => {
 
 export const _send = async (params) => {
   // let baseUrl = "http://localhost:3000";
-  let baseUrl = get(stores.config).host.uri;
+  let baseUrl = get(stores.config).hosts.local.uri;
   return Promise.resolve(new URL(params.uri, baseUrl))
     .then((url) => {
       return {

@@ -34,7 +34,7 @@ $: updatePlaylistStore(inputFilter);
 const updatePlaylistStore = (_inputFilter) => {
   return browser.storage.local.get('stash')
     .then((result) => result.stash || [])
-    .then(print.status_playlist_stash)
+    // .then(print.status_playlist_stash)
     .then((result) => (result || []).flat(1))
     .then((result) => {
       return result.filter((item) => {
@@ -45,7 +45,7 @@ const updatePlaylistStore = (_inputFilter) => {
         }
       })
     })
-    .then(print.status_playlist_items)
+    // .then(print.status_playlist_items)
     .then((items) => playlistStore.update((_items) => items))
     .catch(print.failure_stash_playlist_get);
 }

@@ -6,6 +6,7 @@ import Toolbar from "./Toolbar.svelte";
 import Clock from "./Clock.svelte";
 import Profile from "./Profile.svelte";
 import Todo from "./Todo.svelte";
+import Config from "./Config.svelte";
 
 import ActionMenu from "./ActionMenu.svelte";
 import SpotifyControls from "./SpotifyControls.svelte";
@@ -37,6 +38,7 @@ export const components = {
     "timer": Timer,
     "clock": Clock,
     "profile": Profile,
+    "config": Config,
     "todo": Todo,
     "chart": Chart,
     "expandlist": ExpandList,

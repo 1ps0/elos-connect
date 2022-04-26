@@ -57,6 +57,11 @@ export const menuItems = [
     group: "1"
   },
   {
+    name: "panel-config",
+    value: { icon: "settings", highlight: "Settings and Config"},
+    group: "1"
+  },
+  {
     name: "panel-todo",
     value: { icon: "list", highlight: "TODO List"},
     group: "1"

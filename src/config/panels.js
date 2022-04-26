@@ -77,6 +77,16 @@ export const panelTypes = {
       showIn: "tab"
     }
   },
+  "panel-config": {
+    target: "panel-config",
+    name: "config",
+    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*4,),
+    h: 5,
+    componentName: "config",
+    props: {
+      showIn: "tab"
+    }
+  },
   "panel-focus": {
     target: "panel-focus",
     name: "focus",
@@ -95,7 +105,7 @@ export const panelTypes = {
     target: "panel-web-players",
     name: "web_players",
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 6,),
-    h: 5,
+    h: 3,
     componentName: "web_players",
     event: {
       name: 'filterType',
@@ -110,7 +120,7 @@ export const panelTypes = {
     target: "panel-playlists",
     name: "playlists",
     w: columnForConfig(layoutConfig),
-    h: 5,
+    h: 4,
     componentName: "playlists",
     // props: {
     //   storeKey: 'stash',
@@ -127,13 +137,14 @@ export const panelTypes = {
     target: "panel-todo",
     name: "todo",
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*3,),
+    h: 5,
     componentName: "todo",
   },
   "panel-entryform": {
     target: "panel-entryform",
     name: "entryform",
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*6,),
-    h: 8,
+    h: 5,
     componentName: "entryform",
     props: {
       dataStore: "profile"
@@ -143,6 +154,7 @@ export const panelTypes = {
     target: "panel-eventlog",
     name: "eventlog",
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*2,),
+    h: 3,
     componentName: "itemlist",
     props: {
       readonly: true,
@@ -158,6 +170,7 @@ export const panelTypes = {
     target: "panel-actionhistory",
     name: "actionhistory",
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*8,),
+    h: 3,
     componentName: "chart",
     props: {
       readonly: true,
@@ -168,6 +181,7 @@ export const panelTypes = {
     target: "panel-journal",
     name: "journal",
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*6,),
+    h: 4,
     componentName: "expandlist",
     props: {
       readonly: true,
@@ -181,6 +195,7 @@ export const panelTypes = {
     target: "panel-gallery",
     name: "gallery",
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*5,),
+    h: 5,
     componentName: "imagegallery",
     props: {
       dataStore: "files",

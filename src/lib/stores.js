@@ -22,7 +22,7 @@ export const storageFor = (name, otherwise={}) => {
     .then(_ => otherwise)
 };
 
-const configWritable = writable(workspaceConfig);
+const configWritable = writable(storageFor("config", workspaceConfig));
 const actionHistoryWritable = writable(storageFor("actionHistory", []));
 const eventLogWritable = writable(storageFor("eventLog", []));
 const layoutItemsWritable = writable(storageFor("layoutItems", { items: [], add: [] }));
@@ -39,15 +39,17 @@ export const stores = {
 };
 
 Object.entries(stores).forEach((entry) => {
-  const name = entry[0];
-  const store = entry[1];
+  let name = entry[0];
+  let store = entry[1];
   store.subscribe((val) => {
     if (val !== undefined && val !== "undefined") {
       return Promise.resolve({ name: val })
-        // .then(print.status_storage)
+        .then(print.status_storage)
         // .then(pruneMethods)
         .then(browser.storage.local.set)
         .catch(print.failure_status_store);
     }
   });
 });
+
+export { stores as default };

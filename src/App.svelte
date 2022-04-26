@@ -134,10 +134,11 @@ onMount(async () => {
   let panels = Promise.resolve([]);
   (defaults || [
     "panel-mainmenu",
-    "panel-focus",
+    "panel-config",
     "panel-playlists",
     "panel-web-players",
     "panel-actionmenu",
+    // "panel-focus",
     // "panel-dashboard",
     // "panel-timer",
     // "panel-commandbar",

@@ -6,6 +6,7 @@ import { writable, readable, derived, get } from "svelte/store";
 import { stores } from "./lib/stores.js";
 import { loadSites, loadHistory, loadCommands, notify, print } from "./lib/apis.js";
 import { cmds } from "./lib/omnibox.js";
+import { workspaceConfig } from "./workspace.js";
 
 // suggested for OS
 const OSTypes = [
@@ -19,7 +20,7 @@ const OSTypes = [
 ];
 
 
-const getCommands = (params) => {
+const getCommands = (params) => {};
 
   // built-in events
 const pluginEvents = [
@@ -38,11 +39,11 @@ const pluginEvents = [
 const defaultForEvent = (eventName) => {
   return {
     eventName: {
-        "suggested_key": {
-          "default": "Alt+Shift+G",
-          "mac": "MacCtrl+E"
-        },
-        "description": `eLOS Connect - ${eventName.split('_').filter((word) => word.indexOf('execute', 'action') == -1}`
+      "suggested_key": {
+        "default": "Alt+Shift+G",
+        "mac": "MacCtrl+E"
+      },
+      // "description": `eLOS Connect - ${eventName.split('_').filter((word) => word.indexOf('execute', 'action') == -1}`
     }
   }
 };
@@ -55,9 +56,10 @@ const renderEventDefaults = () => {
 
 const enrichManifest = () => {
   browser.runtime.getManifest()
+    .then(print.status_get_manifest)
     .then((manifest) => {
       return {
-        manifest.get('commands', {})
+        ...manifest.get('commands', {})
       }
     })
     .then((_manifest) => print.alert_new_manifest(_manifest))
@@ -66,9 +68,11 @@ const enrichManifest = () => {
 
 const setLogLevel = (level) => {
   return Promise.resolve(level)
-    .then((_level) => stores.config.update((_config) => {
-      ..._config,
-      logLevel:_level
+    .then((_level) => {
+      return stores.config.update((current) => ({
+        ...current,
+        logLevel: _level
+      }))
     })
     .catch(print.failure_set_log_level);
 }
@@ -83,10 +87,10 @@ const resetCommand = (params) => {
 const updateCommand = (params) => {
   return Promise.resolve(params)
     .then(print.status_update_shortcut_params)
-    .then((_params) => {
+    .then((_params) => ({
       name: _params.name,
       shortcut: _params.parent.input.value
-    })
+    }))
     .then(browser.commands.update)
     .then(notify.success_update_command)
     .catch(print.failure_reset_command);
@@ -101,44 +105,93 @@ const addHost = (params) => {
     .catch(print.failure_add_host)
 }
 
-const loadHosts = (params) => {
-  return Promise.resolve(params)
+const loadHosts = () => {
+  return Promise.resolve('hosts')
     .then((_params) => {
-      return browser.storage.local.get('config')
+      return browser.storage.local.get('hosts')
     })
-    .then((data) => [data['config'].host])
+    .then((data) => data.hosts)
     .catch(print.failure_load_hosts);
 }
 
-onMount(async () => {
+onMount(() => {
   print.success_Dashboard_mounted();
+
   // browser.commands.onCommand.addListener(updateCommand);
 });
+
+const updateWorkspace = (params) => {
+  return Promise.resolve(params)
+    .then((_params) => _params.target)
+    // .then(print.status_update_workspace_params)
+    .then((_input) => ({
+      key: _input.attributes.key.value,
+      value: _input.type === 'checkbox' ? _input.checked : _input.value
+    }))
+    // .then(print.status_update_workspace)
+    .then((changed) => {
+      stores.config.update((_config) => {
+        _config.hosts.local[changed.key] = changed.value;
+        return _config;
+      })
+    })
+    // TODO persist workspaceConfig
+    .catch(print.failure_update_workspace)
+}
+
+let configFields = ['logs.level', 'notifyLevel', 'hosts']
+let listFields = ['journal', 'todo', 'activePlaylist', 'playlistHistory', 'recentlySaved']
 
 </script>
 
 <section class="title">
-  <span class="header">
-    <span>eLOS Dashboard</span>
-    <span use:clockTimer class="datetime"></span>
-  </span>
-<!--   <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/>
- -->
+  <h3>Workspace Config</h3>
+  {#each Object.entries(get(stores.config)) as entry (entry[0])}
+    <div>
+      <h4>{entry[0]}</h4>
+      {#if typeof entry[1] === 'string'}
+      STRING: {entry[1]}
+      {:else if entry[1] instanceof Array}
+      ARRAY: {entry[1]}
+      {:else if entry[1].constructor == Object}
+      OBJECT: {entry[1]}
+      {/if}
+    </div>
+  {/each}
+  <!-- <img use:profileEdit src="img/img_avatar.png" alt="Avatar" class="avatar"/> -->
   <p>
     <h3>Set Remote host</h3>
     <div>
-      <ul>Add New: <input on:submit={addHost} type="text"/></ul>
-      {#await loadHosts() then hosts}
-        {#each hosts as host}
-          <li>
-            <p>{host.name}</p>
-            <p>{host.uri}</p>
-          </li>
+      <!-- <ul>Add New: <input on:submit={addHost} type="text"/></ul> -->
+      {#each Object.entries(workspaceConfig.hosts) as host}
+        <p>{host[0]}</p>
+        <hr/>
+        <div>
+        {#each Object.entries(host[1]) as entry}
+          <p>
+            <span>{entry[0]}</span>
+            {#if typeof entry[1] === 'boolean'}
+              <input on:change={updateWorkspace} type="checkbox" key={entry[0]} checked={entry[1]}/>
+            {:else if typeof entry[1] === 'string'}
+              <input on:change={updateWorkspace} type="text" key={entry[0]} value={entry[1]}/>
+            {:else}
+              <span>Unhandled type for ({typeof entry[1]}) {entry[1]}</span>
+            {/if}
+          </p>
+          <!--
+          {:else if entry[1] instanceof Array}
+          ARRAY
+          {:else if entry[1].constructor == Object}
+          OBJECT
+          {/if}
+          <input on:change={(e) => updateWorkspace(e.detail} type="checkbox" value={host.default}/>
+          <input on:change={(e) => updateWorkspace(e.detail} type="text" value={host.name}/>
+          <input on:change={(e) => updateWorkspace(e.detail} type="text" value={host.uri}/>
+          <input on:change={(e) => updateWorkspace(e.detail} type="text" value={host.search}/>
+          -->
         {/each}
-      {:catch failure}
-      <p>Failed to load remote hosts: {failure}</p>
-      {/await}
-      <ul></ul>
+        </div>
+      {/each}
     </div>
     <br>
     <h3>Keyboard shortcut</h3>
