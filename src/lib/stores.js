@@ -22,7 +22,7 @@ export const storageFor = (name, otherwise={}) => {
     .then(_ => otherwise)
 };
 
-const configWritable = writable(storageFor("config", workspaceConfig));
+const configWritable = writable(workspaceConfig); // storageFor("config",
 const actionHistoryWritable = writable(storageFor("actionHistory", []));
 const eventLogWritable = writable(storageFor("eventLog", []));
 const layoutItemsWritable = writable(storageFor("layoutItems", { items: [], add: [] }));

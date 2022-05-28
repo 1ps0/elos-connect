@@ -11,10 +11,20 @@ export const workspaceConfig = {
   logs: {
     level: "debug",
     target: "local",
+    quiet: {
+      keywords: [''],
+      prefix: ['status', 'success'],
+      suffix: ['mounted'],
+    },
   },
   notify: {
     level: "error",
     target: "remote",
+    quiet: {
+      keywords: [''],
+      prefix: ['status', 'success'],
+      suffix: ['mounted'],
+    },
   },
   hosts: {
     local: {
@@ -32,10 +42,19 @@ export const workspaceConfig = {
       search: "/api/search",
     },
   },
-  activePlaylist: {
-    notes: {}, // browser.tabs.getHighlighted(tab.id), textfield input (markdown editor)
-    items: {},
-    tags: [], // all tags found/used,
+  playlist: {
+    mine: {
+      notes: {}, // browser.tabs.getHighlighted(tab.id), textfield input (markdown editor)
+      items: {},
+      tags: [], // all tags found/used,
+    },
+  },
+  options: {
+    filterby: {
+      default: "this",
+      handleFailure: "stop.critical" // stop proxy actions for actions or ongoing panel monitoring. like an interrupt
+    },
+
   },
   playlistHistory: [],
   recentlySaved: [],

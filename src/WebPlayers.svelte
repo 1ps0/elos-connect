@@ -54,12 +54,14 @@ const buttonProps = [
   {
     name: 'show',
     description: '',
+    check: (obj) => true,
     icon: () => 'Show',
     action: bringToFront
   },
   {
     name: 'playPause',
     description: '',
+    check: (obj) => obj.playing,
     icon: (obj) => {
       return obj.playing ? 'Pause' : 'Play';
     },
@@ -68,6 +70,7 @@ const buttonProps = [
   {
     name: 'toggleLoop',
     description: '',
+    check: (obj) => obj.loop,
     icon: (obj) => {
       return obj.loop ? 'LOOPING' : 'SINGLE';
     },

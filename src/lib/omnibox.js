@@ -1,11 +1,16 @@
+// main cli command structure
+
 import {
   doSelectedCopy,
   doReloadSystem,
   reduceTabs,
   findInAll,
   filterTabs,
+  filterTabsBy,
   moveTabs,
   getAllTabs,
+  getAllWindows,
+  getCurrentWindow,
   getCurrentActiveTab,
   getHighlightedTabs,
   setWindowTitle,
@@ -24,6 +29,7 @@ import {
   print,
 } from "./apis.js";
 import { stores } from "./stores.js";
+import { panelTypes } from "../config/panels.js";
 
 print.load_omnibox();
 
@@ -116,6 +122,50 @@ try {
       action: (_params) => {
         console.log("HIT", "window", _params);
       },
+      "%": {
+        content: "%",
+        description: "expand to % of screen",
+        action: (_params) => {
+          console.log("HIT", "window.%", _params);
+          return Promise.resolve(_params)
+            .then((params) => ({
+              top: 0,
+              height: window.screen.height,
+              width: Math.floor(window.screen.width * (parseInt(params[0]) / 100.0))
+            }))
+            .then(print.status_window_percent_width)
+            .then(updateCurrentWindow)
+            .then(notify.success_window_percent)
+            .catch(print.failure_window_percent)
+        }
+      },
+      normalize: {
+        content: "normalize",
+        description: "normalize all windows to this size",
+        action: (params) => {
+          let currentWindow = getCurrentWindow()
+            .then((_window) => ({
+              top: _window.top,
+              left: _window.left,
+              width: _window.width,
+              height: _window.height,
+            }))
+            .catch(print.failure_get_current_window);
+
+          return getAllWindows()
+            .then((_windows) => {
+              return _windows.map((_window) => {
+                return Promise.resolve(_window)
+                  .then((__window) => browser.windows.update(
+                    __window.id,
+                    currentWindow
+                  ))
+                  .catch(print.failure_normalize_window)
+              });
+            })
+            .catch(print.failure_normalize_all_windows)
+        }
+      },
       left: {
         content: "window_left",
         description: "Fit to left side of screen",
@@ -206,15 +256,25 @@ try {
         action: (params) => {
           browser.tabs.query({currentWindow: true }) // or windowId: windows.WINDOW_ID_CURRENT
             .then(print.status_select_tabs)
-            .then((tabs) => {
-              return Promise.all(
-                tabs.map((tab) => browser.tabs.update(
-                  tab.id, { highlighted: true }
-                ))
-              )
-            })
+            .then((tabs) => browser.tabs.highlight(tabs))
             .then(notify.success_select_all)
             .catch(print.failure_select_all);
+        }
+      }
+    },
+    pin: {
+      content: "pin",
+      description: "manage pins in this window",
+      action: (params) => {
+        // const
+        return Promise.resolve(params)
+          .catch(print.failure_pin)
+      },
+      remove: {
+        content: "remove",
+        description: "remove pins from",
+        action: (params) => {
+
         }
       }
     },
@@ -222,15 +282,20 @@ try {
       content: "popout",
       description: "popout current tab (default to left half",
       action: (params) => {
-        return getCurrentActiveTab()
-          .then((tab) => ({
-            tabId: tab[0].id,
-            top: 0,
-            left: 0,
-            width: window.screen.width / 2,
-            height: window.screen.height,
-          }))
-          .then(browser.windows.create)
+        return Promise.resolve(params)
+          .then(filterTabs)
+          .then((tabs) => {
+            return Promise.all(tabs.map((tab) => {
+              return browser.tabs.move({
+                tabId: tab.id,
+                windowId: _window.id,
+                top: 0,
+                left: 0,
+                width: window.screen.width / 2,
+                height: window.screen.height,
+              }).catch(print.failure_move_tab)
+            }))
+          })
           .catch(print.failure_gather)
       }
     },
@@ -565,6 +630,59 @@ try {
             browser.sessions.setTabValue(tab.id, params[1]);
           })
           .catch(print.failure);
+      },
+    },
+    panel: {
+      content: "panel",
+      description: "panel actions by name",
+      suggestions: (params) => {
+        return Promise.resolve(params)
+          .then(() => {
+            return Object.keys(panelTypes).map((panelName) => "-".join(panelName.split("-").slice(1)))
+          })
+          .then(print.success_panel_suggestions)
+          .catch(print.failure_panel_suggestions)
+      },
+      pin: {
+        content: "pin",
+        description: "pin",
+        action: (params) => {
+          return getCurrentActiveTab()
+            .then((tabs) => browser.tabs.update(tabs, { pinned: true }))
+            .catch(print.panel_pin_set_pinned)
+        }
+      },
+      shift: {
+        content: "shift",
+        description: "shift",
+        up: {
+          content: "shift up",
+          description: "shift up",
+          action: (params) => {
+
+          }
+        },
+        down: {
+          content: "shift down",
+          description: "shift down",
+          action: (params) => {
+
+          }
+        },
+      },
+      close: {
+        content: "close",
+        description: "panel.close alias to close.panel",
+        action: (params) => {
+
+        }
+      },
+      horizontal: {
+        content: "horizontal",
+        description: "max/shrink horizontal",
+        action: (params) => {
+
+        }
       },
     },
     open: {

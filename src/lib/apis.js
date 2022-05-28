@@ -19,7 +19,7 @@ export const notify = new Proxy(() => {}, {
   // TODO set alert level filtering based on _name[0]
   get(target, name) {
     let _name = name.toUpperCase().split('_');
-    console.log("NOTIFYING", name);
+    console.log("NOTIFYING", name, target);
     return (args) => {
       const state = _name[0];
       return browser.notifications.create({
@@ -34,6 +34,16 @@ export const notify = new Proxy(() => {}, {
   }
 });
 
+//.then(register.success_last_message)
+export const register = new Proxy(() => {}, {
+  get(target, name) {
+    let _name = name.toUpperCase().split('_');
+    return (args) => {
+      console.log(`[REGISTER][${_name[0]}][${_name.slice(1).join('_')}]`, args);
+      return args;
+    }
+  }
+});
 
 // -- util
 
@@ -112,6 +122,7 @@ export const _fetch = async (params) => {
     })
     .then(fetch)
     .then(handleResponse)
+    .then(register.success_last_message)
     .catch(print.failure_fetch);
 };
 
@@ -133,6 +144,7 @@ export const _send = async (params) => {
     })
     .then((args) => fetch(args.url, args))
     .then(handleResponse)
+    .then(register.success_last_message)
     .catch(print.failure_send);
 }
 
@@ -319,7 +331,10 @@ export const loadHistory = async (params) => {
     .catch(print.failure_load_history);
 }
 
-export const loadCommands = async (params) => {
+// web_accessible_resources
+// browser.extension.getURL("beasts/frog.jpg");
+
+export const loadCommands = (params) => {
   return browser.commands.getAll()
     .then((cmds) => {
       return cmds.map((cmd) => ({
@@ -329,6 +344,20 @@ export const loadCommands = async (params) => {
       }))
     })
     .catch(print.failure_load_commands);
+}
+/*
+    "MediaNextTrack"
+    "MediaPlayPause"
+    "MediaPrevTrack"
+    "MediaStop"
+*/
+export const setupCommands = (params) => {
+  browser.commands.onCommand.addListener(function (command) {
+    if (command === "toggle-feature") {
+      console.log("Toggling the feature!");
+    }
+  });
+
 }
 
 // ---------- Actions
@@ -583,12 +612,25 @@ export const setWindowActive = (data) => {
 // --- tab ops
 // NOTE: all 'get' types dont have a catch failure by design
 
-export const getAllTabs = async () => {
+export const getAllTabs = () => {
   return browser.tabs.query({})
     .then((tabs) => {
       return tabs.filter((tab) => tab != tabs.TAB_ID_NONE);
     })
     .catch(print.failure_get_all_tabs)
+}
+
+export const getAllWindows = () => {
+  return browser.windows.getAll()
+    .then((_windows) => {
+      return _windows.filter((_window) => _window != _windows.WINDOW_ID_NONE);
+    })
+    .catch(print.failure_get_all_windows)
+}
+
+export const getCurrentWindow = () => {
+  return browser.windows.getCurrent()
+    .catch(print.failure_get_current_window);
 }
 
 export const getCurrentWindowTabs = () => {
@@ -623,6 +665,9 @@ export const getPlayingTabs = (params) => {
     .catch(print.failure_get_playing_tabs);
 }
 
+// ---- filter
+
+
 export const tabQueries = (arg) => {
   return {
     // objects: all, window, this
@@ -636,6 +681,8 @@ export const tabQueries = (arg) => {
   }[arg];
 };
 
+export const validateFilter = (params) => {};
+
 export const tabIdQueries = (arg) => {
   return {
     single: tabQueries('this')
@@ -647,16 +694,23 @@ export const tabIdQueries = (arg) => {
   }[arg]
 };
 
-
-export const validateFilter = (params) => {};
-
-export const filterBy = (params) => {
+export const filterTabsBy = (params) => {
   return {
     url: (tabs) => tabs.filter((tab) => new RegExp(params[1]).test(tab.url)),
-    playing: (tabs) => { tabs },
+    playing: (tabs) => { tabs.filter((tab) => tab.audible)},
     last: (tabs) => { tabs },
     tag: (tabs) => { tabs },
   }[params[0]]
+}
+
+export const filterTabs = (params) => {
+  let filter = Promise.resolve(params)
+    .then(filterTabsBy)
+    .catch(print.failure_filterTabsBy);
+
+  return getAllTabs()
+    .then(filter)
+    .catch(print.failure_filter_tabs)
 }
 
 export const updatePlaying = (store) => {
@@ -865,7 +919,13 @@ export const bringToFront = (e) => {
     .catch(print.failure_bring_to_front);
 }
 
-export const updateCurrentWindow = async (params) => {
+export const updateWindow = (params) => {
+  return Promise.resolve(params)
+    .then((_params) => browser.windows.update(..._params))
+    .catch(print.failure_update_window);
+}
+
+export const updateCurrentWindow = (params) => {
   return browser.windows.update(
     browser.windows.WINDOW_ID_CURRENT,
     params
@@ -921,18 +981,6 @@ export const walkNodes = (walker) => {
     nodes.push([node.name, node.data]);
   }
   return nodes;
-}
-
-// ---- filter
-
-export const filter = () => {
-
-};
-
-export const filterTabs = (params) => {
-  return getAllTabs()
-    .then((tabs) => tabs.filter((tab) => new RegExp(params[0]).test(tab.url)))
-    .catch(print.failure_filter_tabs)
 }
 
 // ---- reduce
@@ -1003,8 +1051,6 @@ export const setStore = (params) => {
 export const checkKeymap = (params) => {};
 export const updateKeymap = (params) => {};
 export const undoKeymap = (params) => {};
-// export const _ = (params) => {};
-// export const _ = (params) => {};
 
 // -- ensemble / client / api functions
 
@@ -1074,14 +1120,14 @@ export const boldSearchTerm = (option, searchTerm) => {
 export const selectedFile = (item) => item ? item['locations'][0].split('/Volumes/ARCHIVE/')[1] : "";
 export const selectedFilePath = (item) => `/api/load?filepath=${selectedFile(item)}`;
 
-export function openFile(e) {
+export const openFile = (e) => {
   console.log('open file', e);
   let data = e.detail;
   return _openFile(data);
 };
 
 
-export function _openFile(data) {
+export const _openFile = (data) => {
   let target;
 
   if (["md", "txt", "json", "py", "js"].indexOf(data['file.ext']) != -1) {
@@ -1121,7 +1167,7 @@ export function _openFile(data) {
 }
 
 
-export function _updateLog(val) {
+export const _updateLog = (val) => {
   const date = dateStringFromDate(new Date());
   return Promise.resolve(val)
     .then((_val) => ({
@@ -1135,7 +1181,7 @@ export function _updateLog(val) {
     .catch(print.failure__update_log);
 }
 
-export function updateLog(e) {
+export const updateLog = (e) => {
   return Promise.resolve(e)
     .then((_e) => _e.detail)
     .then(_updateLog)
@@ -1145,7 +1191,7 @@ export function updateLog(e) {
 // -- playlist controls 1
 
 
-export function startPlaylist(name) {
+export const startPlaylist = (name) => {
   /*
   1. get profile data
   2. update profile data with playlist cursor
@@ -1193,3 +1239,4 @@ stores.config.subscribe((val) => {
 // stores.actionHistory.subscribe((val) => {
 //   console.log("[update] stores.actionHistory update", val);
 // });
+

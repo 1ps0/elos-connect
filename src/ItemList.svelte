@@ -116,7 +116,7 @@ const squashItem = (title, length) => {
           </div>
         </li>
       {/if}
-      {#each queue as _item (_item) }
+      {#each queue as _item (_item.name) }
         <li
           class="item"
           on:click={() => didClick(_item)}
@@ -128,17 +128,17 @@ const squashItem = (title, length) => {
             {transform(_item)}
           {/if}
           </span>
-          <!-- FIXME, breaks for buttons input
-          {#each buttons as prop (prop)}
+          <!-- FIXME, breaks for buttons input -->
+          {#each buttons as prop (prop.name)}
             <div
               class="item-button"
               on:click|preventDefault={(e) => Promise.resolve(_item).then(prop.action).catch(print.failure_item_list)}
             >
               {prop.icon(_item)}
             </div>
-          {/each} -->
+          {/each}
 
-          {#if deletable}
+          {#if _item.deletable || deletable}
             <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
           {/if}
         </li>

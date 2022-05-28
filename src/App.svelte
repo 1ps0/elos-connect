@@ -134,10 +134,10 @@ onMount(async () => {
   let panels = Promise.resolve([]);
   (defaults || [
     "panel-mainmenu",
-    "panel-config",
-    "panel-playlists",
     "panel-web-players",
+    "panel-playlists",
     "panel-actionmenu",
+    "panel-config",
     // "panel-focus",
     // "panel-dashboard",
     // "panel-timer",
@@ -160,6 +160,9 @@ onMount(async () => {
 </script>
 
 <main>
+  <header>
+    <!-- <TopBar/> -->
+  </header>
 
   <section>
     <LayoutGrid
@@ -179,7 +182,6 @@ onMount(async () => {
             3. shift down
             4. close
             5. max/shrink vertical
-            6.
           -->
           <hr/>
         </span>

@@ -1,12 +1,14 @@
 
 // import browser from "webextension-polyfill";
 import { writable, get } from 'svelte/store';
+import { setContext, getContext } from 'svelte';
 import { cmds } from "./lib/omnibox.js";
 import { stores } from "./lib/stores.js";
 import {
   _fetch,
   setupRelay,
-  print
+  print,
+  notify,
 } from "./lib/apis.js";
 
 console.log("LOADING ELOS CONNECT - background.js");
@@ -14,15 +16,15 @@ console.log("LOADING ELOS CONNECT - background.js");
 // ------ GLOBAL ERRORS
 
 $: {
-  if (browser.runtime.lastError !== null) {
-    var err = browser.runtime.lastError;
+  if (browser.runtime.lastError) {
+    let err = browser.runtime.lastError;
     Promise.resolve({
       title: `browser.runtime lastError: ${err.name}`,
       message: err.message
       // buttons: ['retry', 'close']
     })
-    .then(notify.failure)
-    .catch(print.failure);
+    .then(notify.received_global_errors)
+    .catch(print.failure_global_errors);
   }
 };
 
@@ -30,15 +32,27 @@ $: {
 
 // ------ THEME
 
-let currentTheme = null;
+//let currentTheme = null;
 const _setOmniboxTheme = (params) => {
   // windows.WINDOW_ID_CURRENT
-  return [params, browser.theme.update(params)];
+  // return Promise.resolve(params)
+  //   .then(browser.theme.update)
+  //   .then((_params) => setContext("currentTheme", _params))
+  //   .catch(print.failure_set_omnibox_theme);
 };
 
-const setOmniboxTheme = () => {
-  Promise.resolve(currentTheme)
-    .then(setOmniboxTheme)
+const setThemeContext = (value) => {
+  // return Promise.resolve(value || browser.theme.getCurrent())
+  //   .then((_current) => setContext("currentTheme", _current))
+  //   .then(print.success)
+  //   .catch(print.failure);
+}
+
+const _resetOmniboxTheme = () => {
+  return Promise.resolve("currentTheme")
+    .then(getContext)
+    .then(print.status_get_context_current_theme)
+    .then(_setOmniboxTheme)
     .catch(print.failure_reset_omnibox_theme);
 }
 
@@ -62,12 +76,12 @@ const createOmniboxActivationTheme = (theme) => {
 
 const restoreCurrentTheme = () => {
   return Promise.resolve(
-    currentTheme ?
-    currentTheme : browser.theme.getCurrent()
+    _currentTheme ?
+    _currentTheme : browser.theme.getCurrent()
   )
   .then(createOmniboxActivationTheme)
   .then((params) => {
-    currentTheme = browser.theme.getCurrent();
+    _currentTheme = browser.theme.getCurrent();
     return params;
   })
   .then(setOmniboxTheme)
@@ -257,12 +271,7 @@ try {
   browser.omnibox.onInputEntered.addListener(omniboxOnInputEntered);
   browser.omnibox.onInputCancelled.addListener(omniboxOnInputCancelled);
 
-  browser.runtime.onInstalled.addListener(() => {
-    currentTheme = browser.theme.getCurrent();
-    // return Promise.resolve(details)
-    //   .then(print.success)
-    //   .catch(print.failure);
-  });
+  browser.runtime.onInstalled.addListener(setThemeContext);
 
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
 

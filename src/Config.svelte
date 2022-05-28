@@ -139,16 +139,16 @@ const updateWorkspace = (params) => {
     .catch(print.failure_update_workspace)
 }
 
-let configFields = ['logs.level', 'notifyLevel', 'hosts']
+let configFields = ['logs', 'notifyLevel', 'hosts']
 let listFields = ['journal', 'todo', 'activePlaylist', 'playlistHistory', 'recentlySaved']
 
 </script>
 
 <section class="title">
   <h3>Workspace Config</h3>
-  {#each Object.entries(get(stores.config)) as entry (entry[0])}
+  {#each Object.entries(workspaceConfig).filter((entry) => configFields.indexOf(entry[0]) != -1) as entry}
     <div>
-      <h4>{entry[0]}</h4>
+      <h4>{name}</h4>
       {#if typeof entry[1] === 'string'}
       STRING: {entry[1]}
       {:else if entry[1] instanceof Array}
@@ -211,7 +211,12 @@ let listFields = ['journal', 'todo', 'activePlaylist', 'playlistHistory', 'recen
     {/await}
     <br>
 <!--
-  TODO RemoteConfig - status, remote version, available routes/functions, auth/active session(s), storage type and capacity,
+  TODO RemoteConfig -
+  "status",
+  "remote version",
+  "available routes/functions",
+  "auth/active session(s)",
+  "storage type and capacity",
 
   Config is just workspace.js
 

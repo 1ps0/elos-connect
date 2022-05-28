@@ -20,6 +20,7 @@ import {
   updatePlaying,
   getCurrentActiveTab,
   getAllTabs,
+  getAllWindows,
   bringToFront,
   notify,
   print
@@ -29,6 +30,22 @@ import ItemList from "./ItemList.svelte";
 let focusStore = writable({});
 
 const activeTab = {};
+
+const updateStoreFromPinned = (store) => {
+  return getAllTabs()
+    .then((tabs) => {
+      return tabs.map((tab) => ({
+        title: tab.title,
+        tabId: tab.id,
+        windowId: tab.windowId,
+        isArticle: tab.isArticle,
+        url: tab.url,
+        timestamp: Date.now()
+      }));
+    })
+    .then((tabs) => store.update((n) => tabs))
+    .catch(print.failure_focus_update_store_from_pinned);
+};
 
 const updateStoreFromTabs = (store) => {
   return getAllTabs()
@@ -42,7 +59,8 @@ const updateStoreFromTabs = (store) => {
         timestamp: Date.now()
       }));
     })
-    .then((tabs) => store.update((n) => tabs));
+    .then((tabs) => store.update((n) => tabs))
+    .catch(print.failure_focus_update_store_from_tabs)
 }
 
 let groupMode = "window";
@@ -113,9 +131,25 @@ const handleClicked = (_item) => {
 };
 
 
+const windowsStore = writable({});
 const playersStore = writable({});
 
+$:{
+  getAllWindows()
+  .then((_windows) => windowsStore.update((_) => _windows))
+  .catch(print.failure_focus_update_windows)
+}
+
 </script>
+
+<section>
+  <p>Windows</p>
+  <ItemList
+    readonly=true
+    dataStore={windowsStore}
+    on:didClick={bringToFront}
+  />
+</section>
 
 <section>
   <p>Played (state capture demo)</p>
