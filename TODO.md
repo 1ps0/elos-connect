@@ -5,6 +5,19 @@ check off items
 track pomodoro interval for items
 
 ---
+identifiers
+areas = {
+    browser: {  },
+    tabGroup: { this, here, window, selected, all },
+    displayTypes: {
+        webAction: { toggle playing, toggle loop, edit playing list, toggle playing list },
+        browserAction: {},
+        remoteAction: { sync pull, sync push, search remote, }
+    },
+
+
+}
+
 
 components for the parent child relationship between settings and implementation structure
 settings are seeds

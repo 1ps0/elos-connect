@@ -137,7 +137,7 @@ const playersStore = writable({});
 $:{
   getAllWindows()
   .then((_windows) => windowsStore.update((_) => _windows))
-  .catch(print.failure_focus_update_windows)
+  .catch(print.failure_focus_update_window);
 }
 
 </script>

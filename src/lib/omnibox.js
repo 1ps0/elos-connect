@@ -268,13 +268,27 @@ try {
       action: (params) => {
         // const
         return Promise.resolve(params)
+          .then(filterTabs)
+          .then((tabs) => tabs.map((tab) => {
+            return browser.tabs.update(tab.id, {
+              pinned: true
+            })
+          })
           .catch(print.failure_pin)
       },
       remove: {
         content: "remove",
         description: "remove pins from",
         action: (params) => {
-
+          return Promise.resolve(params)
+            .then(filterTabs)
+            .then((tabs) => Promise.all(tabs.map((tab) => {
+              return browser.tabs.update(tab.id, {
+                pinned: false
+              })
+              .catch(print.failure_update_tab_pinned)
+            }))
+            .catch(print.failure_pin_remove);
         }
       }
     },
@@ -622,15 +636,28 @@ try {
     set: {
       content: "set",
       description: "Set tag for this window or tab.",
-      action: (params) => {
-        console.log("HIT ", "set", params);
-        return getCurrentActiveTab()
-          .then((tab) => {
-            // browser.sessions.removeTabValue(tabId, key)
-            browser.sessions.setTabValue(tab.id, params[1]);
-          })
-          .catch(print.failure);
+      tag: {
+        action: (params) => {
+          console.log("HIT ", "set tag", params);
+          return getCurrentActiveTab()
+            .then((tab) => {
+              // browser.sessions.removeTabValue(tabId, key)
+              browser.sessions.setTabValue(tab.id, params[1]);
+            })
+            .catch(print.failure);
+        },
       },
+      group: {
+        action: (params) => {
+          console.log("HIT ", "set group", params);
+          return getCurrentActiveTab()
+            .then((tab) => {
+              // browser.sessions.removeTabValue(tabId, key)
+              browser.sessions.setTabValue(tab.id, params[1]);
+            })
+            .catch(print.failure);
+        },
+      }
     },
     panel: {
       content: "panel",
@@ -646,11 +673,7 @@ try {
       pin: {
         content: "pin",
         description: "pin",
-        action: (params) => {
-          return getCurrentActiveTab()
-            .then((tabs) => browser.tabs.update(tabs, { pinned: true }))
-            .catch(print.panel_pin_set_pinned)
-        }
+        action: (params) => {}
       },
       shift: {
         content: "shift",
@@ -808,11 +831,6 @@ try {
         content: "track_add",
         description: "track_add",
         action: (params) => { console.log("HIT ", "track_add", params)},
-      },
-      set_cycle: {
-        content: "track_set_cycle",
-        description: "track_set_cycle",
-        action: (params) => { console.log("HIT ", "track_set_cycle", params)},
       },
       show_as: {
         content: "track_show_as",
