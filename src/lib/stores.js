@@ -14,6 +14,23 @@ then writable calls readable's values for those datasets
 import { writable } from 'svelte/store';
 import { workspaceConfig } from "../workspace.js";
 
+import {
+  sendBookmarks,
+  addBookmark,
+  renderBranch,
+  _renderBranch,
+  extractBookmarks,
+  getAllBookmarks,
+} from "./apis/bookmarks.js";
+
+
+
+export const localStorageFor = (name, otherwise={}) => {
+  return Promise.resolve(`${name}`)
+    .then(browser.storage.local.get)
+    .catch(print.failure_storage_for)
+    .then(_ => otherwise)
+};
 
 export const storageFor = (name, otherwise={}) => {
   return Promise.resolve(`${name}`)
@@ -22,12 +39,12 @@ export const storageFor = (name, otherwise={}) => {
     .then(_ => otherwise)
 };
 
-const configWritable = writable(workspaceConfig); // storageFor("config",
-const actionHistoryWritable = writable(storageFor("actionHistory", []));
-const eventLogWritable = writable(storageFor("eventLog", []));
-const layoutItemsWritable = writable(storageFor("layoutItems", { items: [], add: [] }));
-const todoWritable = writable(storageFor("todo", []));
-const filesWritable = writable(storageFor("files"));
+const configWritable = writable(workspaceConfig); // localStorageFor("config",
+const actionHistoryWritable = writable(localStorageFor("actionHistory", []));
+const eventLogWritable = writable(localStorageFor("eventLog", []));
+const layoutItemsWritable = writable(localStorageFor("layoutItems", { items: [], add: [] }));
+const todoWritable = writable(localStorageFor("todo", []));
+const filesWritable = writable(localStorageFor("files"));
 
 export const stores = {
   config: configWritable,

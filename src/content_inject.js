@@ -192,7 +192,7 @@ function handleMessage(request, sender, sendResponse) {
 }
 
 try {
-  print.success_content_inject.js_mounted();
+  print.success_content_inject_js_mounted();
   browser.runtime.onMessage.addListener(handleMessage);
   console.log("content_inject.js finished mounting")
 } catch (e) {

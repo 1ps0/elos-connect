@@ -1,35 +1,47 @@
 // main cli command structure
 
+import { stores } from "./stores.js";
+import { panelTypes } from "../config/panels.js";
 import {
-  doSelectedCopy,
   doReloadSystem,
-  reduceTabs,
-  findInAll,
+  doSelectedCopy,
   filterTabs,
   filterTabsBy,
-  moveTabs,
+  findInAll,
   getAllTabs,
   getAllWindows,
-  getCurrentWindow,
   getCurrentActiveTab,
+  getCurrentWindow,
   getHighlightedTabs,
-  setWindowTitle,
-  setTabActive,
   getQueriedTabs,
-  tabQueries,
-  syncStorage,
+  getQueriedTag,
+  moveTabs,
+  reduceCSVToJSON,
+  reduceTabs,
+  sendPlayPause,
   sendRestart,
   sendToggleLoop,
-  sendPlayPause,
-  updateCurrentWindow,
+  setTabActive,
+  setWindowTitle,
+  syncStorage,
+  tabQueries,
   updateClipboard,
+  updateCurrentWindow,
+  doUnloadTabs,
   _fetch,
   _send,
   notify,
   print,
 } from "./apis.js";
-import { stores } from "./stores.js";
-import { panelTypes } from "../config/panels.js";
+
+import {
+  sendBookmarks,
+  addBookmark,
+  renderBranch,
+  _renderBranch,
+  extractBookmarks,
+  getAllBookmarks,
+} from "./apis/bookmarks.js";
 
 print.load_omnibox();
 
@@ -61,6 +73,40 @@ try {
           .catch(print.failure_sync);
       },
     },
+    move: {
+      content: "move",
+      description: "Move selection to tagged entity",
+      // suggestion: (params) => {
+      // // TODO suggest: "elos move <this> main", window 2 title: "main | ..."
+      // // TODO suggest: "elos move <window> ... (yield window names)"
+      // // TODO global.config: suggest defaults: [windows.title, tabs.title, ...]
+      // },
+      action: (params) => {
+        console.log("MOVE")
+        let _tag = params.length > 1 ? params.slice(1) : ['popout'];
+        Promise.resolve(params)
+          .then((_params) => params.length > 1 ? params.slice(1) : ['popout'])
+          .then(getWindowByPrefix)
+          .then((_window) => getAllTabs({window: _window.id}))
+          .then(tabs.move(tabs))
+          .then(notify.success_move)
+          .catch(print.failure_move)
+        let _tabs = getQueriedTabs([...params, ..._tag]);
+      }
+    },
+    watch: {
+      content: "watch",
+      description: "Watch selected field for changes",
+      action: (params) => {
+        console.log("MOVE")
+        let _tag = params.length > 1 ? params.slice(1) : ['selection'];
+        return Promise.resolve([...params, ..._tag])
+          // .then(getQueriedTabs)
+          // .then(getQueriedTag)
+          // TODO add tab listeners for type of watcher (this is a major feature)
+          .catch(print.failure_watch)
+      }
+    },
     stash: {
       content: "stash",
       description: "PARAMS: this, window, all | [tag_name]; Capture essential content in each of the selected tabs, and store with stash.",
@@ -84,7 +130,6 @@ try {
       action: (params) => {
         console.log("HIT", "stash", params);
         // params: null, "this", "window", "all"
-        let _tag = params.length > 1 ? params.slice(1) : ['unsorted'];
         let _tabs = getQueriedTabs([...params, ..._tag]);
 
         return browser.storage.local.get("stash")
@@ -244,11 +289,65 @@ try {
         .catch(print.failure_gather)
       }
     },
+    split: {
+      content: "split",
+      description: "split",
+      action: (params) => {
+        console.log("HIT ", "split", params);
+        // elos split selected tile column,
+        return Promise.resolve(params)
+          .then(getHighlightedTabs)
+          .then((tabs) => {
+            return {
+              width: Math.floor(
+                window.screen.width /
+                max(3, tabs.length + 1)
+              ),
+              tabs: tabs,
+            }
+          })
+          .then((data) => {
+            return data.tabs.map((tab) => ({
+              top: 0,
+              left: data.width * idx,
+              width: data.width,
+              height: window.screen.height,
+              tabId: tab.id,
+            }))
+          })
+          .then((data) => {
+            data.forEach((tab) => {
+              browser.windows.create(data)
+                .catch(print.failure_split_tabs);
+            })
+          })
+          .catch(notify.failure_split)
+      },
+    },
+    unload: {
+      content: "unload",
+      description: "unload current tabs",
+      action: (params) => {
+        // TODO browser.tabs.unload this/selection/tabs/window
+        return Promise.resolve(params)
+          .then(getHighlightedTabs)
+          .then(doUnloadTabs)
+          // use tabs.warmup() to undo this/prime a tab
+          .catch(print.failure_unload)
+      }
+    },
     select: {
       content: "select",
       description: "select specified tabs",
       action: (params) => {
         console.log("SELECT HIT", params);
+      },
+      element: {
+        content: "element",
+        description: "select element picker",
+        action: (params) => {
+          // TODO ublock origin element picker
+        }
       },
       all: {
         content: "all",
@@ -273,7 +372,7 @@ try {
             return browser.tabs.update(tab.id, {
               pinned: true
             })
-          })
+          }))
           .catch(print.failure_pin)
       },
       remove: {
@@ -287,8 +386,8 @@ try {
                 pinned: false
               })
               .catch(print.failure_update_tab_pinned)
-            }))
-            .catch(print.failure_pin_remove);
+            })))
+            .catch(print.failure_pin_remove)
         }
       }
     },
@@ -343,7 +442,7 @@ try {
     },
     clear: {
       content: "clear",
-      description: "clear",
+      description: "clear ... stash",
       stash: {
         content: "stash",
         description: "stash",
@@ -464,7 +563,8 @@ try {
           console.log("HIT ", "copy_tabs", params)
           return Promise.resolve({})
             .then(doSelectedCopy)
-            .then(notify, notify.failure)
+            .then(reduceCSVToJSON)
+            .then(notify, notify.failure_copy_tabs)
             .catch(print.failure_copy_tabs)
         },
       },
@@ -540,6 +640,14 @@ try {
           // playing | all
         }
       },
+      cache: {
+        content: "cache",
+        description: "cache current playing and play offline",
+        action: (_params) => {
+          //
+          return params
+        }
+      },
     },
     search: {
       content: "search",
@@ -597,6 +705,18 @@ try {
       description: "config",
       action: (params) => {
         console.log("HIT ", "config", params)
+        /*
+        TODO config items passable to params
+        - remote url
+        - defaults format/list for suggestions
+        - defaults for open in new window
+        - defaults for stash
+          - keep window group: T/F (in stash structure, so { window1: [tab1...]} rather than [tab..., tab1, tab2..., tabn, ...])
+        - default use bookmarks or cache or remote for data lookup
+        - default ordering for article queue
+        - default ordering for current courses
+        - default panels shown
+        */
         return Promise.resolve(params)
           .then((_params) => _params.split(" ").slice(1))
           .then((args) => {
@@ -635,8 +755,10 @@ try {
     },
     set: {
       content: "set",
-      description: "Set tag for this window or tab.",
+      description: "Set value.",
       tag: {
+        content: "tag",
+        description: "Set tag for this window or tab.",
         action: (params) => {
           console.log("HIT ", "set tag", params);
           return getCurrentActiveTab()
@@ -648,6 +770,8 @@ try {
         },
       },
       group: {
+        content: "group",
+        description: "Set group for this window or tab.",
         action: (params) => {
           console.log("HIT ", "set group", params);
           return getCurrentActiveTab()
@@ -790,40 +914,6 @@ try {
         }
       },
     },
-    split: {
-      content: "split",
-      description: "split",
-      action: (params) => {
-        console.log("HIT ", "split", params);
-        // elos split selected tile column,
-        return getHighlightedTabs()
-          .then((tabs) => {
-            return {
-              width: Math.floor(
-                window.screen.width /
-                max(3, tabs.length + 1)
-              ),
-              tabs: tabs,
-            }
-          })
-          .then((data) => {
-            return data.tabs.map((tab) => ({
-              top: 0,
-              left: data.width * idx,
-              width: data.width,
-              height: window.screen.height,
-              tabId: tab.id,
-            }))
-          })
-          .then((data) => {
-            data.forEach((tab) => {
-              browser.windows.create(data)
-                .catch(print.failure_split_tabs);
-            })
-          })
-          .catch(notify.failure_split)
-      },
-    },
     track: {
       content: "track",
       description: "track",
@@ -906,6 +996,34 @@ try {
         content: "help_worker_status",
         description: "help_worker_status",
         action: (params) => { console.log("HIT ", "help_worker_status", params)},
+      },
+    },
+    bookmarks: {
+      content: "bookmarks",
+      description: "bookmarks",
+      import: {
+        content: "import",
+        description: "import",
+        action: (params) => {
+          console.log("HIT ", "storage", params);
+          // elos storage selected tile column,
+          return Promise.resolve(params)
+            .then((_params) => {
+
+            })
+            .catch(notify.failure_bookmarks_import)
+        }
+      },
+      export: {
+        content: "export",
+        description: "export",
+        action: (params) => {
+          // save off bookmarks as a flat json array
+          return getAllBookmarks()
+            // .then(syncStorage)
+            .then((bookmarks) => {})
+            .catch(notify.failure_bookmarks_export)
+        }
       },
     },
     history: {

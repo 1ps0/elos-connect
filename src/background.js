@@ -186,6 +186,8 @@ const findCommands = (_input) => {
 const omniboxOnInputChanged = (text, addSuggestions) => {
   // console.log("CHANGED", lastInput, ", BECAME:", text);
   lastInput = text;
+  if (lastInput && lastInput.length == 0) {}
+
   try {
     return Promise.resolve(lastInput)
       .then(findCommands)
@@ -245,6 +247,14 @@ const omniboxOnInputCancelled = () => {
 }
 
 
+const commandAction = (name) => {
+  return Promise.resolve(name)
+    .then(renderAction)
+    .then(print.success_command_action)
+    .catch(print.failure_command_action)
+}
+
+
 try {
   print.success_background_js_mounted();
 
@@ -272,7 +282,7 @@ try {
   browser.omnibox.onInputCancelled.addListener(omniboxOnInputCancelled);
 
   browser.runtime.onInstalled.addListener(setThemeContext);
-
+  browser.commands.onCommand.addListener(commandAction)
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
 
 } catch (e) {

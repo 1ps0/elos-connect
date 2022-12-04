@@ -1,3 +1,12 @@
+import { _cmds} from "../lib/omnibox.js";
+
+_cmds.forEach((item, key) => {
+  if ('action' in item) {};
+  if ('content' in item) {};
+  if ('description' in item) {};
+  if ('suggestions' in item) {};
+});
+
 test('browser.omnibox.setDefaultSuggestion', () => {
   expect(jest.isMockFunction(browser.omnibox.setDefaultSuggestion)).toBe(true);
   browser.omnibox.setDefaultSuggestion({ description: 'mocking things' });

@@ -1,49 +1,12 @@
 // 2nd order
 import { get } from 'svelte/store';
 import { stores } from "./stores.js";
+import { print, notify, register } from "./apis/proxy.js";
 
-// -- feedback via print or notify
+// -- apis/*.js joined here
 
-export const print = new Proxy(() => {}, {
-  get(target, name) {
-    let _name = name.toUpperCase().split('_');
-    return (args) => {
-      console.log(`[${_name[0]}][${_name.slice(1).join('_')}]`, args);
-      return args;
-    }
-  }
-});
-print.load_apis();
-
-export const notify = new Proxy(() => {}, {
-  // TODO set alert level filtering based on _name[0]
-  get(target, name) {
-    let _name = name.toUpperCase().split('_');
-    console.log("NOTIFYING", name, target);
-    return (args) => {
-      const state = _name[0];
-      return browser.notifications.create({
-        type: "basic",
-        title: _name[0],
-        message: _name.slice(1).join('_'),
-        // buttons: params.buttons || []
-      })
-      .catch(print.failure_notify)
-      .finally(() => args);
-    }
-  }
-});
-
-//.then(register.success_last_message)
-export const register = new Proxy(() => {}, {
-  get(target, name) {
-    let _name = name.toUpperCase().split('_');
-    return (args) => {
-      console.log(`[REGISTER][${_name[0]}][${_name.slice(1).join('_')}]`, args);
-      return args;
-    }
-  }
-});
+// FIXME remove when fully depreciating this file.
+export { print, notify, register };
 
 // -- util
 
@@ -150,9 +113,15 @@ export const _send = async (params) => {
 
 // -- system
 
+export const doUnloadTabs = (params) => {
+  return Promise.resolve(params)
+    .then(browser.tabs.discard)
+    .catch(print.failure_unload_tabs)
+}
+
 export const doReloadSystem = (params) => {
-  return browser.runtime.reload().
-    catch(print.failure_do_reload_system);
+  return browser.runtime.reload()
+    .catch(print.failure_do_reload_system);
 }
 
 // ------- Send composites
@@ -612,25 +581,38 @@ export const setWindowActive = (data) => {
 // --- tab ops
 // NOTE: all 'get' types dont have a catch failure by design
 
-export const getAllTabs = () => {
-  return browser.tabs.query({})
+export const getAllTabs = (params) => {
+  return Promise.resolve(params)
+    .then(browser.tabs.query)
     .then((tabs) => {
       return tabs.filter((tab) => tab != tabs.TAB_ID_NONE);
     })
     .catch(print.failure_get_all_tabs)
 }
 
-export const getAllWindows = () => {
-  return browser.windows.getAll()
+export const getAllWindows = (params) => {
+  return Promise.resolve(params)
+    .then(browser.windows.getAll)
     .then((_windows) => {
-      return _windows.filter((_window) => _window != _windows.WINDOW_ID_NONE);
+      return _windows.filter((_window) => _window.id != _windows.WINDOW_ID_NONE);
     })
     .catch(print.failure_get_all_windows)
 }
 
-export const getCurrentWindow = () => {
-  return browser.windows.getCurrent()
+export const getCurrentWindow = (params) => {
+  return Promise.resolve(params)
+    .then(browser.windows.getCurrent)
     .catch(print.failure_get_current_window);
+}
+
+export const getWindowByPrefix = (prefix) => {
+  return getAllWindows()
+    .then((_windows) => {
+      return _windows.filter((_window) => {
+        _window.title.indexOf(prefix) != -1
+      })
+    })
+    .catch(print.failure_get_window_by_prefix)
 }
 
 export const getCurrentWindowTabs = () => {
@@ -651,12 +633,14 @@ export const getCurrentActiveTab = () => {
   .catch(print.failure_get_current_tab);
 };
 
-export const getHighlightedTabs = (newClip) => {
-  return browser.tabs.query({
+export const getHighlightedTabs = (params) => {
+  return Promise.resolve(params)
+    .then((_params) => ({
+      // params: _params,
       highlighted: true,
-      // active: true,
       windowId: browser.windows.WINDOW_ID_CURRENT
-    })
+    }))
+    .then(browser.tabs.query)
     .catch(print.failure_get_highlighted_tabs);
 }
 
@@ -680,6 +664,16 @@ export const tabQueries = (arg) => {
     playing: getPlayingTabs,
   }[arg];
 };
+
+
+
+export const tagQueries = (arg) => {
+  return {
+    //
+    prefix: getWindowByPrefix,
+  }[arg];
+};
+
 
 export const validateFilter = (params) => {};
 
@@ -740,6 +734,11 @@ export const loadTab = (params) => {
 
 // ------- Storage
 
+export const getQueriedTag = (_params) => {
+  return Promise.resolve(_params)
+    .then((params) => params)
+    .catch(print.failure_get_queried_tag);
+}
 
 export const getQueriedTabs = (params) => {
   return Promise.resolve(params)
@@ -975,7 +974,7 @@ const setupAuth = () => {
 
 // -- render functions
 
-export const walkNodes = (walker) => {
+const walkNodes = (walker) => {
   let nodes = [];
   while(node = walker.nextNode()) {
     nodes.push([node.name, node.data]);
@@ -984,6 +983,11 @@ export const walkNodes = (walker) => {
 }
 
 // ---- reduce
+
+export const reduceCSVToJSON = (data) => {
+  // FIXME
+  return data;
+}
 
 export const reducePlaying = (tabs, obj) => {
   if (!tabs) { return null; }
