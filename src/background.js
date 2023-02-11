@@ -91,9 +91,36 @@ const restoreCurrentTheme = () => {
 
 // ------ MESSAGING
 
-const handleMessage = (request, sender, sendResponse) => {
-  console.log("[background] got message", request, sender, sendResponse);
+// const handleMessage = (request, sender, sendResponse) => {
+const handleMessage = (message) => {
+  console.log("[background] got message", message);
   // TODO setup message handling and routing here
+  if (message.action === "toggleReaderMode") {
+    // Toggle Reader Mode
+    browser.readerMode.toggleReaderMode();
+
+    // Send a message to the content script to let it know that Reader Mode has been toggled
+    browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      browser.tabs.sendMessage(tabs[0].id, { action: "readerModeToggled" });
+    });
+  } else if (message.action === "processMarkdown") {
+    // Do something with the Markdown, such as sending it to a remote URL or saving it to a file
+    const markdown = message.markdown;
+    
+    // Make a POST request to the remote URL with the ZIP file as the request body
+    fetch('http://example.com/api/submit', {
+      method: 'POST',
+      body: zipBuffer
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+  }
 };
 
 export const updateTab = (tabId, changeInfo, tab) => {
@@ -186,6 +213,8 @@ const findCommands = (_input) => {
 const omniboxOnInputChanged = (text, addSuggestions) => {
   // console.log("CHANGED", lastInput, ", BECAME:", text);
   lastInput = text;
+  if (lastInput && lastInput.length == 0) {}
+
   try {
     return Promise.resolve(lastInput)
       .then(findCommands)
@@ -245,6 +274,41 @@ const omniboxOnInputCancelled = () => {
 }
 
 
+
+// ------ websocket to server --- In background.js
+
+// // Connect to the websocket
+// const socket = new WebSocket('ws://localhost:5000/ws');
+
+// // Add a context menu item
+// browser.contextMenus.create({
+//   id: 'process-link',
+//   title: 'Process link',
+//   contexts: ['link'],
+// });
+
+// // Add an event listener for when the context menu item is clicked
+// browser.contextMenus.onClicked.addListener((info, tab) => {
+//   if (info.menuItemId === 'process-link') {
+//     // Send the link over the websocket
+//     socket.send(JSON.stringify({
+//       action: 'process_link',
+//       link: info.linkUrl,
+//     }));
+//   }
+// });
+
+// -------------------
+
+
+const commandAction = (name) => {
+  return Promise.resolve(name)
+    .then(renderAction)
+    .then(print.success_command_action)
+    .catch(print.failure_command_action)
+}
+
+
 try {
   print.success_background_js_mounted();
 
@@ -272,7 +336,7 @@ try {
   browser.omnibox.onInputCancelled.addListener(omniboxOnInputCancelled);
 
   browser.runtime.onInstalled.addListener(setThemeContext);
-
+  browser.commands.onCommand.addListener(commandAction)
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
 
 } catch (e) {

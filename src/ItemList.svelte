@@ -9,7 +9,7 @@ TODO -
 6. mass select/actions
 7. filterable
 */
-
+import TreeNode from "./TreeNode.svelte";
 import { createEventDispatcher, onMount } from 'svelte';
 import { writable, get } from 'svelte/store';
 import { _fetch, print } from "./lib/apis.js";
@@ -102,6 +102,7 @@ const squashItem = (title, length) => {
 
 </script>
 
+<!-- <TreeNode items={queue} /> -->
 
 <section class="log-body">
   {#if queue}
@@ -139,7 +140,7 @@ const squashItem = (title, length) => {
           {/each}
 
           {#if _item.deletable || deletable}
-            <span class="close" name={_item.name} on:click={close}>{"\u00D7"}</span>
+            <span class="close" name={_item.name} on:click={close}><i class="fas fa-times"></i></span>
           {/if}
         </li>
       {:else}
@@ -221,5 +222,6 @@ ul li:hover {
   background-color: #f44336;
   color: white;
 }
-
 </style>
+
+<!---->

@@ -7,7 +7,7 @@ import ItemList from "./ItemList.svelte";
 
 // stores.files, stores.actionHistory, stores.layoutItems
 import { stores } from "./lib/stores.js";
-import { fileList, openFile } from "./lib/apis.js";
+import { fileList, openFile } from "./lib/apis/files.js";
 
 
 const dispatch = createEventDispatcher();

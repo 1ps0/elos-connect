@@ -1,17 +1,16 @@
 <script>
 import { onMount } from 'svelte';
 
-import {
-  _fetch,
-  _send,
-  getCurrentActiveTab,
-  sendToContent,
+
+import { 
   doSelectedCopy,
   doDownloadVideo,
   doReloadSystem,
-  notify,
-  print
-} from "./lib/apis.js"
+  applyDarkMode,
+  extractReaderText,
+} from "./lib/actions.js";
+import { print, notify } from "./lib/apis/proxy.js";
+
 
 // let savePDFButton = document.querySelector('#save-pdf');
 // let courseDataElement = document.querySelector('#active-course-data');
@@ -24,40 +23,23 @@ let enabledCourseSites = [
 ];
 
 
-const extractReaderText = (e) => {
-  // browser.runtime.onMessage.addListener(registerScript);
-  return getCurrentActiveTab()
-    .then((tabs) => {
-      return tabs.filter((tab) => tab.isArticle)[0];
-    })
-    .then((tab) => {
-        !tab.isInReaderMode ? browser.tabs.toggleReaderMode() : false;
-        return tab.id;
-    })
-    .then((tabId) => ({
-      tabId: tabId,
-      message:'extractReaderText'
-    }))
-    .then(sendToContent)
-    .then(print.status_content_response_reader_text)
-    .then((pageData) => ({
-      uri: "api/analysis/data",
-      body: pageData,
-    }))
-    .then(_send)
-    .catch(print.failure_extract_reader_text);
-}
+// --------
 
 
+// --------
 
 let items = [
   {
-    title: 'Extract Text',
-    click: extractReaderText,
-  },
-  {
     title: 'Reload eLOS',
     click: doReloadSystem
+  },
+  {
+    title: 'Set Dark mode 1',
+    click: applyDarkMode,
+  },
+  {
+    title: 'Extract Text',
+    click: extractReaderText,
   },
   {
     title: 'Copy Selected Tabs',

@@ -1,10 +1,72 @@
 
-add a list of items
-ability to persist items or dupe or add from 'template'
-check off items
-track pomodoro interval for items
+# TODO
+
+> updated 12-4-2022
+> https://jasmine.github.io/
+
+
+- build tests
+
+- bookmarks as storage
+    - topics/
+    - daily/
+    - in-progress/
+-
+
+- daily:
+    - daily journal document (mm-dd-yyyy.md)
+    - daily recurring items (todo, schedule reminders)
+    - daily work items (gmail, duolingo, coursera)
+    -
 
 ---
+
+## Items
+
+- move tab to window
+    - specify which window
+    - each object is a primitive, alias or lookup
+
+- move selected to window
+
+- add a list of items
+- ability to persist items or dupe or add from 'template'
+- check off items
+- track pomodoro interval for items
+
+- add "offline" caching for tabs with articles etc
+
+---
+
+idea: autostash
+
+lifecycle events for tabs
+- discard after x time inactive
+- hide after y time inactive (skip this, out of band)
+- stash after z time inactive
+
+- exceptions: pins, common tabs
+- stash autosort, enqueue,
+- determine "completeness" of viewing (video %, page #, etc)
+- feature: article queue,
+    - top word text vectors
+        - grouped into n clusters depending on proximal distances within the known space
+    - vs semantics of generated/manual tag phrases in static lists
+- 'rescue' stashed tabs, can we capture session state?
+
+- lifecycle cron/windowing:
+    - decrement a "life point" every x time units
+    - reset or downgrade tab/window state
+    - select by tags for different effects (ex: "test" window having more permanence, or get trimmed by default)
+
+- lifecycle schemes customizable and premade
+    - autostash
+    - daily cull
+    - consolidate to one window
+    -
+
+---
+
 identifiers
 areas = {
     browser: {  },
