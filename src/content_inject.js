@@ -1,9 +1,6 @@
+// This file is injected into and runs this code in the browser tab.
 
-import {
-  setupRelay,
-  _fetch,
-  print
-} from "./lib/apis.js";
+import { print } from "./lib/apis/proxy.js";
 print.load_elos_connect_content_inject();
 
 // ----- Util
@@ -17,146 +14,31 @@ const isElementVisible = (element) => {
 }
 
 
-// ----- Element Select
 
-const startElementTracking = () => {
-  // Document.elementFromPoint()
-}
-const stopElementTracking = () => {};
-
-// ----- Media Control
-
-const getPlayable = () => {
-  return Promise.resolve(['video', 'audio'])
-    .then((types) => {
-      return types.reduce((_out, _type) => {
-        return [
-          ..._out,
-          ...Array.from(
-            document.querySelectorAll(_type))
-              .filter((el) => isElementVisible(el))
-        ];
-      }, []);
-    })
-    .catch(print.failure_get_playable);
-};
-
-const toggleLoop = () => {
-  return getPlayable()
-    .then((playing) => {
-      playing.forEach((item) => {
-        item.loop = !item.loop;
-      });
-      return playing;
-    })
-    .catch(print.failure_toggle_loop);
-}
-
-const playPause = () => {
-  return getPlayable().then((playing) => {
-      console.log("Playing and Pausing", playing);
-      playing.forEach((item) => {
-        if (item.paused) { item.play(); }
-        else   { item.pause(); }
-      });
-      return playing;
-    })
-    .catch(print.failure_play_pause);
-};
-
-
-const restart = () => {
-  return getPlayable().then((playing) => {
-      console.log("Restarting", playing);
-      playing.forEach((item) => {
-        item.currentTime = 0;
-      });
-      return playing;
-    })
-    .catch(print.failure_play_pause);
-};
-
-const getPlayingInfo = (playing) => {
-  return playing.map((obj) => {
-    return {
-      url: obj.src,
-      autoplay: obj.autoplay,
-      autopip: obj.autopictureinpicture,
-      paused: obj.paused,
-      muted: obj.muted,
-      loop: obj.loop,
-      currentTime: obj.currentTime,
-      duration: obj.duration
-    }
-  });
-}
-
-const renderPlayingStatus = (playing) => {
-  if (playing.length > 0) {
-    return {
-      playable: playing.map((obj) => {
-        return {
-          ...obj,
-          hasPlayable: true,
-          playing: !obj.paused,
-          loop: obj.loop,
-        }
-      }),
-      url: window.location.href
-    };
-  }
-};
-
-// ------ Text handling / searching
-
-/**
- * Get all the text nodes into a single array
- */
-function getNodes() {
-  let walker = document.createTreeWalker(document, window.NodeFilter.SHOW_TEXT, null, false);
-  let nodes = [];
-  while(node = walker.nextNode()) {
-    nodes.push(node);
-  }
-
-  return nodes;
-}
-
-/**
- * Gets all text nodes in the document, then for each match, return the
- * complete text content of nodes that contained the match.
- * If a match spanned more than one node, concatenate the textContent
- * of each node.
- */
-function getContent(ranges) {
-
-  let contexts = [];
-  let nodes = getNodes();
-
-  for (let range of ranges) {
-    let context = nodes[range.startTextNodePos].textContent;
-    let pos = range.startTextNodePos;
-    while (pos < range.endTextNodePos) {
-      pos++;
-      context += nodes[pos].textContent;
-    }
-    contexts.push(context);
-  }
-  return contexts;
-}
-
-function extractReaderText() {
-  return {
-    title: document.querySelector('.reader-title h1').value,
-    link: document.querySelector('.reader-domain a').href,
-    readerTime: document.querySelector('.reader-estimated-time').value,
-    contentBody: document.querySelectorAll('.page')
-  };
-}
 
 function handleMessage(request, sender, sendResponse) {
   console.log("[CONTENT] Message from the page script:", request, sender, sendResponse);
-  if (request.message === 'playPause') {
+  if (request.message === "setDarkMode") {
+    return Promise.resolve(elementHexMap)
+      .then(applyDarkMode)
+      .then((response) => ({
+        response: response,
+        success: true 
+      }))
+      .then(sendResponse)
+      .catch(print.failure_handle_message_set_dark_mode)
+  }
+  else if (message.action === "readerModeToggled") {
+    return Promise.resolve()
+      .then(zipImagesAndText)
+      .then((zipBuffer) => ({
+        success: true,
+        data: zipBuffer
+      }))
+      .then(sendResponse)
+      .catch(print.failure_zip_images_and_text)
+  }
+  else if (request.message === 'playPause') {
     return playPause()
       .then(getPlayingInfo)
       .then(renderPlayingStatus)

@@ -1,6 +1,12 @@
 
 # TODO
 
+> updated 12-4-2022
+> https://jasmine.github.io/
+
+
+- build tests
+
 - bookmarks as storage
     - topics/
     - daily/
@@ -32,6 +38,7 @@
 
 ---
 
+<<<<<<< HEAD
 idea: key combo to switch between sections of the application
 
 - ex: cmd+L focus on url bar

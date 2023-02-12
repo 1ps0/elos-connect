@@ -204,20 +204,18 @@ onMount(async () => {
 
 main {
   margin: 0 0 0 0;
-  /*background-color: blue;*/
+  background-color: #232834;
   font-size: 16px; /* Increased text to enable scrolling */
   padding: 0px 2px;
 }
 
 section > div {
   display: block;
-  /*position: absolute;*/
   overflow: auto;
-  /*top: 50%;
-  left: 50%;*/
   min-height: 100%;
   min-width: 100%;
   transform: translate(-50%, -50%);
+  color: #8c96ac;
 }
 
 </style>

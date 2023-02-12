@@ -18,7 +18,7 @@ import { writable, get } from 'svelte/store';
 
 import {
   updatePlaying,
-  getCurrentActiveTab,
+  getCurrentActive,
   getAllTabs,
   getAllWindows,
   bringToFront,
@@ -180,7 +180,7 @@ $:{
     <li>
       <title>Active Page (update demo)</title>
       <p>
-        {#await getCurrentActiveTab()}
+        {#await getCurrentActive()}
           Loading current Active Tab
         {:then tabs}
           {#each tabs as tab}

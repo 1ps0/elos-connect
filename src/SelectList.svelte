@@ -104,46 +104,51 @@ onMount(async () => {
 
 <style>
 
-ul {
-  list-style:none;
-  list-style-type:none;
-  padding:0px;
-  margin:0px;
-}
 
-/* Style the links inside the pill navigation menu */
-.pill-nav li {
-  background-repeat:no-repeat;
-  background-position:0px 5px;
-  display: block;
-  color: black;
-  text-align: center;
-  padding: 14px;
-  text-decoration: none;
-  /*font-size: 17px;*/
-  border-radius: 5px;
-  float: left;
-}
+  /* Style the links inside the pill navigation menu */
+  .pill-nav li {
+    background-repeat:no-repeat;
+    background-position:0px 5px;
+    border:1px solid transparent;
+    color:#666;
+    float:left;
+    font-size:12px;
+    height:24px;
+    line-height:24px;
+    margin-right:8px;
+    padding-left:5px;
+    padding-right:5px;
+    text-align:center;
+    text-decoration:none;
+    transition:all 200ms ease-in-out;
+  }
 
-/* Change the color of links on mouse-over */
-.pill-nav li:hover {
-  background-color: #ddd;
-  color: black;
-}
+  .pill-nav li.active {
+    border:1px solid #000;
+    color:#fff;
+  }
 
-/* Add a color to the active/current link */
-.pill-nav li.active {
-  background-color: dodgerblue;
-  color: white;
-}
+  .pill-nav li:hover {
+    color:#fff;
+  }
 
-/*
-  Menu Tabs
-  https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_search_menu
-*/
+  .pill-nav li:first-child {
+    margin-left:0px;
+  }
 
-section {
-  font-family: Arial, Helvetica, sans-serif;
-}
+  /* SelectList styles */
+  .pill-nav li {
+    border: 1px solid #965A38;
+    color: #5D5C5C;
+  }
 
+  .pill-nav li.active {
+    background-color: #965A38;
+    color: #F7F5EF;
+  }
+
+  .pill-nav li:hover {
+    background-color: #F7F5EF;
+    color: #965A38;
+  }
 </style>

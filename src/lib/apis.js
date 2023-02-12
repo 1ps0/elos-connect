@@ -1,4 +1,5 @@
 // 2nd order
+
 import { get } from 'svelte/store';
 import { stores } from "./stores.js";
 import { print, notify, register } from "./apis/proxy.js";
@@ -8,55 +9,24 @@ import { print, notify, register } from "./apis/proxy.js";
 // FIXME remove when fully depreciating this file.
 export { print, notify, register };
 
-// -- util
+import * as reduce from "./apis/reduce.js";
 
-function zip(keys, vals) {
-  return keys.reduce((m, key, index) => {
-    m[key] = vals[index];
-    return m;
-  }, {});
-}
-
-
-export const resolvePath = (path, obj, separator='.') => {
-  var properties = Array.isArray(path) ? path : path.split(separator);
-  return properties.reduce((prev, curr) => prev && prev[curr], obj);
-}
-
-export const intersection = (sA, sB) => {
-  return Promise.resolve(sA)
-    .then((_sA) => new Set([_sA].flat(1)))
-    .then(print.status_intersection_sA)
-    .then((_sA) => {
-      const result = new Set();
-      for (let elem of sB) {
-        if (_sA.has(elem)) {
-          console.log("[INTERSECTION]", elem)
-          result.add(elem);
-        }
-      }
-      console.log("[DONE]", result)
-      return [...result];
-    })
-    .catch(print.failure_intersection);
-};
-
-
-export const union = (sA, sB) => {
-  const _keys = new Set(sA);
-  for (let elem of sB) {
-    _keys.add(elem);
-  }
-  return [..._keys];
-};
-
+// -- apis/*.js joined here
+// TODO trim
+import * as bookmarks from "./apis/bookmarks.js";
+import * as files from "./apis/files.js";
+import * as network from "./network.js";
+import * as send from "./send.js";
+import * as tabs from "./apis/tabs.js";
+import * as windows from "./apis/windows.js";
 
 // attempt to fix the DataCloneError error,
 // where sendMessage of some kind includes
 // methods in an object, so they need to be pruned
 export const pruneMethods = (value) => {
   return Promise.resolve(value)
-    .then(JSON.parse(JSON.stringify(value)))
+    .then(JSON.stringify)
+    .then(JSON.parse)
     .catch(print.failure_stores_prune_methods);
 }
 
@@ -732,214 +702,6 @@ export const loadTab = (params) => {
 }
 
 
-// ------- Storage
-
-export const getQueriedTag = (_params) => {
-  return Promise.resolve(_params)
-    .then((params) => params)
-    .catch(print.failure_get_queried_tag);
-}
-
-export const getQueriedTabs = (params) => {
-  return Promise.resolve(params)
-    .then((_params) => _params.length ? _params[0] : 'this')
-    .then(tabQueries) // keyword
-    // .then(print.status_tab_query)
-    .then((tabQuery) => tabQuery())
-    .then(reduceTabs)
-    .then((tabs) => {
-      return tabs.map((tab) => ({
-        ...tab,
-        tag: [params.slice(1)].flat(1),
-        timestamp: Date.now(),
-        // language: browser.tabs.detectLanguage(tab.id)
-      }));
-    })
-    .catch(print.failure_stash_tabs);
-
-}
-
-export const getAllStorageLocal = (params) => {
-  return Promise.resolve((params && params.length) ? params : undefined)
-    .then(browser.storage.local.get)
-    .catch(print.failure_sync);
-}
-
-export const setupStorage = (params) => {
-  return browser.storage.local.onChanged.addListener((changes) => {
-    Promise.resolve(changes)
-      .then(Object.entries)
-      .then((entries) => {
-        entries.forEach((entry) => {
-          let key = entry[0];
-          let oldValue = entry[1].oldValue;
-          let newValue = entry[1].newValue;
-        })
-      })
-      .catch(print.failure_setup_storage);
-    });
-}
-
-export const syncStorage = (params) => {
-  // params: storageKey, priority:mine|theirs|merge
-  return browser.storage.local.get(params)
-    .then((data) => ({
-      uri: `/api/pkg/mine/sync`, // TODO enable custom and automatic package names
-      body: data
-    }))
-    .then(_send)
-    .catch(print.failure_sync_storage);
-}
-
-export const clearStorageKey = (params) => {
-  // params: storageKey == saveKey == originKey
-  let storageKey = params[0];
-  return Promise.resolve({
-      storageKey:[]
-    })
-    .then(browser.storage.local.set)
-    .catch(print.failure_storage_clear)
-
-}
-
-// ------- Register content script
-
-export const _unregisterScript = (subPointer) => {
-  return subPointer.unregister();
-}
-
-export const _registerScript = (message) => {
-  let hosts = message.hosts;
-  let code = message.code;
-
-  return browser.contentScripts.register({
-    matches: hosts,
-    js: [{code}],
-    runAt: "document_idle"
-  });
-}
-
-// ------- Send to webpage content_inject.js
-
-export const sendToContent = (params) => {
-  return Promise.resolve(params)
-    .then(print.status_send_to_content)
-    .then((data) => {
-      browser.tabs.sendMessage(data.tabId, data);
-      return data;
-    })
-    .then(notify.success)
-    .catch(print.failure_send_to_content);
-}
-
-export const sendToggleLoop = (e) => {
-  return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message:'toggleLoop' }))
-    .then(sendToContent)
-    .catch(print.failure_send_toggle_loop);
-}
-
-export const sendPlayPause = (e) => {
-  return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message:'playPause' }))
-    .then(sendToContent)
-    .catch(print.failure_send_play_pause);
-};
-
-export const sendRestart = (e) => {
-  return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message:'restart' }))
-    .then(sendToContent)
-    .catch(print.failure_send_restart);
-};
-
-export const updateClipboard = (newClip) => {
-  return navigator.clipboard.writeText(newClip)
-    .catch(print.failure_update_clipboard);
-};
-
-
-export const setupMenuSaveText = () => {
-  browser.contextMenus.create({
-    title: 'Add selected to Focus',
-    id: 'add-selected-to-focus',
-    contexts: ['selection'],
-  })
-  .catch(print.failure_create_context_menu);
-
-  browser.contextMenus.onClicked.addListener((info) => {
-    if (info.menuItemId === 'add-selected-to-focus') {
-      // clipboard.writeText();
-      browser.storage.local.get("notes")
-        .then((result) => result.notes)
-        .then((_notes) => ({
-          notes: [
-            ..._notes,
-            `${info.pageUrl.split('#')[0]}#:~:text=${encodeURIComponent(info.selectionText)}`
-          ]
-        }))
-        .then(browser.storage.local.set)
-        .catch(print.failure_focus_add_selected);
-    }
-  });
-}
-
-export const doSelectedCopy = async (e) => {
-  return getHighlightedTabs()
-    .then((tabs) => {
-      console.log('doing selected copy:', browser.windows.WINDOW_ID_CURRENT, tabs);
-      return tabs.map((tab) => `${tab.title},${tab.url}`).join('\n');
-    })
-    .then(updateClipboard)
-    .then(notify.success)
-    .catch(print.failure_selected_copy);
-}
-
-export const doDownloadVideo = (params) => {
-  return getCurrentActiveTab()
-    .then((tab) => ({
-      uri: "api/action/download/video",
-      body: {
-        uri: tab[0].url,
-      }
-    }))
-    .then(_send)
-    .then(notify.success)
-    .catch(print.failure_download_video);
-}
-
-export const bringToFront = (e) => {
-  return Promise.resolve(e)
-    .then((_e) => e.detail ? e.detail : e)
-    .then(print.start_bring_to_front)
-    .then(setTabActive)
-    .then(setWindowActive)
-    .then(print.success)
-    .catch(print.failure_bring_to_front);
-}
-
-export const updateWindow = (params) => {
-  return Promise.resolve(params)
-    .then((_params) => browser.windows.update(..._params))
-    .catch(print.failure_update_window);
-}
-
-export const updateCurrentWindow = (params) => {
-  return browser.windows.update(
-    browser.windows.WINDOW_ID_CURRENT,
-    params
-  ).catch(print.failure_update_current_window);
-};
-
-
-export const setPinnedTab = async (params) => {
-  return getHighlightedTabs().then( (tabs) => {
-    for (const tab of tabs) {
-      browser.tabs.update(tab.id, { pinned: true })
-        .catch(print.failure_update_tab_pinned);
-    }
-  });
-};
 
 export const getBrowserInfo = async () => {
   return browser.runtime.getBrowserInfo()
@@ -952,122 +714,12 @@ export const getBrowserInfo = async () => {
   .catch(print.failure_get_browser_info);
 };
 
-// --- browser impl
-
-/*global getAccessToken*/
-
-const setupAuth = () => {
-  /**
-  When the button's clicked:
-  - get an access token using the identity API
-  - use it to get the user's info
-  - show a notification containing some of it
-  getAccessToken()
-      .then(getUserInfo)
-      .then(createNotify)
-      .catch(print.failure);
-  */
-  browser.identity.getRedirectURL();
-}
-
-
-
-// -- render functions
-
-const walkNodes = (walker) => {
-  let nodes = [];
-  while(node = walker.nextNode()) {
-    nodes.push([node.name, node.data]);
-  }
-  return nodes;
-}
-
-// ---- reduce
-
-export const reduceCSVToJSON = (data) => {
-  // FIXME
-  return data;
-}
-
-export const reducePlaying = (tabs, obj) => {
-  if (!tabs) { return null; }
-  if (!obj) { obj = {}; }
-  return tabs.reduce((_out, curr) => {
-    if (!_out[curr.name]) {
-      _out[curr.name] = curr;
-    }
-    return _out;
-  }, obj);
-};
-
-export const reduceDocumentText = () => {
-  return Promise.resolve(
-    document.createTreeWalker(
-      document,
-      window.NodeFilter.SHOW_TEXT,
-      null,
-      false
-    )
-  )
-  .then(walkNodes)
-  .then(print.success)
-  .catch(print.failure)
-}
-
-export const reduceTabs = (tabs) => {
-  return tabs.map((tab) => {
-    return {
-      uri: tab.url,
-      url: tab.url,
-      label: tab.title,
-      title: tab.title,
-      tabId: tab.id,
-      windowId: tab.windowId,
-      muted: tab.mutedInfo.muted,
-      playing: tab.audible,
-      article: tab.isArticle,
-      timestamp: Date.now(),
-      // icon: tab.favIconUrl, // spammy base64 rendering
-      // language: browser.tabs.detectLanguage(tab.id)
-    }
-  })
-}
-
-// -- content processing
-
-export const sendPage = async (params) => {
-  return Promise.resolve(params.data)
-    .then((tab) => {
-      if (tab.isInReaderMode) {}
-      else {
-        browser.tabs.toggleReaderMode();
-      }
-      return data;
-    })
-    .catch(print.failure);
-};
-
-export const setStore = (params) => {
-  return stores[params.name];
-};
 
 
 export const checkKeymap = (params) => {};
 export const updateKeymap = (params) => {};
 export const undoKeymap = (params) => {};
 
-// -- ensemble / client / api functions
-
-
-
-export const fileList = async (params) => {
-  // _fetch("/api/file/search", params).then( (data) => {
-  //   stores.files.update(n => ({...n, ...data, dirty: false }));
-  //   console.log("updated filelist", data, params);
-  // }).catch ((err) => {
-  //   console.log("failed to update filelist", err, params);
-  // })
-};
 
 // -- filters
 
@@ -1118,129 +770,3 @@ export const boldSearchTerm = (option, searchTerm) => {
 
   return html || option
 }
-
-// -- event callbacks
-
-export const selectedFile = (item) => item ? item['locations'][0].split('/Volumes/ARCHIVE/')[1] : "";
-export const selectedFilePath = (item) => `/api/load?filepath=${selectedFile(item)}`;
-
-export const openFile = (e) => {
-  console.log('open file', e);
-  let data = e.detail;
-  return _openFile(data);
-};
-
-
-export const _openFile = (data) => {
-  let target;
-
-  if (["md", "txt", "json", "py", "js"].indexOf(data['file.ext']) != -1) {
-    target = "panel-editor";
-  }
-  else if (data['file.ext'] === "pdf") {
-    target = "panel-pdf";
-  }
-  else if (["jpg", "gif", "png"].indexOf(data['file.ext']) != -1) {
-    target = "panel-gallery";
-  }
-
-  if (target !== undefined) {
-    let options = {
-      target_name: target,
-      props: {
-        data: selectedFilePath(data),
-        language: data['file.ext'] || 'markdown',
-        theme: 'vs-light',
-        features: ['wordWrap',]
-      }
-    };
-    console.log("data for open file", options);
-
-    // stores.actionHistory.update(n => [...(n || []), data]);
-
-    // TODO take a step back here. this is potentially circular with add() and
-    // should be rolled into its own find/add/remove/toggle system for specific
-    // content types. so we dont double open a window, but also CAN open two windows
-    // of the same kind.
-    stores.layoutItems.update( n => {
-      n.add.push([target, options]);
-      n.dirty = true;
-      return n;
-    });
-  }
-}
-
-
-export const _updateLog = (val) => {
-  const date = dateStringFromDate(new Date());
-  return Promise.resolve(val)
-    .then((_val) => ({
-      ...val,
-      at: Math.floor(Date.now() / 1000),
-      timestamp: date
-    }))
-    .then((_val) => {
-      stores.eventLog.update((n) => [...(n.length ? n : (n ? [n] : [])), _val])
-    })
-    .catch(print.failure__update_log);
-}
-
-export const updateLog = (e) => {
-  return Promise.resolve(e)
-    .then((_e) => _e.detail)
-    .then(_updateLog)
-    .catch(print.failure_update_log)
-}
-
-// -- playlist controls 1
-
-
-export const startPlaylist = (name) => {
-  /*
-  1. get profile data
-  2. update profile data with playlist cursor
-  3. cursor entry for 'active package'
-  4. cursor location is url, and progress
-  5. cursor has a history
-  6. shows past played, duration, notes
-  7. cursor lookahead shows next item in playlist
-  8. cursor history is a collection of objects in key-value stores
-  9. suggestion functions based on next, and past history items
-  10. operations for the current playlist item, the current cursor location
-  11. location is by object, as location is over time and object resulting from action
-  */
-  return browser.storage.local.get('stash')
-    .then((_stash) => _stash.stash)
-    .then((data) => data[name])
-    .then((playlist) => {
-      return playlist.reduce((sum, item) => {
-        return sum[item.name]
-      }, {})
-    })
-    .then(start)
-    .catch(print.failure_start_playlist);
-}
-
-
-
-// -- subscriptions
-
-stores.layoutItems.subscribe(val => {
-  console.log("[update] stores.layoutItems update", val)
-});
-
-stores.config.subscribe((val) => {
-  console.log("[update] stores.workspace update", val);
-});
-
-// stores.eventLog.subscribe((val) => {
-//   console.log("[update] stores.eventLog update", val);
-//   // if (val && Object.keys(val).length > 0) {
-//   //   sendProfileUpdate('action', val);
-//   // }
-// });
-
-// stores.actionHistory.subscribe((val) => {
-//   console.log("[update] stores.actionHistory update", val);
-// });
-
