@@ -4,7 +4,10 @@ import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
 import { stores } from "./lib/stores.js";
-import { loadSites, loadHistory, loadCommands, notify, print } from "./lib/apis.js";
+import * as load from "./lib/apis/load.js";
+
+import * as network from "./lib/apis/network.js";
+
 import { cmds } from "./lib/omnibox.js";
 import { workspaceConfig } from "./workspace.js";
 
@@ -56,14 +59,14 @@ const renderEventDefaults = () => {
 
 const enrichManifest = () => {
   browser.runtime.getManifest()
-    .then(print.status_get_manifest)
+    .then(proxy.print.status_get_manifest)
     .then((manifest) => {
       return {
         ...manifest.get('commands', {})
       }
     })
-    .then((_manifest) => print.alert_new_manifest(_manifest))
-    .catch(print.failure_enrich_manifest)
+    .then((_manifest) => proxy.print.alert_new_manifest(_manifest))
+    .catch(proxy.print.failure_enrich_manifest)
 }
 
 const setLogLevel = (level) => {
@@ -74,35 +77,35 @@ const setLogLevel = (level) => {
         logLevel: _level
       }))
     })
-    .catch(print.failure_set_log_level);
+    .catch(proxy.print.failure_set_log_level);
 }
 
 const resetCommand = (params) => {
   return Promise.resolve(params)
-    .then(print.status_reset_params)
+    .then(proxy.print.status_reset_params)
     .then(browser.commands.reset)
-    .catch(print.failure_reset_command);
+    .catch(proxy.print.failure_reset_command);
 };
 
 const updateCommand = (params) => {
   return Promise.resolve(params)
-    .then(print.status_update_shortcut_params)
+    .then(proxy.print.status_update_shortcut_params)
     .then((_params) => ({
       name: _params.name,
       shortcut: _params.parent.input.value
     }))
     .then(browser.commands.update)
-    .then(notify.success_update_command)
-    .catch(print.failure_reset_command);
+    .then(proxynotify.success_update_command)
+    .catch(proxy.print.failure_reset_command);
 };
 
 const addHost = (params) => {
   return Promise.resolve(params) // e.value
     .then((_input) = _input.text)
     // TODO validate input as name
-    .then(print.status_add_host)
+    .then(proxy.print.status_add_host)
     // TODO ... do something with the value
-    .catch(print.failure_add_host)
+    .catch(proxy.print.failure_add_host)
 }
 
 const loadHosts = () => {
@@ -111,11 +114,11 @@ const loadHosts = () => {
       return browser.storage.local.get('hosts')
     })
     .then((data) => data.hosts)
-    .catch(print.failure_load_hosts);
+    .catch(proxy.print.failure_load_hosts);
 }
 
 onMount(() => {
-  print.success_Dashboard_mounted();
+  proxy.print.success_Dashboard_mounted();
 
   // browser.commands.onCommand.addListener(updateCommand);
 });
@@ -123,12 +126,12 @@ onMount(() => {
 const updateWorkspace = (params) => {
   return Promise.resolve(params)
     .then((_params) => _params.target)
-    // .then(print.status_update_workspace_params)
+    // .then(proxy.print.status_update_workspace_params)
     .then((_input) => ({
       key: _input.attributes.key.value,
       value: _input.type === 'checkbox' ? _input.checked : _input.value
     }))
-    // .then(print.status_update_workspace)
+    // .then(proxy.print.status_update_workspace)
     .then((changed) => {
       stores.config.update((_config) => {
         _config.hosts.local[changed.key] = changed.value;
@@ -136,7 +139,7 @@ const updateWorkspace = (params) => {
       })
     })
     // TODO persist workspaceConfig
-    .catch(print.failure_update_workspace)
+    .catch(proxy.print.failure_update_workspace)
 }
 
 let configFields = ['logs', 'notifyLevel', 'hosts']
@@ -195,7 +198,7 @@ let listFields = ['journal', 'todo', 'activePlaylist', 'playlistHistory', 'recen
     </div>
     <br>
     <h3>Keyboard shortcut</h3>
-    {#await loadCommands() then commands}
+    {#await load.commands() then commands}
       <div id="item-list">
         {#each commands as cmd}
         <p>

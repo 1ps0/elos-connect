@@ -4,7 +4,8 @@ import { onMount, setContext, getContext, hasContext } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 
 import { stores } from "./lib/stores.js";
-import { loadSites, loadHistory, loadCommands, notify, print } from "./lib/apis.js";
+import * as load from "./lib/apis/load.js";
+import * as proxy from "./lib/apis/proxy.js";
 import { cmds } from "./lib/omnibox.js";
 
 // import { commandLine } from "./lib/commandLine.js";
@@ -48,7 +49,7 @@ const getCommands = (params) => {
 
 const resetCommand = async (params) => {
   return browser.commands.reset(params.name)
-    .catch(print.failure);
+    .catch(proxy.print.failure);
 };
 
 const updateCommand = async (params) => {
@@ -57,8 +58,8 @@ const updateCommand = async (params) => {
     name: params.name,
     shortcut: params.parent.input.value
   })
-  .then(notify.success)
-  .catch(print.failure);
+  .then(proxy.notify.success)
+  .catch(proxy.print.failure);
 };
 
 const bucketHistory = async (results) => {
@@ -77,9 +78,9 @@ const addHost = (params) => {
   return Promise.resolve(params) // e.value
     .then((_input) = _input.text)
     // TODO validate input as name
-    .then(print.status_add_host)
+    .then(proxy.print.status_add_host)
     // TODO ... do something with the value
-    .catch(print.failure_add_host)
+    .catch(proxy.print.failure_add_host)
 }
 
 const loadHosts = (params) => {
@@ -88,7 +89,7 @@ const loadHosts = (params) => {
       return browser.storage.local.get('config')
     })
     .then((data) => [data['config'].host])
-    .catch(print.failure_load_hosts);
+    .catch(proxy.print.failure_load_hosts);
 }
 
 const browserStats = async (params) => {
@@ -117,13 +118,13 @@ const browserStats = async (params) => {
           per_is_article: data.filter((tab) => tab.isArticle).length / data.length,
         }
       })
-      .catch(print.failure);
+      .catch(proxy.print.failure);
 
 }
 
 
 onMount(async () => {
-  print.success_Dashboard_mounted();
+  proxy.print.success_Dashboard_mounted();
   // browser.commands.onCommand.addListener(updateCommand);
 });
 
@@ -168,7 +169,7 @@ onMount(async () => {
     </div>
     <br>
     <h3>Keyboard shortcut</h3>
-    {#await loadCommands() then commands}
+    {#await load.commands() then commands}
       <div id="item-list">
         {#each commands as cmd}
         <p>
@@ -212,7 +213,7 @@ onMount(async () => {
     <br>
 
     <h3>History Top Sites</h3>
-      {#await bucketHistory(loadSites()) then data}
+      {#await bucketHistory(load.sites()) then data}
         <div id="item-list">
           {#each data.sites as site (site.title)}
             <p><a href="{site.url}">{site.title}</a></p>
@@ -224,7 +225,7 @@ onMount(async () => {
     <br>
 
     <h3>Browsing History breakdown</h3>
-      {#await bucketHistory(loadHistory()) then history}
+      {#await bucketHistory(load.history()) then history}
         <div id="item-list">
           {#each history as item (item.title)}
             <p><a href="{item.url}">{item.title}</a></p>

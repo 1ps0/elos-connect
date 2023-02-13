@@ -1,53 +1,11 @@
 // main cli command structure
 
-import { stores } from "./stores.js";
-import { panelTypes } from "../config/panels.js";
-import {
-  doReloadSystem,
-  doSelectedCopy,
-  filterTabs,
-  filterTabsBy,
-  findInAll,
-  getAllTabs,
-  getAllWindows,
-  getCurrentActiveTab,
-  getCurrentWindow,
-  getHighlightedTabs,
-  getQueriedTabs,
-  getQueriedTag,
-  moveTabs,
-  reduceCSVToJSON,
-  reduceTabs,
-  sendPlayPause,
-  sendRestart,
-  sendToggleLoop,
-  setTabActive,
-  setWindowTitle,
-  syncStorage,
-  tabQueries,
-  updateClipboard,
-  updateCurrentWindow,
-  doUnloadTabs,
-  _fetch,
-  _send,
-  notify,
-  print,
-} from "./apis.js";
-
-import {
-  sendBookmarks,
-  addBookmark,
-  renderBranch,
-  _renderBranch,
-  extractBookmarks,
-  getAllBookmarks,
-} from "./apis/bookmarks.js";
 
 import { panelTypes } from "../config/panels.js";
 
-import * as proxy from "./apis/proxy.js";
 import * as bookmarks from "./apis/bookmarks.js";
 import * as files from "./apis/files.js";
+import * as proxy from "./apis/proxy.js";
 import * as reduce from "./apis/reduce.js";
 import * as storage from "./apis/storage.js";
 import * as tabs from "./apis/tabs.js";
@@ -97,9 +55,7 @@ try {
       // // TODO global.config: suggest defaults: [windows.title, tabs.title, ...]
       // },
       action: (params) => {
-        console.log("MOVE")
         let _tabs = getQueriedTabs([...params, ..._tag]);
-        console.log("MOVE")
         Promise.resolve(args)
           .then((_args) => args.length > 1 ? args.slice(1) : ['popout'])
           .then(getWindowByPrefix)
@@ -107,8 +63,6 @@ try {
           .then(tabs.move(tabs))
           .then(proxy.notify.success_move)
           .catch(proxy.print.failure_move)
-        let _tag = args.length > 1 ? args.slice(1) : ['popout'];
-        let _tabs = tabs.getQueried([...args, ..._tag]);
       }
     },
     watch: {
@@ -154,7 +108,7 @@ try {
               if (!tab.tag || tab.tag === "unsorted") {
                 tab.tag = _tag;
               }
-              browser.bookmarks.create({
+              bookmarks.create({
                 title: tab.title,
                 url: tab.url,
                 parentId: "stash"
@@ -996,9 +950,7 @@ try {
           console.log("HIT ", "storage", args);
           // elos storage selected tile column,
           return Promise.resolve(args)
-            .then((_args) => {
-
-            })
+            .then((_args) => {})
             .catch(proxy.notify.failure_bookmarks_import)
         }
       },
@@ -1008,7 +960,7 @@ try {
         action: (args) => {
           // save off bookmarks as a flat json array
           return bookmarks.getAll()
-            // .then(syncStorage)
+            // .then(storage.sync)
             .then((bookmarks) => {})
             .catch(proxy.notify.failure_bookmarks_export)
         }
@@ -1035,7 +987,7 @@ try {
         description: "export",
         action: (params) => {
           // save off bookmarks as a flat json array
-          return getAllBookmarks()
+          return bookmarks.getAll()
             // .then(syncStorage)
             .then((bookmarks) => {})
             .catch(notify.failure_bookmarks_export)
@@ -1109,8 +1061,7 @@ try {
   };
 }
 catch (err) {
-  console.log(err);
-  // return Promise.reject(err);
+  proxy.print.failure_omnibox(err);
 }
 
 export const cmds = _cmds;

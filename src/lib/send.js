@@ -44,68 +44,6 @@ export const sendRestart = (e) => {
     .catch(print.failure_send_restart);
 };
 
-const relayRegistry = {};
-export const setupRelay = (params) => {
-  // TODO lazy capture incoming ports from external sources:
-  // external sources: sidebar, page content.
-
-  // getPorts
-  // TODO add 'args' which let you include select keys too
-  const ports = () => {
-    return Promise.resolve(relayRegistry)
-      .then(Object.values)
-      .then((values) => values.map((relay) => relay.port))
-      .then(Array.from)
-      .catch(print.failure_get_ports)
-  }
-
-  const handleMessage = (args) => {
-    console.log("[RELAY][MESSAGE][RECEIVE]", args, params.debug ? params : '');
-    if (params.handler) {
-      params.handler(args);
-    }
-  }
-  const postMessage = (args) => {
-    let _postData = relayRegistry[params.name];
-    console.log("[RELAY][MESSAGE][SEND]", args, params.debug ? params : '');
-    if (args.action === "disconnect") {
-      postData.port.disconnect(); // should trigger a callback disconnecting the rest
-    }
-    return _postData.port.postMessage(args)
-  }
-  const initRelay = (name) => {
-    const port = browser.runtime.connect({ name: name });
-    port.onMessage.addListener((args) => {
-      return Promise.resolve(args)
-        .then(handleMessage)
-        .catch(print.failure_port_message)
-    });
-    return port;
-  };
-  // addPort
-  browser.runtime.onConnect.addListener((args) => {
-    console.log("[RELAY][CONNECT][NEW]", args);
-    let _port = initRelay(args);
-    args.name = args.name ? args.name : params.name // TODO add random gen etag type
-    relayRegistry[args.name] = {
-      ...params,
-      ...args,
-      port: _port
-    };
-  });
-  // removePort
-  browser.runtime.onDisconnect.addListener((params) => {
-    if (!params.name) {
-      console.log("[RELAY][DISCONNECT][FAILURE]", "No field 'name'", params)
-    }
-    let _connection = relayRegistry[params.name];
-    _connection.port.disconnect(); // can be used to validate a mutual disconnection
-    relayRegistry[params.name] = null;
-  })
-  console.log("[RELAY][INIT]", params);
-  return postMessage; // everything else is internally handled
-}
-
 // export const sendRuntimeMessage = async (params) => {
 //   return browser.runtime.sendMessage(params)
 //     .catch(print.failure);
@@ -132,6 +70,17 @@ export const sendMessageToTabs = async (tabs) => {
 export const addRuntimeMessageHook = async (params) => {
   return browser.runtime.onMessage.addListener(params.hook);
 };
+
+
+// attempt to fix the DataCloneError error,
+// where sendMessage of some kind includes
+// methods in an object, so they need to be pruned
+export const pruneMethods = (value) => {
+  return Promise.resolve(value)
+    .then(JSON.stringify)
+    .then(JSON.parse)
+    .catch(proxy.print.failure_stores_prune_methods);
+}
 
 export const sendRuntimeMessage = async (params) => {
   return Promise.resolve(params)
@@ -189,6 +138,7 @@ export const sendLink = async (tagName) => {
     .then(notify.success)
     .catch(print.failure_send_link)
   }
+
 
 export const sendSidebar = (params) => {
   // params is { tabId: 0, windowId: 0 } only

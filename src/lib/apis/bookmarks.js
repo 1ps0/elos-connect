@@ -3,7 +3,7 @@ import { print } from "./proxy.js";
 import * as windows from "./windows.js";
 
 
-export const createBookmarks = (tabs) => {
+export const create = (tabs) => {
     return Promise.all(
         tabs.map((tab) => {
             return Promise.resolve(tab)
@@ -18,7 +18,7 @@ export const createBookmarks = (tabs) => {
     );
 }
 
-export const updateBookmarks = (tabId, changeInfo, tab) => {
+export const update = (tabId, changeInfo, tab) => {
     if (changeInfo.status === "complete") {
         return Promise.resolve(tab)
             .then(_tab => ({url:tab.url, title: tab.title}))
@@ -46,9 +46,9 @@ export const removeBookmarksOnTabRemoval = (tabId) => {
 
 Promise.resolve("monitoring")
     .then(windows.getTabsByWindowValue)
-    .then(createBookmarks)
+    .then(create)
     .then(() => {
-        browser.tabs.onUpdated.addListener(updateBookmarks);
+        browser.tabs.onUpdated.addListener(update);
         browser.tabs.onCreated.addListener(createBookmarksOnTabCreation);
         browser.tabs.onRemoved.addListener(removeBookmarksOnTabRemoval);
     })
@@ -68,7 +68,7 @@ export const addBookmarkFromTab = (args) => {
 
 }
 
-export const addBookmark = (args) => {
+export const add = (args) => {
   return Promise.resolve(args)
     // .then((_args) => {
 

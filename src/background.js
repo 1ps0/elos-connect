@@ -2,14 +2,11 @@
 // import browser from "webextension-polyfill";
 import { writable, get } from 'svelte/store';
 import { setContext, getContext } from 'svelte';
+// import * as network from "./lib/apis/network.js";
+
+import * as proxy from "./lib/apis/proxy.js";
 import { cmds } from "./lib/omnibox.js";
 import { stores } from "./lib/stores.js";
-import {
-  _fetch,
-  setupRelay,
-  print,
-  notify,
-} from "./lib/apis.js";
 
 console.log("LOADING ELOS CONNECT - background.js");
 
@@ -23,70 +20,11 @@ $: {
       message: err.message
       // buttons: ['retry', 'close']
     })
-    .then(notify.received_global_errors)
-    .catch(print.failure_global_errors);
+    .then(proxy.notify.received_global_errors)
+    .catch(proxy.print.failure_global_errors);
   }
 };
 
-
-
-// ------ THEME
-
-//let currentTheme = null;
-const _setOmniboxTheme = (params) => {
-  // windows.WINDOW_ID_CURRENT
-  // return Promise.resolve(params)
-  //   .then(browser.theme.update)
-  //   .then((_params) => setContext("currentTheme", _params))
-  //   .catch(print.failure_set_omnibox_theme);
-};
-
-const setThemeContext = (value) => {
-  // return Promise.resolve(value || browser.theme.getCurrent())
-  //   .then((_current) => setContext("currentTheme", _current))
-  //   .then(print.success)
-  //   .catch(print.failure);
-}
-
-const _resetOmniboxTheme = () => {
-  return Promise.resolve("currentTheme")
-    .then(getContext)
-    .then(print.status_get_context_current_theme)
-    .then(_setOmniboxTheme)
-    .catch(print.failure_reset_omnibox_theme);
-}
-
-const resetOmniboxTheme = (params) => {
-  return [params, browser.theme.reset()];
-}
-
-const createOmniboxActivationTheme = (theme) => {
-  return {
-    ...theme,
-    colors: {
-      ...theme.colors,
-      toolbar_field: "black",
-      toolbar_field_text: "gray",
-      toolbar_field_highlight: "green",
-      toolbar_field_focus: "black",
-      toolbar_field_text_focus: "white",
-    }
-  };
-};
-
-const restoreCurrentTheme = () => {
-  return Promise.resolve(
-    _currentTheme ?
-    _currentTheme : browser.theme.getCurrent()
-  )
-  .then(createOmniboxActivationTheme)
-  .then((params) => {
-    _currentTheme = browser.theme.getCurrent();
-    return params;
-  })
-  .then(setOmniboxTheme)
-  .catch(print.failure_restore_current_theme);
-}
 
 
 // ------ MESSAGING
@@ -138,8 +76,8 @@ export const updateTab = (tabId, changeInfo, tab) => {
         changed: changeInfo
       }
     )
-    .then(print.success_update_tab)
-    .catch(print.failure_update_tab);
+    .then(proxy.print.success_update_tab)
+    .catch(proxy.print.failure_update_tab);
 }
 
 // ------ COMMAND SEARCH
@@ -189,7 +127,7 @@ export const renderSuggestions = (_cmds) => {
         return result;
       }, []);
     })
-    .catch(print.failure_render_suggestions);
+    .catch(proxy.print.failure_render_suggestions);
 }
 
 const findCommands = (_input) => {
@@ -219,9 +157,9 @@ const omniboxOnInputChanged = (text, addSuggestions) => {
     return Promise.resolve(lastInput)
       .then(findCommands)
       .then(renderSuggestions)
-      // .then(print.status_render_suggestions)
+      // .then(proxy.print.status_render_suggestions)
       .then(addSuggestions)
-      .catch(print.failure_omnibox_changed);
+      .catch(proxy.print.failure_omnibox_changed);
   }
   catch (err) {
     console.log(err);
@@ -239,13 +177,13 @@ export const registerHistory = (event) => {
   return stores.actionHistory.update((n) => {
     console.log("_____", n);
     return n;
-  }).catch(print.failure_register_history);
+  }).catch(proxy.print.failure_register_history);
     // ...(n.length ? n : (n ? [n] : [])), {
     // ...(n ? (n.length ? n : [n]) : []), {
     //   event: event,
     //   timestamp: new Date(),
     // }])
-    // .catch(print.failure_register_history)
+    // .catch(proxy.print.failure_register_history)
     // .finally((_) => event); // function param passthrough
 };
 
@@ -255,9 +193,9 @@ export const renderAction = (_input) => {
     // FIXME if _input is partial (like "syn", down arrow, enter)
     //       then check if results are OKAY,
     //       else process from input, not lastInput
-    // .then(print.status_render_action)
+    // .then(proxy.print.status_render_action)
     .then((_cmds) => _cmds[0].action(_cmds[1]))
-    .catch(print.failure_render_action);
+    .catch(proxy.print.failure_render_action);
 }
 
 const omniboxOnInputEntered = (input, disposition) => {
@@ -265,8 +203,8 @@ const omniboxOnInputEntered = (input, disposition) => {
   return Promise.resolve(lastInput)
     // .then(registerHistory)
     .then(renderAction)
-    // .then(print.success_on_input_entered)
-    .catch(print.failure_omnibox_entered);
+    // .then(proxy.print.success_on_input_entered)
+    .catch(proxy.print.failure_omnibox_entered);
 };
 
 const omniboxOnInputCancelled = () => {
@@ -303,13 +241,48 @@ const omniboxOnInputCancelled = () => {
 const commandAction = (name) => {
   return Promise.resolve(name)
     .then(renderAction)
-    .then(print.success_command_action)
-    .catch(print.failure_command_action)
+    .then(proxy.print.success_command_action)
+    .catch(proxy.print.failure_command_action)
+}
+
+// --------
+
+class CommandContextMenu {
+  constructor(command) {
+    this.command = command;
+  }
+
+  onClick(info, tab) {
+    this.command.action();
+  }
+
+  create() {
+    return {
+      id: this.command.content,
+      title: this.command.content,
+      contexts: ["browser_action"],
+      onclick: this.onClick,
+    };
+  }
+}
+
+class CommandsContextMenu {
+  constructor(commands) {
+    this.commands = commands;
+  }
+
+  create() {
+    return Object.values(this.commands).map(
+      (command) => new CommandContextMenu(command).create()
+    );
+  }
 }
 
 
+// ----
+
 try {
-  print.success_background_js_mounted();
+  proxy.print.success_background_js_mounted();
 
   // let params = {
   //   name: `sidebar-${browser.windows.getCurrent().id}`,
@@ -318,15 +291,18 @@ try {
   // };
   // params.postMessage = setupRelay(params);
 
+  // GENERAL MESSAGE HANDLER
   browser.runtime.onMessage.addListener(handleMessage);
 
+  // WATCH FOR PROPERTY CHANGES
   browser.tabs.onUpdated.addListener(updateTab, {
     properties: ["audible"], // , "hidden", "mutedInfo", "url"
     // tabId: tabId
   });
 
+  // OMNIBOX START
   browser.omnibox.setDefaultSuggestion({
-    description: "this is a limited eLOS preview; v0.0.9-prealpha"
+    description: "this is a limited eLOS preview; v0.0.11-prealpha"
   });
 
   browser.omnibox.onInputStarted.addListener(omniboxOnInputStarted);
@@ -337,6 +313,21 @@ try {
   browser.runtime.onInstalled.addListener(setThemeContext);
   browser.commands.onCommand.addListener(commandAction)
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
+
+  // OMNIBOX END
+
+
+  // CONTEXT MENUS
+  browser.contextMenus.create({
+    id: "root",
+    title: "WebExtension Commands",
+    contexts: ["browser_action"],
+  });
+
+  const contextMenus = new CommandsContextMenu(cmds);
+  contextMenus.create().forEach((menu) => {
+    browser.contextMenus.create(menu);
+  });
 
 } catch (e) {
   console.log("Caught background.js init error", e);

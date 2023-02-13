@@ -38,7 +38,6 @@
 
 ---
 
-<<<<<<< HEAD
 idea: key combo to switch between sections of the application
 
 - ex: cmd+L focus on url bar

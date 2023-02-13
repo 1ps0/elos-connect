@@ -23,3 +23,27 @@ const alarms = {
     "adaptive-learning-alarm": () => createAlarm("adaptive-learning-alarm", 7),
     "feedback-loop-alarm": () => createAlarm("feedback-loop-alarm", 1)
 };
+
+const cronJob = require('cron-job');
+
+let cronJobs = [];
+
+const registerCronEvent = (cronExpression, eventToFire) => {
+  const job = new cronJob(cronExpression, () => {
+    eventToFire();
+  });
+  cronJobs.push(job);
+  job.start();
+  return Promise.resolve(job);
+};
+
+const deleteCronEvent = (jobToDelete) => {
+  jobToDelete.stop();
+  cronJobs = cronJobs.filter(job => job !== jobToDelete);
+  return Promise.resolve();
+};
+
+const getCronEvents = () => {
+  return Promise.resolve(cronJobs);
+};
+

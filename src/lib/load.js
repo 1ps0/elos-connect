@@ -1,11 +1,13 @@
 
+import * as network from "./network.js";
+
 // ---------- Load composites
 
 export const loadTags = async () => {
   return Promise.resolve({ uri:'api/analysis/tag'})
-    .then(_fetch)
+    .then(network._fetch)
     .then((results) => results.names.map((tag) => tag[1]))
-    .catch(print.failure_load_tabs);
+    .catch(proxy.print.failure_load_tabs);
 };
 
 export const loadSites = async () => {
@@ -25,7 +27,7 @@ export const loadSites = async () => {
         sites: sites,
       }
     })
-    .catch(print.failure_load_sites);
+    .catch(proxy.print.failure_load_sites);
 }
 
 export const loadSessions = async () => {
@@ -35,13 +37,13 @@ export const loadSessions = async () => {
 
       }))
     })
-    .then(print.success)
-    .catch(print.failure_load_sessions);
+    .then(proxy.print.success)
+    .catch(proxy.print.failure_load_sessions);
 }
 
 export const loadVisits = async (params) => {
   return browser.history.getVisits(params)
-    .catch(print.failure_load_visits);
+    .catch(proxy.print.failure_load_visits);
 }
 
 export const loadHistory = async (params) => {
@@ -61,7 +63,7 @@ export const loadHistory = async (params) => {
         typedCount: item.typedCount // navigated to this page by typing in the address.
       }));
     })
-    .catch(print.failure_load_history);
+    .catch(proxy.print.failure_load_history);
 }
 
 // web_accessible_resources
@@ -76,5 +78,5 @@ export const loadCommands = (params) => {
         shortcut: cmd.shortcut
       }))
     })
-    .catch(print.failure_load_commands);
+    .catch(proxy.print.failure_load_commands);
 }

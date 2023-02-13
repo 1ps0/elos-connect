@@ -8,8 +8,9 @@ import {
   updatePlaying,
   sendPlayPause,
   sendToggleLoop,
-  print
-} from "./lib/apis.js";
+} from "./lib/actions.js";
+import * as proxy from "./lib/apis/proxy.js";
+
 import ItemList from "./ItemList.svelte";
 
 let showType = ['audio', 'video'];
@@ -36,7 +37,7 @@ const handlePlayerUpdate = (request, sender, sendResponse) => {
       response: "Response from WebPlayers"
     }))
     .then(sendResponse)
-    .catch(print.failure);
+    .catch(proxy.print.failure);
 };
 
 /*
@@ -79,8 +80,9 @@ const buttonProps = [
 ];
 
 onMount(async () => {
-  print.success_WebPlayers_mounted()
+  proxy.print.success_WebPlayers_mounted()
   browser.runtime.onMessage.addListener(handlePlayerUpdate);
+  // TODO on tab playing state changed, update
   updatePlaying(tabStore);
 });
 

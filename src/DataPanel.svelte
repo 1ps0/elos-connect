@@ -10,7 +10,7 @@ import SelectCell from './cell/select-cell.svelte';
 import CheckboxCell from './cell/checkbox-cell.svelte';
 
 
-import { _fetch, _send } from "./lib/apis.js";
+import * as network from "./lib/apis/network.js";
 import { stores } from "./lib/stores.js"
 
 
@@ -29,7 +29,7 @@ $: {
 }
 
 const updateData = async () => {
-  let results = await _fetch({ uri: `/api/db/${dbName}`});
+  let results = await network._fetch({ uri: `/api/db/${dbName}`});
   console.log("[DataGrid] Fetch", results);
   columns = renderColumns(results['columns']);
   rows = renderRows(results);
@@ -94,7 +94,7 @@ function renderRows(data) {
 function pushValues() {
   const { columns } = grid.get();
 
-  _send("/api/db/metrics", params={
+  network._send("/api/db/metrics", params={
     body: {
       columns: grid.get(),
       rows: grid.data

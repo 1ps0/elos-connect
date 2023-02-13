@@ -9,7 +9,7 @@ import {
   applyDarkMode,
   extractReaderText,
 } from "./lib/actions.js";
-import { print, notify } from "./lib/apis/proxy.js";
+import * as proxy from "./lib/apis/proxy.js";
 
 
 // let savePDFButton = document.querySelector('#save-pdf');
@@ -51,7 +51,7 @@ let items = [
   },
 ]
 onMount(async () => {
-  print.success_ActionMenu_mounted();
+  proxy.print.success_ActionMenu_mounted();
 });
 </script>
 

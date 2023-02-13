@@ -5,7 +5,7 @@ import * as proxy from "./proxy.js";
 
 // ------- Register content script
 
-export const registerContentScript = (hosts) => {
+export const registerScript = (hosts) => {
   return Promise.resolve({
       matches: ["<all_urls>"],
       js: [{file: "build/content_inject.js"}],
@@ -99,7 +99,32 @@ const startElementTracking = () => {
 }
 const stopElementTracking = () => {};
 
-const 
+// ---- Extractive
+
+const captureScrollPosition = (options = {}) =>
+  Promise.resolve(options)
+    .then(() => {
+      const { document } = options;
+      if (!document) {
+        document = window.document;
+      }
+
+      const currentScrollPosition = document.documentElement.scrollTop || document.body.scrollTop;
+      const totalScrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+
+      return {
+        currentScrollPosition,
+        totalScrollHeight
+      };
+    })
+    .catch((error) => {
+      console.error("Error capturing scroll position:", error);
+      throw error;
+    });
+
+module.exports = {
+  captureScrollPosition
+};
 
 // ----- Media Control
 

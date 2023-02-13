@@ -23,16 +23,6 @@ import * as send from "./send.js";
 
 import { workspaceConfig } from "../workspace.js";
 
-import {
-  sendBookmarks,
-  addBookmark,
-  renderBranch,
-  _renderBranch,
-  extractBookmarks,
-  getAllBookmarks,
-} from "./apis/bookmarks.js";
-
-
 
 export const localStorageFor = (name, otherwise={}) => {
   return Promise.resolve(`${name}`)

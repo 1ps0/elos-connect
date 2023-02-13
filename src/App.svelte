@@ -21,7 +21,7 @@ import { components } from "./components.js";
 import { panelTypes, layoutConfig } from "./config/panels.js";
 console.log("PANEL TYPES", panelTypes);
 
-import { print } from "./lib/apis.js";
+import * as proxy from "./lib/apis/proxy.js";
 import { stores } from "./lib/stores.js"
 
 import LayoutGrid from "./LayoutGrid.svelte";
@@ -128,7 +128,7 @@ function _togglePanel(itemName) {
 
 
 onMount(async () => {
-  print.success_App_mounted();
+  proxy.print.success_App_mounted();
 
   let defaults = browser.runtime.getManifest().panels.default;
   let panels = Promise.resolve([]);
@@ -150,12 +150,12 @@ onMount(async () => {
       return add(name)
     });
   });
-  let result = await panels.catch(print.failure_panels);
+  let result = await panels.catch(proxy.print.failure_panels);
   // console.log("FINISHED PANEL ADD", result);
   return result;
 });
-// .then(print.success_app)
-// .catch(print.failure);
+// .then(proxy.print.success_app)
+// .catch(proxy.print.failure);
 
 </script>
 

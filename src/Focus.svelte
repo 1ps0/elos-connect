@@ -16,15 +16,12 @@ current 'focus' workspace: (card form)
 import { onMount } from 'svelte';
 import { writable, get } from 'svelte/store';
 
-import {
-  updatePlaying,
-  getCurrentActive,
-  getAllTabs,
-  getAllWindows,
-  bringToFront,
-  notify,
-  print
-} from "./lib/apis.js";
+import * as actions from "./lib/actions.js";
+
+import * as proxy from "./lib/apis/proxy.js";
+import * as tabs from "./lib/apis/tabs.js";
+import * as windows from "./lib/apis/windows.js";
+
 import ItemList from "./ItemList.svelte";
 
 let focusStore = writable({});
@@ -32,7 +29,7 @@ let focusStore = writable({});
 const activeTab = {};
 
 const updateStoreFromPinned = (store) => {
-  return getAllTabs()
+  return tabs.getAll()
     .then((tabs) => {
       return tabs.map((tab) => ({
         title: tab.title,
@@ -44,11 +41,11 @@ const updateStoreFromPinned = (store) => {
       }));
     })
     .then((tabs) => store.update((n) => tabs))
-    .catch(print.failure_focus_update_store_from_pinned);
+    .catch(proxy.print.failure_focus_update_store_from_pinned);
 };
 
 const updateStoreFromTabs = (store) => {
-  return getAllTabs()
+  return tabs.getAll()
     .then((tabs) => {
       return tabs.map((tab) => ({
         title: tab.title,
@@ -60,7 +57,7 @@ const updateStoreFromTabs = (store) => {
       }));
     })
     .then((tabs) => store.update((n) => tabs))
-    .catch(print.failure_focus_update_store_from_tabs)
+    .catch(proxy.print.failure_focus_update_store_from_tabs)
 }
 
 let groupMode = "window";
@@ -68,11 +65,11 @@ $: {
   switch(groupMode) {
     case "tab":
       updateStoreFromTabs(focusStore)
-        .catch(print.failure_focus_groupmode_tab);
+        .catch(proxy.print.failure_focus_groupmode_tab);
       break;
     case "window":
       updateStoreFromTabs(focusStore)
-        .catch(print.failure_focus_groupmode_window);
+        .catch(proxy.print.failure_focus_groupmode_window);
       break;
     case "tag":
       break;
@@ -83,11 +80,11 @@ const buttonProps = [
     name: 'show',
     description: '',
     icon: () => 'Show',
-    action: bringToFront
+    action: actions.bringToFront
   },
 ];
 onMount(async () => {
-  print.success_Focus_mounted();
+  proxy.print.success_Focus_mounted();
   // groupMode = "window";
   /*
     autotag. a note in the toolbar that auto generates based on content being viewed.
@@ -135,9 +132,9 @@ const windowsStore = writable({});
 const playersStore = writable({});
 
 $:{
-  getAllWindows()
+  windows.getAll()
   .then((_windows) => windowsStore.update((_) => _windows))
-  .catch(print.failure_focus_update_window);
+  .catch(proxy.print.failure_focus_update_window);
 }
 
 </script>
@@ -147,7 +144,7 @@ $:{
   <ItemList
     readonly=true
     dataStore={windowsStore}
-    on:didClick={bringToFront}
+    on:didClick={actions.bringToFront}
   />
 </section>
 
@@ -157,7 +154,7 @@ $:{
     readonly=true
     dataStore={playersStore}
     titleKey="title"
-    on:didClick={bringToFront}
+    on:didClick={actions.bringToFront}
   />
 </section>
 
@@ -172,7 +169,7 @@ $:{
     readonly=true
     dataStore={focusStore}
     titleKey="title"
-    on:didClick={bringToFront}
+    on:didClick={actions.bringToFront}
   />
 </section>
 <section>
@@ -180,7 +177,7 @@ $:{
     <li>
       <title>Active Page (update demo)</title>
       <p>
-        {#await getCurrentActive()}
+        {#await tabs.getCurrentActive()}
           Loading current Active Tab
         {:then tabs}
           {#each tabs as tab}

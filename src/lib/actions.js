@@ -20,11 +20,18 @@ export const doUnloadTabs = (tabs) => {
     .then(Promise.all)
     .catch(proxy.print.failure_unload_tabs)
 }
+// export const doUnloadTabs = (tabs) => {
+//   return Promise.resolve(tabs)
+//     .then(browser.tabs.discard)
+//     .catch(print.failure_unload_tabs)
+// }
 
-export const doReloadSystem = (params) => {
-  return browser.runtime.reload()
+export const doReloadSystem = (args) => {
+  return Promise.resolve(args)
+    .then(browser.runtime.reload)
     .catch(proxy.print.failure_do_reload_system);
 }
+
 
 // ---
 
@@ -123,7 +130,7 @@ export const updateLog = (e) => {
 
 // --- extractions
 
-const extractReaderText = (e) => {
+export const extractReaderText = (e) => {
   // browser.runtime.onMessage.addListener(registerScript);
   return tabs.getCurrentActive()
     .then((_tabs) => {

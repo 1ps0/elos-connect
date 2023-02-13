@@ -3,7 +3,9 @@
 import { onMount } from 'svelte';
 
 import { stores } from "./lib/stores.js"
-import { updateLog } from "./lib/apis.js";
+import { updateLog } from "./lib/actions.js";
+
+import * as proxy from "./lib/apis/proxy.js";
 
 import ItemList from "./ItemList.svelte";
 
