@@ -2,8 +2,8 @@ import { get } from 'svelte/store';
 
 export const print = new Proxy(() => {}, {
   get(target, name) {
-    let _name = name.toUpperCase().split('_');
     return (args) => {
+      let _name = name.toUpperCase().split('_');
       console.log(`[${_name[0]}][${_name.slice(1).join('_')}]`, args);
       return args;
     }
@@ -39,3 +39,19 @@ export const register = new Proxy(() => {}, {
     }
   }
 });
+
+// TODO this might be a router for complex data transformers
+// export const include = new Proxy(() => {}, {
+//   get(target, name) {
+//     return (args) => {
+//       console.log(`[INCLUDE][${name}]`, args);
+//       if (name == 'tabs') {
+
+//       }
+//       return {
+//         ...args,
+
+//       };
+//     }
+//   }
+// });

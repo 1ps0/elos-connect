@@ -33,13 +33,13 @@ $: {
 const handleMessage = (message) => {
   console.log("[background] got message", message);
   // TODO setup message handling and routing here
-  if (message.action === "toggleReaderMode") {
+  if (message.action === "set.readerMode") {
     // Toggle Reader Mode
     browser.readerMode.toggleReaderMode();
 
     // Send a message to the content script to let it know that Reader Mode has been toggled
     browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      browser.tabs.sendMessage(tabs[0].id, { action: "readerModeToggled" });
+      browser.tabs.sendMessage(tabs[0].id, { action: "set.readerMode" });
     });
   } else if (message.action === "processMarkdown") {
     // Do something with the Markdown, such as sending it to a remote URL or saving it to a file

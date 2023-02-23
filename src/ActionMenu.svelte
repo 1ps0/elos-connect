@@ -3,9 +3,9 @@ import { onMount } from 'svelte';
 
 
 import { 
-  doSelectedCopy,
-  doDownloadVideo,
-  doReloadSystem,
+  relectedCopy,
+  rownloadVideo,
+  reloadSystem,
   applyDarkMode,
   extractReaderText,
 } from "./lib/actions.js";
@@ -31,7 +31,7 @@ let enabledCourseSites = [
 let items = [
   {
     title: 'Reload eLOS',
-    click: doReloadSystem
+    click: reloadSystem
   },
   {
     title: 'Set Dark mode 1',
@@ -43,11 +43,11 @@ let items = [
   },
   {
     title: 'Copy Selected Tabs',
-    click: doSelectedCopy
+    click: selectedCopy
   },
   {
     title: 'Download Video',
-    click: doDownloadVideo
+    click: downloadVideo
   },
 ]
 onMount(async () => {

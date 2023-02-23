@@ -5,42 +5,45 @@ import { getCurrentActive } from "./apis/tabs.js";
 
 // ------- Send to webpage content_inject.js
 
-export const sendToContent = (params) => {
-  return Promise.resolve(params)
+export const toContent = (args) => {
+  return Promise.resolve(args)
     .then(print.status_send_to_content)
     .then((data) => {
       browser.tabs.sendMessage(data.tabId, data);
-      return data;
+      return {
+        ...data,
+        success: true
+      };
     })
     .then(notify.success)
     .catch(print.failure_send_to_content);
 }
 
-export const sendSetDarkMode = (e) => {
+export const setDarkMode = (e) => {
   return Promise.resolve(e)
-    .then((data) => ({ tabId: data.id, message:'setDarkMode' }))
-    .then(sendToContent)
+    .then((data) => ({ tabId: data.id, message:'set.darkMode' }))
+    .then(toContent)
     .catch(print.failure_send_toggle_loop);
 }
 
-export const sendToggleLoop = (e) => {
+export const toggleLoop = (e) => {
   return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message:'toggleLoop' }))
-    .then(sendToContent)
+    .then((data) => ({ tabId: data.tabId, message:'media.toggleLoop' }))
+    .then(toContent)
     .catch(print.failure_send_toggle_loop);
 }
 
-export const sendPlayPause = (e) => {
+export const playPause = (e) => {
   return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message:'playPause' }))
-    .then(sendToContent)
+    .then((data) => ({ tabId: data.tabId, message:'media.playPause' }))
+    .then(toContent)
     .catch(print.failure_send_play_pause);
 };
 
-export const sendRestart = (e) => {
+export const restart = (e) => {
   return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message:'restart' }))
-    .then(sendToContent)
+    .then((data) => ({ tabId: data.tabId, message:'media.restart' }))
+    .then(toContent)
     .catch(print.failure_send_restart);
 };
 
@@ -56,7 +59,7 @@ export const sendTabMessage = (args) => {
     .catch(print.failure_send_tab_message);
 };
 
-export const sendMessageToTabs = async (tabs) => {
+export const sendMessageToTabs = (tabs) => {
   return Promise.all(tabs.map((tab) => {
     return browser.tabs.sendMessage(
       tab.id,
@@ -67,7 +70,7 @@ export const sendMessageToTabs = async (tabs) => {
   }))
 }
 
-export const addRuntimeMessageHook = async (params) => {
+export const addRuntimeMessageHook = (params) => {
   return browser.runtime.onMessage.addListener(params.hook);
 };
 
@@ -89,7 +92,7 @@ export const sendRuntimeMessage = async (params) => {
     .catch(print.failure_send_runtime_message);
 };
 
-export const sendToContentScript = async (params) => {
+export const toContentScript = async (params) => {
   return Promise.resolve(params)
     .then((_params) => ({
       direction: _params.direction,

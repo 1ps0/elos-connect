@@ -1,5 +1,5 @@
 
-import { print } from "./proxy.js";
+import * as proxy from "./proxy.js";
 import * as windows from "./windows.js";
 
 
@@ -13,7 +13,7 @@ export const create = (tabs) => {
                     url: tab.url,
                 }))
                 .then(browser.bookmarks.create)
-                .catch(print.failure_create_tab_bookmark)
+                .catch(proxy.print.failure_create_tab_bookmark)
         })
     );
 }
@@ -22,8 +22,8 @@ export const update = (tabId, changeInfo, tab) => {
     if (changeInfo.status === "complete") {
         return Promise.resolve(tab)
             .then(_tab => ({url:tab.url, title: tab.title}))
-            .then(_meta => browser.bookmarks.update("monitoring", _meta))
-            .catch(print.failure_update_monitoring_bookmark)
+            .then(_meta => browser.bookmarks.update("", _meta))
+            .catch(proxy.print.failure_update_monitoring_bookmark)
 
     }
 }
@@ -37,7 +37,7 @@ export const createMonitoringBookmarks = (tab) => {
             windowId: tab.windowId,
         }))
         .then(browser.bookmarks.create)
-        .catch(print.failure_create_monitoring_bookmarks)
+        .catch(proxy.print.failure_create_monitoring_bookmarks)
 }
 
 export const removeBookmarksOnTabRemoval = (tabId) => {
@@ -52,15 +52,13 @@ Promise.resolve("monitoring")
         browser.tabs.onCreated.addListener(createBookmarksOnTabCreation);
         browser.tabs.onRemoved.addListener(removeBookmarksOnTabRemoval);
     })
-    .catch((error) => {
-        console.error(`Error: ${error}`);
-    });
+    .catch(proxy.print.failure_remove_bookmarks_on_tab_removal);
 
 // --------
 
 export const sendBookmarks = () => {
   return Promise.resolve(args)
-    .catch(print.failure_send_bookmarks)
+    .catch(proxy.print.failure_send_bookmarks)
 };
 
 
@@ -79,7 +77,7 @@ export const add = (args) => {
 
     }))
     .then(browser.bookmarks.create)
-    .catch(print.failure_send_bookmarks)
+    .catch(proxy.print.failure_send_bookmarks)
 };
 
 export const renderBranch = (nodes) => {
@@ -146,14 +144,14 @@ const recurseNodes = (node, path) => {
 export const extract = (args) => {
   return browser.bookmarks.getTree()
     .then(node => recurseNodes(node[0], '.'))
-    .catch(print.failure_extract_bookmarks)
+    .catch(proxy.print.failure_extract_bookmarks)
 }
 
 export const getAll = (args) => {
   return Promise.resolve(args)
     .then(extract)
-    .then(print.status_bookmarks_get_tree)
-    .catch(print.failure_get_tree);
+    .then(proxy.print.status_bookmarks_get_tree)
+    .catch(proxy.print.failure_get_tree);
 }
 
 export const search = (args) => {}
@@ -171,7 +169,7 @@ export const importFromStash = (args) => {
         */
       });
     })
-    .catch(print.failure_import_from_stash);
+    .catch(proxy.print.failure_import_from_stash);
 };
 
 // ---
@@ -187,7 +185,7 @@ export const createBookmarkForTag = _tag => {
             tags: ["example-tag"]
         });
     })
-    .catch(print.failure_import_from_stash);
+    .catch(proxy.print.failure_import_from_stash);
 
 }
 
@@ -201,5 +199,5 @@ export const createBookmarkForResearchNote = _type => {
       research_notes: "# Research Notes\n1. **Source**: [Example Article](https://example.com)\n2. **Key Takeaways**:\n- Point 1\n- Point 2\n3. **Comments**:\n- Example comment 1\n- Example comment 2"
   })
   .then(browser.bookmarks.create)
-  .catch(print.failure_import_from_stash);
+  .catch(proxy.print.failure_import_from_stash);
 }

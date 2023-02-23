@@ -8,7 +8,7 @@ import * as proxy from "./proxy.js";
 export const registerScript = (hosts) => {
   return Promise.resolve({
       matches: ["<all_urls>"],
-      js: [{file: "build/content_inject.js"}],
+      js: [{file: "build/content_actions.js"}],
       runAt: "document_idle"
     })
     .then(browser.contentScripts.register)
@@ -215,7 +215,7 @@ const renderPlayingStatus = (playing) => {
 /**
  * Get all the text nodes into a single array
  */
-function getNodes() {
+function getTextNodes() {
   let walker = document.createTreeWalker(document, window.NodeFilter.SHOW_TEXT, null, false);
   let nodes = [];
   while(node = walker.nextNode()) {
@@ -231,7 +231,7 @@ function getNodes() {
  * If a match spanned more than one node, concatenate the textContent
  * of each node.
  */
-function getContent(ranges) {
+function getTextForRanges(ranges) {
 
   let contexts = [];
   let nodes = getNodes();

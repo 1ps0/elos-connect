@@ -11,7 +11,7 @@ import * as tabs from "./apis/tabs.js";
 
 // -- system
 
-export const doUnloadTabs = (tabs) => {
+export const unloadTabs = (tabs) => {
   return Promise.resolve(tabs)
     .then((tabs) => tabs.map((tab) => browser.tabs.update(tab.id, {
       active: false,
@@ -26,7 +26,7 @@ export const doUnloadTabs = (tabs) => {
 //     .catch(print.failure_unload_tabs)
 // }
 
-export const doReloadSystem = (args) => {
+export const reloadSystem = (args) => {
   return Promise.resolve(args)
     .then(browser.runtime.reload)
     .catch(proxy.print.failure_do_reload_system);
@@ -51,7 +51,7 @@ export const updatePlaying = (store) => {
   }).catch(proxy.print.failure_update_playing);
 };
 
-export const doSelectedCopy = async (e) => {
+export const selectedCopy = async (e) => {
   return tabs.getHighlightedTabs()
     .then((tabs) => {
       console.log('doing selected copy:', browser.windows.WINDOW_ID_CURRENT, tabs);
@@ -62,7 +62,7 @@ export const doSelectedCopy = async (e) => {
     .catch(proxy.print.failure_selected_copy);
 }
 
-export const doDownloadVideo = (params) => {
+export const downloadVideo = (params) => {
   return tabs.getCurrentActive()
     .then((tab) => ({
       uri: "api/action/download/video",
@@ -97,7 +97,7 @@ export const updateClipboard = (newClip) => {
 
 export const applyDarkMode = (e) => {
   return getCurrentActive()
-    .then(sendSetDarkMode)
+    .then(send.setDarkMode)
     .then(proxy.print.success_apply_dark_mode)
     .catch(proxy.print.failure_apply_dark_mode)
 }
@@ -186,7 +186,7 @@ export const startPlaylist = (name) => {
 
 
 
-export const doRestoreSession = async (_sessions) => {
+export const restoreSession = async (_sessions) => {
   return Promise.resolve(_sessions)
     .then((sessions) => {
       if (!sessions || !sessions.length) {
