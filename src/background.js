@@ -2,9 +2,10 @@
 // import browser from "webextension-polyfill";
 import { writable, get } from 'svelte/store';
 import { setContext, getContext } from 'svelte';
-// import * as network from "./lib/apis/network.js";
+import * as network from "./lib/network.js";
 
 import * as proxy from "./lib/apis/proxy.js";
+import * as theme from "./lib/apis/theme.js";
 import { cmds } from "./lib/omnibox.js";
 import { stores } from "./lib/stores.js";
 
@@ -31,51 +32,43 @@ $: {
 
 // const handleMessage = (request, sender, sendResponse) => {
 const handleMessage = (message) => {
-  console.log("[background] got message", message);
+  proxy.print.status_background_got_message(message);
   // TODO setup message handling and routing here
   if (message.action === "set.readerMode") {
     // Toggle Reader Mode
-    browser.readerMode.toggleReaderMode();
-
-    // Send a message to the content script to let it know that Reader Mode has been toggled
-    browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      browser.tabs.sendMessage(tabs[0].id, { action: "set.readerMode" });
-    });
+    return Promise.resolve(message)
+      .then(browser.readerMode.toggleReaderMode)
+      .then(_ => ({ active: true, currentWindow: true }))
+      .then(browser.tabs.query)
+      .then(_tabs => _tabs[0].id)
+      .then(tabId => browser.tabs.sendMessage(tabId, { action: "set.readerMode" }))
+      .catch(proxy.print.failure_set_readermode)
   } else if (message.action === "processMarkdown") {
-    // Do something with the Markdown, such as sending it to a remote URL or saving it to a file
-    const markdown = message.markdown;
-
-    // Make a POST request to the remote URL with the ZIP file as the request body
-    fetch('http://example.com/api/submit', {
-      method: 'POST',
-      body: zipBuffer
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-
+    return Promise.resolve(message)
+      .then(msg => msg.markdown)
+      .then(mkdown => ({
+        body: mkdown
+      }))
+      .then(network._send)
+      .catch(proxy.print.failure_process_markdown)
   }
 };
 
 export const updateTab = (tabId, changeInfo, tab) => {
-  console.log("GOT TAB UPDATE", tabId, changeInfo, tab);
-    return browser.runtime.sendMessage(
-      {
-        name: tab.id,
-        tabId: tab.id,
-        windowId: tab.windowId,
-        muted: tab.mutedInfo.muted,
-        title: tab.title,
-        url: tab.url,
-        playing: tab.audible,
-        article: tab.isArticle,
-        changed: changeInfo
-      }
-    )
+  return Promise.resolve(tab)
+    .then(proxy.print.status_background_updating_tab)
+    .then(_tab => ({
+      name: tab.id,
+      tabId: tab.id,
+      windowId: tab.windowId,
+      muted: tab.mutedInfo.muted,
+      title: tab.title,
+      url: tab.url,
+      playing: tab.audible,
+      article: tab.isArticle,
+      changed: changeInfo
+    })
+    .then(browser.runtime.sendMessage)
     .then(proxy.print.success_update_tab)
     .catch(proxy.print.failure_update_tab);
 }
@@ -130,6 +123,11 @@ export const renderSuggestions = (_cmds) => {
     .catch(proxy.print.failure_render_suggestions);
 }
 
+const materialzeCommandPaths = (_cmds) => {
+  return Promise.resolve(_cmds)
+    .then(_cmds => Object.entities(_cmds))
+}
+
 const findCommands = (_input) => {
   let parts = _input.toLowerCase().split(" ");
   let cursor = cmds;
@@ -157,7 +155,6 @@ const omniboxOnInputChanged = (text, addSuggestions) => {
     return Promise.resolve(lastInput)
       .then(findCommands)
       .then(renderSuggestions)
-      // .then(proxy.print.status_render_suggestions)
       .then(addSuggestions)
       .catch(proxy.print.failure_omnibox_changed);
   }
@@ -173,18 +170,19 @@ const omniboxOnInputStarted = (params) => {
 };
 
 export const registerHistory = (event) => {
-  console.log("register history:", stores.actionHistory, event, get(stores.actionHistory));
-  return stores.actionHistory.update((n) => {
-    console.log("_____", n);
-    return n;
-  }).catch(proxy.print.failure_register_history);
-    // ...(n.length ? n : (n ? [n] : [])), {
-    // ...(n ? (n.length ? n : [n]) : []), {
-    //   event: event,
-    //   timestamp: new Date(),
-    // }])
-    // .catch(proxy.print.failure_register_history)
-    // .finally((_) => event); // function param passthrough
+  return Promise.resolve(event)
+    .then(proxy.print.status_register_history)
+    .then(_event => {
+        return (n) => [
+          ...n,
+          {
+            event: _event,
+            timestamp: new Date(),
+          }
+        ]
+    })
+    .then(stores.actionHistory.update)
+    .catch(proxy.print.failure_register_history);
 };
 
 export const renderAction = (_input) => {
@@ -193,22 +191,23 @@ export const renderAction = (_input) => {
     // FIXME if _input is partial (like "syn", down arrow, enter)
     //       then check if results are OKAY,
     //       else process from input, not lastInput
-    // .then(proxy.print.status_render_action)
+    .then(proxy.print.status_render_action)
     .then((_cmds) => _cmds[0].action(_cmds[1]))
     .catch(proxy.print.failure_render_action);
 }
 
 const omniboxOnInputEntered = (input, disposition) => {
-  console.log("INPUT SUBMITTED", lastInput, '--', input, '--', cmds[input]);
+  // console.log("INPUT SUBMITTED", lastInput, '--', input, '--', cmds[input]);
   return Promise.resolve(lastInput)
-    // .then(registerHistory)
+    .then(proxy.print.status_on_input_entered)
+    .then(registerHistory)
     .then(renderAction)
-    // .then(proxy.print.success_on_input_entered)
+    .then(proxy.print.success_on_input_entered)
     .catch(proxy.print.failure_omnibox_entered);
 };
 
 const omniboxOnInputCancelled = () => {
-  resetOmniboxTheme();
+  theme.resetOmnibox();
 }
 
 
@@ -310,7 +309,7 @@ try {
   browser.omnibox.onInputEntered.addListener(omniboxOnInputEntered);
   browser.omnibox.onInputCancelled.addListener(omniboxOnInputCancelled);
 
-  browser.runtime.onInstalled.addListener(setThemeContext);
+  // browser.runtime.onInstalled.addListener(setThemeContext);
   browser.commands.onCommand.addListener(commandAction)
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
 

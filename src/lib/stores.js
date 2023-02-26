@@ -18,7 +18,6 @@ import * as proxy from "./apis/proxy.js";
 import * as tabs from "./apis/tabs.js";
 
 import * as network from "./network.js";
-import * as send from "./send.js";
 
 
 import { workspaceConfig } from "../workspace.js";
@@ -28,7 +27,6 @@ export const localStorageFor = (name, otherwise={}) => {
   return Promise.resolve(`${name}`)
     .then(browser.storage.local.get)
     .catch(print.failure_storage_for)
-    .then(_ => otherwise)
 };
 
 export const bookmarksFor = (name, otherwise={}) => {
@@ -42,11 +40,7 @@ const layoutItemsWritable = writable(bookmarksFor("layoutItems", { items: [], ad
 
 export const stores = {
   config: configWritable,
-  // todo: todoWritable,
-  // actionHistory: actionHistoryWritable,
-  // eventLog: eventLogWritable,
   layoutItems: layoutItemsWritable,
-  // files: filesWritable,
 };
 
 

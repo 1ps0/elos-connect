@@ -43,31 +43,7 @@
 
 - `SelectList` - for fetching/listing data and triggering actions when an entry is selected
 - `ItemList` - for listing, adding, removing simple data, and specifying events when clicked.
-- `DataGrid` - for listing, adding, removing complex tabular data with reactivity
-- `Pdf` - for viewing Pdf files in a panel
-- `Toolbar` - for generally extending configurability of a panel. contains and extrapolates options to be modified
-- `Slider` - (rough) for reactive updating use in `Toolbar` or other cases
-- `VideoPlayer` - for viewing video files
-- `ImageGallery` - for viewing image files
 - `Timer` - a simple countdown timer, with controls
-- `Clock`
-- `CommandBar`
-- `TagBar`
-- `Profile`
-
-### High Order Components
-
-- `Session`
-- `Files`
--
-
-### (Svelte) Directives
-
-- `clock`
-- `linker`
-- `fileList`
-- `commandLine`
-- `profileEdit`
 
 ### Stores
 

@@ -6,35 +6,36 @@ import * as proxy from "./proxy.js";
 
 // ------ THEME
 
-//let currentTheme = null;
-const _setOmniboxTheme = (params) => {
+let currentTheme = null;
+const _setOmnibox = (args) => {
   // windows.WINDOW_ID_CURRENT
-  // return Promise.resolve(params)
-  //   .then(browser.theme.update)
-  //   .then((_params) => setContext("currentTheme", _params))
-  //   .catch(proxy.print.failure_set_omnibox_theme);
+  return Promise.resolve(args)
+    .then(browser.theme.update)
+    .then((_args) => setContext("currentTheme", _args))
+    .catch(proxy.print.failure_set_omnibox_theme);
 };
 
 const setThemeContext = (value) => {
-  // return Promise.resolve(value || browser.theme.getCurrent())
-  //   .then((_current) => setContext("currentTheme", _current))
-  //   .then(proxy.print.success)
-  //   .catch(proxy.print.failure);
+  return Promise.resolve(value)
+    .then(_value => _value || browser.theme.getCurrent())
+    .then((_current) => setContext("currentTheme", _current))
+    .then(proxy.print.success_set_theme_context)
+    .catch(proxy.print.failure_set_theme_context);
 }
 
-const _resetOmniboxTheme = () => {
+const _resetOmnibox = () => {
   return Promise.resolve("currentTheme")
     .then(getContext)
     .then(proxy.print.status_get_context_current_theme)
-    .then(_setOmniboxTheme)
+    .then(_setOmnibox)
     .catch(proxy.print.failure_reset_omnibox_theme);
 }
 
-const resetOmniboxTheme = (params) => {
-  return [params, browser.theme.reset()];
+const resetOmnibox = (args) => {
+  return [args, browser.theme.reset()];
 }
 
-const createOmniboxActivationTheme = (theme) => {
+const createOmniboxActivation = (theme) => {
   return {
     ...theme,
     colors: {
@@ -48,16 +49,14 @@ const createOmniboxActivationTheme = (theme) => {
   };
 };
 
-const restoreCurrentTheme = () => {
-  return Promise.resolve(
-    _currentTheme ?
-    _currentTheme : browser.theme.getCurrent()
-  )
-  .then(createOmniboxActivationTheme)
-  .then((params) => {
-    _currentTheme = browser.theme.getCurrent();
-    return params;
-  })
-  .then(setOmniboxTheme)
-  .catch(proxy.print.failure_restore_current_theme);
+const restoreCurrent = () => {
+  return Promise.resolve(_currentTheme)
+    .then(_theme => _theme || browser.theme.getCurrent()
+    // .then(createOmniboxActivation)
+    .then((args) => {
+      _currentTheme = browser.theme.getCurrent();
+      return args;
+    })
+    .then(setOmniboxTheme)
+    .catch(proxy.print.failure_restore_current_theme);
 }

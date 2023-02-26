@@ -6,7 +6,7 @@ import { writable, readable, derived, get } from "svelte/store";
 import { stores } from "./lib/stores.js";
 import * as load from "./lib/apis/load.js";
 
-import * as network from "./lib/apis/network.js";
+import * as network from "./lib/network.js";
 
 import { cmds } from "./lib/omnibox.js";
 import { workspaceConfig } from "./workspace.js";

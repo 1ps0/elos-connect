@@ -191,31 +191,4 @@ export const panelTypes = {
       transform: ((x) => x)
     }
   },
-  "panel-gallery": {
-    target: "panel-gallery",
-    name: "gallery",
-    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*5,),
-    h: 5,
-    componentName: "imagegallery",
-    props: {
-      dataStore: "files",
-      dataSourcePath: "/api/file/search",
-    }
-  },
-  "panel-drop": {
-    target: "panel-drop",
-    name: "drop",
-    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*4,),
-    h: 8,
-    componentName: "drop",
-    props: {
-      dataStore: "files"
-    }
-  },
-  "panel-pkgindex": {
-    target: "panel-pkgindex",
-    name: "pkgindex",
-    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*8,),
-    componentName: "pkgindex",
-  },
 };

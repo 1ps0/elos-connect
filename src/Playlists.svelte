@@ -13,11 +13,9 @@ remote stores are grouped by playlist storekey
 import { onMount } from 'svelte';
 import { writable, get, derived } from 'svelte/store';
 
+import * as proxy from "./lib/apis.js";
+
 import ItemList from "./ItemList.svelte";
-import {
-  notify,
-  print,
-} from "./lib/apis.js";
 
 
 let storeKey = 'stash';
@@ -34,7 +32,7 @@ $: updatePlaylistStore(inputFilter);
 const updatePlaylistStore = (_inputFilter) => {
   return browser.storage.local.get('stash')
     .then((result) => result.stash || [])
-    // .then(print.status_playlist_stash)
+    // .then(proxy.print.status_playlist_stash)
     .then((result) => (result || []).flat(1))
     .then((result) => {
       return result.filter((item) => {
@@ -45,9 +43,9 @@ const updatePlaylistStore = (_inputFilter) => {
         }
       })
     })
-    // .then(print.status_playlist_items)
+    // .then(proxy.print.status_playlist_items)
     .then((items) => playlistStore.update((_items) => items))
-    .catch(print.failure_stash_playlist_get);
+    .catch(proxy.print.failure_stash_playlist_get);
 }
 
 
@@ -59,7 +57,7 @@ const openLink = (e) => {
       active: true,
     }))
     .then(browser.tabs.create)
-    .catch(print.failure_playlists_open_link)
+    .catch(proxy.print.failure_playlists_open_link)
 };
 
 const handleDelete = (params) => {};
@@ -79,7 +77,7 @@ const itemButtons = [];
     // buttons={itemButtons}
 
 onMount(async () => {
-  print.success_Playlists_mounted();
+  proxy.print.success_Playlists_mounted();
   updatePlaylistStore();
 });
 

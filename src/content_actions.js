@@ -19,7 +19,7 @@ const isElementVisible = (element) => {
 const handleMediaMessage = (obj) => {
   return Promise.resolve(obj)
     .then(obj => ({ 
-      ...obj
+      ...obj,
       message: obj.request.message, 
       tabId: obj.sender.tab.id, 
       tab: obj.sender.tab 

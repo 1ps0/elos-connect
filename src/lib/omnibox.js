@@ -60,7 +60,7 @@ try {
           .then((_args) => args.length > 1 ? args.slice(1) : ['popout'])
           .then(getWindowByPrefix)
           .then((_window) => tabs.getAll({window: _window.id}))
-          .then(tabs.move(tabs))
+          .then(_tabs => tabs.move(_tabs))
           .then(proxy.notify.success_move)
           .catch(proxy.print.failure_move)
       }
@@ -224,7 +224,7 @@ try {
     gather: {
       content: "gather",
       description: "move input|all tabs to current|new window",
-      action: async (args) => {
+      action: (args) => {
         // args in ('all', '<domain>', <tag>, ilike <title>, type: video, audio, article)
         let tabs = Promise.resolve(args)
           .then(tabs.filter)
@@ -649,7 +649,7 @@ try {
       // option: show suggestions with tabs containing criteria
       //  - suggestions have tab name and matched criteria/surrounding
       suggestions: (args) => {
-        return tabs.findInAll(args);
+        return find.findInAll(args);
       },
       action: (args) => {
       }

@@ -1,5 +1,5 @@
 
-import { print, notify, register } from "./proxy.js";
+import * as proxy from "./proxy.js";
 
 // --- tab ops
 // NOTE: all 'get' types dont have a catch failure by design
@@ -10,7 +10,7 @@ export const getAll = (args) => {
     .then((tabs) => {
       return tabs.filter((tab) => tab != tabs.TAB_ID_NONE);
     })
-    .catch(print.failure_get_all_tabs)
+    .catch(proxy.print.failure_get_all_tabs)
 }
 
 
@@ -22,7 +22,7 @@ export const getCurrentWindow = () => {
     .then((tabs) => {
       return tabs.filter((tab) => tab != tabs.TAB_ID_NONE);
     })
-    .catch(print.failure_get_current_window_tabs);
+    .catch(proxy.print.failure_get_current_window_tabs);
 }
 
 export const getCurrentActive = () => {
@@ -32,8 +32,8 @@ export const getCurrentActive = () => {
     })
     .then(browser.tabs.query)
     .then(_tab_array => _tab_array[0])
-    .then(print.success_current_active_tab)
-    .catch(print.failure_get_current_tab);
+    .then(proxy.print.success_current_active_tab)
+    .catch(proxy.print.failure_get_current_tab);
 };
 
 export const getHighlighted = (args) => {
@@ -44,12 +44,12 @@ export const getHighlighted = (args) => {
       windowId: browser.windows.WINDOW_ID_CURRENT
     }))
     .then(browser.tabs.query)
-    .catch(print.failure_get_highlighted_tabs);
+    .catch(proxy.print.failure_get_highlighted_tabs);
 }
 
 export const getPlaying = (args) => {
   return browser.tabs.query({ audible: true })
-    .catch(print.failure_get_playing_tabs);
+    .catch(proxy.print.failure_get_playing_tabs);
 }
 
 
@@ -59,7 +59,7 @@ export const move = (tabs, _window) => {
       index: -1, // arg reverse: 0 to reverse, -1 to stay same
       windowId: _window.id
     })
-    .catch(print.failure_move_tab)
+    .catch(proxy.print.failure_move_tab)
 }
 
 const addActiveTabId = (data) => {
@@ -68,17 +68,17 @@ const addActiveTabId = (data) => {
       ...data,
       tabId: tabs[0].id
     }))
-    .catch(print.failure_add_active_tab_id)
+    .catch(proxy.print.failure_add_active_tab_id)
 }
 
 export const tabIdQueries = (arg) => {
   return {
     single: tabQueries('this')
       .then((tab) => tab.id)
-      .catch(print.failure_tab_id_single),
+      .catch(proxy.print.failure_tab_id_single),
     plural: tabQueries('window')
       .then((tabs) => tabs.map((tab) => tab.id))
-      .catch(print.failure_tab_id_plural),
+      .catch(proxy.print.failure_tab_id_plural),
   }[arg]
 };
 
@@ -94,11 +94,11 @@ export const filterBy = (args) => {
 export const filter = (args) => {
   let filter = Promise.resolve(args)
     .then(filterTabsBy)
-    .catch(print.failure_filterTabsBy);
+    .catch(proxy.print.failure_filterTabsBy);
 
   return getAllTabs()
     .then(filter)
-    .catch(print.failure_filter_tabs)
+    .catch(proxy.print.failure_filter_tabs)
 }
 
 
@@ -109,14 +109,14 @@ export const setActive = (data) => {
     .then((_data) => {
       return browser.tabs.update(data.tabId, { active: true })
     })
-    .catch(print.failure_set_tab_active);
+    .catch(proxy.print.failure_set_tab_active);
 };
 
 export const setPinned = async (args) => {
   return tabs.getHighlightedTabs().then( (tabs) => {
     for (const tab of tabs) {
       browser.tabs.update(tab.id, { pinned: true })
-        .catch(print.failure_update_tab_pinned);
+        .catch(proxy.print.failure_update_tab_pinned);
     }
   });
 };
@@ -144,7 +144,7 @@ export const getQueried = (args) => {
   return Promise.resolve(args)
     .then((_args) => _args.length ? _args[0] : 'this')
     .then(queries) // keyword
-    // .then(print.status_tab_query)
+    // .then(proxy.print.status_tab_query)
     .then((tabQuery) => tabQuery())
     .then(reduceTabs)
     .then((tabs) => {
@@ -155,6 +155,9 @@ export const getQueried = (args) => {
         // language: browser.tabs.detectLanguage(tab.id)
       }));
     })
-    .catch(print.failure_stash_tabs);
+    .catch(proxy.print.failure_stash_tabs);
 
 }
+
+// ----
+

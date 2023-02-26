@@ -1,6 +1,7 @@
 
 
-import * as proxy from "./proxy.js";
+import * as proxy from "./apis/proxy.js";
+import * as contextMenu from './apis/context_menu.js';
 
 
 // ------- Register content script
@@ -32,7 +33,7 @@ export const _registerScript = (message) => {
 
 // ------ Content scripts
 
-const elementHexMap = {
+export const elementHexMap = {
   "body": ["#1a2028", "#242b34"],
   "div": ["#1a2028", "#242b34"],
   "header": ["#61ba86", "#1e2a34"],
@@ -65,7 +66,7 @@ const elementHexMap = {
   "pre": ["#363f4e", "#1a2028"],
 };
 
-function applyDarkMode(schema) {
+export const applyDarkMode = (schema) => {
   return Promise.resolve(schema)
     .then((colorSchema) => {
       const elements = document.querySelectorAll('*');
@@ -82,7 +83,7 @@ function applyDarkMode(schema) {
     .catch(proxy.print.failure_apply_dark_mode);
 }
 
-function extractReaderText() {
+export const extractReaderText = () => {
   return {
     title: document.querySelector('.reader-title h1').value,
     link: document.querySelector('.reader-domain a').href,
@@ -94,14 +95,14 @@ function extractReaderText() {
 
 // ----- Element Select
 
-const startElementTracking = () => {
+export const startElementTracking = () => {
   // Document.elementFromPoint()
 }
-const stopElementTracking = () => {};
+export const stopElementTracking = () => {};
 
 // ---- Extractive
 
-const captureScrollPosition = (options = {}) =>
+export const captureScrollPosition = (options = {}) =>
   Promise.resolve(options)
     .then(() => {
       const { document } = options;
@@ -122,13 +123,10 @@ const captureScrollPosition = (options = {}) =>
       throw error;
     });
 
-module.exports = {
-  captureScrollPosition
-};
 
 // ----- Media Control
 
-const getPlayable = () => {
+export const getPlayable = () => {
   return Promise.resolve(['video', 'audio'])
     .then((types) => {
       return types.reduce((_out, _type) => {
@@ -143,7 +141,7 @@ const getPlayable = () => {
     .catch(print.failure_get_playable);
 };
 
-const toggleLoop = () => {
+export const toggleLoop = () => {
   return getPlayable()
     .then((playing) => {
       playing.forEach((item) => {
@@ -154,7 +152,7 @@ const toggleLoop = () => {
     .catch(print.failure_toggle_loop);
 }
 
-const playPause = () => {
+export const playPause = () => {
   return getPlayable().then((playing) => {
       console.log("Playing and Pausing", playing);
       playing.forEach((item) => {
@@ -167,7 +165,7 @@ const playPause = () => {
 };
 
 
-const restart = () => {
+export const restart = () => {
   return getPlayable().then((playing) => {
       console.log("Restarting", playing);
       playing.forEach((item) => {
@@ -178,7 +176,7 @@ const restart = () => {
     .catch(print.failure_play_pause);
 };
 
-const getPlayingInfo = (playing) => {
+export const getPlayingInfo = (playing) => {
   return playing.map((obj) => {
     return {
       url: obj.src,
@@ -193,7 +191,7 @@ const getPlayingInfo = (playing) => {
   });
 }
 
-const renderPlayingStatus = (playing) => {
+export const renderPlayingStatus = (playing) => {
   if (playing.length > 0) {
     return {
       playable: playing.map((obj) => {
@@ -318,16 +316,12 @@ function detectPrimaryColorSelectors() {
 }
 
 
-// // content.js
-
-import { contextMenuConfig } from './context_menu.js';
-
 Promise.resolve()
 .then(() => {
     return window.getSelection().toString();
 })
 .then((selectedText) => {
-    contextMenuConfig.forEach(menu => {
+    contextMenu.config.forEach(menu => {
         browser.contextMenus.create(menu);
     });
 })

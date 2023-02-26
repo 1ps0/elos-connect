@@ -3,8 +3,8 @@ import { onMount } from 'svelte';
 
 
 import { 
-  relectedCopy,
-  rownloadVideo,
+  selectedCopy,
+  downloadVideo,
   reloadSystem,
   applyDarkMode,
   extractReaderText,

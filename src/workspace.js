@@ -7,7 +7,7 @@
 
 export const workspaceConfig = {
   loadedAt: new Date(),
-  version: '0.0.9-prealpha',
+  version: '0.0.12-prealpha',
   logs: {
     level: "debug",
     target: "local",

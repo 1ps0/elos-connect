@@ -92,27 +92,6 @@ function saveSelectedText(info, tab) {
     URL.revokeObjectURL(url);
 }
 
-function copySelectedTextAsJSON(info, tab) {
-    const selectedText = info.selectionText;
-    const currentUrl = window.location.href;
-    const referrer = document.referrer;
-    const date = new Date();
-
-    // Create a JSON object with the selected text, current URL, referrer, and date
-    const jsonData = {
-        "selectedText": selectedText,
-        "currentUrl": currentUrl,
-        "referrer": referrer,
-        "date": date
-    };
-
-    // Convert the JSON object to a string
-    const jsonString = JSON.stringify(jsonData);
-
-    // Copy the JSON string to clipboard
-    navigator.clipboard.writeText(jsonString);
-}
-
 function speakSelectedText(info, tab) {
     const selectedText = info.selectionText;
     const utterance = new SpeechSynthesisUtterance(selectedText);
@@ -120,7 +99,7 @@ function speakSelectedText(info, tab) {
 }
 
 
-export const contextMenuConfig = [
+export const config = [
     {
         id: "search_selected_text",
         title: "Search '%s'",
@@ -140,6 +119,7 @@ export const contextMenuConfig = [
         onClick: defineSelectedText
     }
 ];
+
 function copySelectedTextAsJSON(info, tab) {
     const selection = window.getSelection();
     const range = selection.getRangeAt(0);

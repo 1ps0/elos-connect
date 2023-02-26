@@ -4,7 +4,7 @@ import { stores } from "./stores.js";
 
 // -- primitive functions
 
-export const handleResponse = async (response) => {
+export const handleResponse = (response) => {
   if (response.ok) { // if HTTP-status is 200-299
     return response.json();
   } else {
@@ -13,7 +13,7 @@ export const handleResponse = async (response) => {
   }
 }
 
-export const _fetch = async (args) => {
+export const _fetch = (args) => {
   // let baseUrl = "http://localhost:3000";
   let baseUrl = get(stores.config).hosts.local.uri;
   return Promise.resolve(new URL(args.uri, baseUrl))
@@ -29,7 +29,7 @@ export const _fetch = async (args) => {
     .catch(print.failure_fetch);
 };
 
-export const _send = async (args) => {
+export const _send = (args) => {
   // let baseUrl = "http://localhost:3000";
   let baseUrl = get(stores.config).hosts.local.uri;
   return Promise.resolve(new URL(args.uri, baseUrl))

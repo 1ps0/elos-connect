@@ -2,8 +2,7 @@
 /*
 TODO - desktop
 - set background color/image/video/panel
-- smiley face when no panels open
-- hover over smiley face shows "close" button below it
+- watermark when no panels open
 - right-click capture needs to have an option to show browser right-click menu (probably via capture-event suppression)
 
 TODO - layout

@@ -21,6 +21,64 @@
 
 ---
 
+> Profile: WHOAMI
+
+1. identifying information
+2. personal/private profile
+3. public profile
+4. communications preferences
+5. key interests
+6. machine user (m2m systems)
+7. learning topics
+8. expertise topics
+9. authentications
+10. external integrations
+11. rules and templates
+12. loaded packages
+13. passive backlog (stash)
+14. package/playlist builder
+15. sync options
+
+
+stash
+  select:
+    current
+    window
+  as:
+    taglist
+
+capture
+  type:
+    video
+    audio
+  as:
+    pip
+    save
+
+
+Steps
+1. Input type: Url or File
+2. Add urls or files
+3. list some simple actions that are validated as possible
+
+actions:
+- apply template
+- detect content type: mime, extract images, guess textbook/other
+-
+
+templates/processing actions:
+- extract: {format: textbook, type: lecture 1}
+- website: [site for site in extract_children_links(url)]
+- video: transcript and audio extraction. timeline it.
+- summarize text:
+- format json into markdown
+- format yml to json or markdown
+- format xml to json or markdown
+- format html to json? (not ebnf compatible?) or markdown?
+- extract pdf data (tables, images, etc)
+
+---
+
 ## Items
 
 - move tab to window
