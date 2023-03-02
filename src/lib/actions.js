@@ -52,9 +52,9 @@ export const updatePlaying = (store) => {
 };
 
 export const selectedCopy = async (e) => {
-  return tabs.getHighlightedTabs()
+  return tabs.getHighlighted()
+    .then(proxy.print.status_selected_copy)
     .then((tabs) => {
-      console.log('doing selected copy:', browser.windows.WINDOW_ID_CURRENT, tabs);
       return tabs.map((tab) => `${tab.title},${tab.url}`).join('\n');
     })
     .then(updateClipboard)
@@ -79,7 +79,7 @@ export const bringToFront = (e) => {
   return Promise.resolve(e)
     .then((_e) => e.detail ? e.detail : e)
     .then(proxy.print.start_bring_to_front)
-    .then(tabs.setTabActive)
+    .then(tabs.setActive)
     .then(windows.setWindowActive)
     .then(proxy.print.success)
     .catch(proxy.print.failure_bring_to_front);
@@ -144,7 +144,7 @@ export const extractReaderText = (e) => {
       tabId: tabId,
       message:'extractReaderText'
     }))
-    .then(send.sendToContent)
+    .then(send.toContent)
     .then(proxy.print.status_content_response_reader_text)
     .then((pageData) => ({
       uri: "api/analysis/data",

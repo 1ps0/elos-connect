@@ -24,7 +24,7 @@ try {
     reload: {
       content: "reload",
       description: "reload plugin",
-      action: (args) => actions.doReloadSystem()
+      action: (args) => actions.reloadSystem()
         .then(proxy.notify.success_reload)
         .catch(proxy.notify.failure_reload)
     },
@@ -215,7 +215,7 @@ try {
         description: "set the title of the window/tab",
         action: (args) => {
           return Promise.resolve(args)
-            .then(windows.setWindowTitle)
+            .then(windows.setTitle)
             .then(proxy.notify.success_window_title)
             .catch(proxy.print.failure_set_window_title);
         }
@@ -273,7 +273,7 @@ try {
           .then((data) => {
             data.forEach((tab) => {
               browser.windows.create(data)
-                .catch(print.failure_split_tabs);
+                .catch(proxy.print.failure_split_tabs);
             })
           })
           .catch(proxy.notify.failure_split)
@@ -286,7 +286,7 @@ try {
         // TODO browser.tabs.unload this/selection/tabs/window
         return Promise.resolve(args)
           .then(tabs.getHighlighted)
-          .then(actions.doUnloadTabs)
+          .then(actions.unloadTabs)
           // use tabs.warmup() to undo this/prime a tab
           .catch(proxy.print.failure_unload)
       }

@@ -213,7 +213,7 @@ export const renderPlayingStatus = (playing) => {
 /**
  * Get all the text nodes into a single array
  */
-function getTextNodes() {
+export const getTextNodes = () => {
   let walker = document.createTreeWalker(document, window.NodeFilter.SHOW_TEXT, null, false);
   let nodes = [];
   while(node = walker.nextNode()) {
@@ -229,7 +229,7 @@ function getTextNodes() {
  * If a match spanned more than one node, concatenate the textContent
  * of each node.
  */
-function getTextForRanges(ranges) {
+export const getTextForRanges = (ranges) => {
 
   let contexts = [];
   let nodes = getNodes();
@@ -253,7 +253,7 @@ function getTextForRanges(ranges) {
 // First, install the zip-buffer library
 // npm install zip-buffer
 
-function zipImagesAndText() {
+export const zipImagesAndText = () => {
 
   const imageElements = document.querySelectorAll('img');
   const imageBuffers = [];
@@ -295,7 +295,7 @@ function zipImagesAndText() {
 // ------ Dark Mode attempt 1
 
 // Define a function to detect the primary color CSS selectors in the document
-function detectPrimaryColorSelectors() {
+export const detectPrimaryColorSelectors = () => {
   // Initialize an array to store the detected selectors
   const selectors = [];
 
@@ -316,18 +316,18 @@ function detectPrimaryColorSelectors() {
 }
 
 
-Promise.resolve()
-.then(() => {
-    return window.getSelection().toString();
-})
-.then((selectedText) => {
-    contextMenu.config.forEach(menu => {
-        browser.contextMenus.create(menu);
-    });
-})
-.then(() => {
-    console.log("Context menu items created successfully");
-})
-.catch((error) => {
-    console.error(`Error creating context menu items: ${error}`);
-});
+// Promise.resolve()
+// .then(() => {
+//     return window.getSelection().toString();
+// })
+// .then((selectedText) => {
+//     contextMenu.config.forEach(menu => {
+//         browser.contextMenus.create(menu);
+//     });
+// })
+// .then(() => {
+//     console.log("Context menu items created successfully");
+// })
+// .catch((error) => {
+//     console.error(`Error creating context menu items: ${error}`);
+// });

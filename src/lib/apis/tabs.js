@@ -62,7 +62,7 @@ export const move = (tabs, _window) => {
     .catch(proxy.print.failure_move_tab)
 }
 
-const addActiveTabId = (data) => {
+export const addActiveTabId = (data) => {
   return browser.tabs.query({ active: true })
     .then((tabs) => ({
       ...data,

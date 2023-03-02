@@ -40,7 +40,7 @@ const handleMessage = (request, sender, sendResponse) => {
     return handleMediaMessage(obj);
 
   } else if (request.message === "set.darkMode") {
-    return Promise.resolve(actions.elementHexMap) // chesterish
+    return Promise.resolve(content.elementHexMap) // chesterish
       .then(actions.applyDarkMode)
       .then((response) => ({
         response: response,

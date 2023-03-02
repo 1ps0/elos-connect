@@ -67,7 +67,7 @@ export const updateTab = (tabId, changeInfo, tab) => {
       playing: tab.audible,
       article: tab.isArticle,
       changed: changeInfo
-    })
+    }))
     .then(browser.runtime.sendMessage)
     .then(proxy.print.success_update_tab)
     .catch(proxy.print.failure_update_tab);
