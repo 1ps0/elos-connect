@@ -24,11 +24,6 @@
       max={item.max}
       {dynamic}
       cols={getComputedCols}>
-<!--
-      <Options
-        id="opt_{item.target}"
-        panelOpts={item.props}
-      /> -->
       <slot {item} index={i}/>
     </MoveResize>
   {/each}
@@ -40,7 +35,6 @@
   import { onMount, createEventDispatcher } from "svelte";
   import { debounce, getColumnFromBreakpoints } from "./lib/layout_grid/other.js";
 
-  import Options from "./Options.svelte";
   import MoveResize from "./LayoutGridMoveResize.svelte";
 
   const dispatch = createEventDispatcher();

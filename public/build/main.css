@@ -1,0 +1,684 @@
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/Timer.esbuild-svelte-fake-css */
+p.timer.svelte-ie0v0j {
+  text-align: center;
+  font-size: 18px;
+}
+section.timer-container.svelte-ie0v0j {
+  border: 1px solid black;
+  padding: 10px;
+  display: block;
+  float: left;
+}
+button.svelte-ie0v0j {
+  width: 100%;
+}
+div.control.svelte-ie0v0j {
+  border-top: 1px solid black;
+  padding: 5px;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/Options.esbuild-svelte-fake-css */
+#nav.svelte-15zcbkn a.svelte-15zcbkn {
+  position: absolute;
+  transition: 0.3s;
+  padding: 5px;
+  width: 20px;
+  text-decoration: none;
+  font-size: 14px;
+  color: white;
+  border-radius: 0 5px 5px 0;
+}
+#nav.svelte-15zcbkn a.svelte-15zcbkn:hover {
+  left: 0;
+}
+.tag.svelte-15zcbkn.svelte-15zcbkn {
+  top: 20px;
+  background-color: #4CAF50;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/AutoComplete.esbuild-svelte-fake-css */
+.svelte-autocomplete.svelte-z3l8tr.svelte-z3l8tr {
+  display: inline-block;
+  position: relative;
+  overflow: auto !important;
+}
+input.svelte-z3l8tr.svelte-z3l8tr {
+  height: 2.25rem;
+  min-width: 200px;
+  padding: .25rem .5rem;
+  font-size: 1rem;
+  color: #333;
+  border-radius: .25rem;
+  box-shadow: inset 0 1px 2px rgba(10, 10, 10, 0.1);
+}
+input.modified-search.svelte-z3l8tr.svelte-z3l8tr {
+  padding: .25rem 2rem .25rem var(--modifier-label-width);
+}
+input.svelte-z3l8tr.svelte-z3l8tr,
+.results-list.svelte-z3l8tr.svelte-z3l8tr {
+  border: 1px solid #dbdbdb;
+}
+.search-modifier.svelte-z3l8tr.svelte-z3l8tr {
+  display: block;
+  position: absolute;
+  left: .25rem;
+  top: .25rem;
+  height: calc(100% - .5rem);
+  display: flex;
+  align-items: center;
+  padding: .25rem;
+  border-radius: 3px;
+  background-color: var(--theme);
+  color: var(--highlightTextColor);
+  font-size: 14px;
+}
+.svelte-autocomplete-results-container.svelte-z3l8tr.svelte-z3l8tr {
+  display: none;
+}
+.svelte-autocomplete-results-container.showAutocompleteResults.svelte-z3l8tr.svelte-z3l8tr {
+  display: block;
+}
+.click-catcher.svelte-z3l8tr.svelte-z3l8tr {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.results-list.svelte-z3l8tr.svelte-z3l8tr {
+  width: calc(100% - 2px);
+  position: absolute;
+  left: 1px;
+  top: 35px;
+  list-style-type: none;
+  background-color: #fff;
+  color: #595959;
+  border-radius: 0 0 2px 2px;
+  padding-left: 0;
+  margin: 0;
+  z-index: 10;
+  text-align: left;
+}
+.results-list.border-none.svelte-z3l8tr.svelte-z3l8tr {
+  border: none;
+}
+.results-list.svelte-z3l8tr li.svelte-z3l8tr {
+  padding: .5rem;
+  user-select: none;
+}
+.results-list li span {
+  font-weight: bold;
+  color: #111;
+}
+.modifier.svelte-z3l8tr.svelte-z3l8tr {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #dbdbdb;
+}
+.search-label.svelte-z3l8tr.svelte-z3l8tr {
+  border: 1px solid var(--theme);
+  background-color: var(--theme);
+  border-radius: .25rem;
+  padding: .25rem;
+  margin-right: .25rem;
+  color: var(--highlightTextColor);
+  font-size: .5rem;
+  font-weight: 500;
+}
+.highlight.svelte-z3l8tr .search-label.svelte-z3l8tr {
+  border: 1px solid var(--highlightTextColor);
+}
+.highlight.svelte-z3l8tr.svelte-z3l8tr,
+.results-list.svelte-z3l8tr li.svelte-z3l8tr:hover,
+.results-list li:hover span,
+.results-list .highlight span {
+  background: var(--theme);
+  color: var(--highlightTextColor);
+  font-weight: normal;
+}
+.svelte-autocomplete svg {
+  width: 1.5rem;
+  position: absolute;
+  top: .25rem;
+  right: .35rem;
+  fill: var(--theme);
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/CommandBar.esbuild-svelte-fake-css */
+.title.svelte-1furqj2 {
+  color: #444;
+  width: 100%;
+  padding: 4.5px;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/Clock.esbuild-svelte-fake-css */
+.title.svelte-137h0nn {
+  background-color: #ccc;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  outline: none;
+}
+.datetime.svelte-137h0nn {
+  font-size: 20px;
+  padding: 10px;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/Profile.esbuild-svelte-fake-css */
+.title.svelte-j9o6c4 {
+  background-color: #ccc;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  outline: none;
+}
+.avatar.svelte-j9o6c4 {
+  vertical-align: middle;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/ItemList.esbuild-svelte-fake-css */
+.svelte-yvmoz.svelte-yvmoz {
+  box-sizing: border-box;
+}
+ul.svelte-yvmoz.svelte-yvmoz {
+  margin: 0;
+  padding: 0;
+}
+ul.svelte-yvmoz li.svelte-yvmoz {
+  cursor: pointer;
+  position: relative;
+  padding: 12px;
+  list-style-type: none;
+  background: #eee;
+  font-size: 16px;
+  transition: 0.2s;
+  width: 100%;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+ul.svelte-yvmoz li.svelte-yvmoz:nth-child(odd) {
+  background: #f9f9f9;
+}
+ul.svelte-yvmoz li.svelte-yvmoz:hover {
+  background: #ddd;
+}
+ul.svelte-yvmoz li.checked.svelte-yvmoz {
+  background: #888;
+  color: #fff;
+  text-decoration: line-through;
+}
+ul.svelte-yvmoz li.checked.svelte-yvmoz::before {
+  content: "";
+  position: relative;
+  border-color: #fff;
+  border-style: solid;
+  border-width: 0 2px 2px 0;
+  top: 10px;
+  left: 16px;
+  transform: rotate(45deg);
+  height: 15px;
+  width: 7px;
+}
+.close.svelte-yvmoz.svelte-yvmoz {
+  position: relative;
+  float: right;
+  right: 0;
+  top: 0;
+}
+.close.svelte-yvmoz.svelte-yvmoz:hover {
+  background-color: #f44336;
+  color: white;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/ActionMenu.esbuild-svelte-fake-css */
+a.svelte-14m6orm {
+  margin: 10px;
+  display: inline-block;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/LocationOps.esbuild-svelte-fake-css */
+li.svelte-152z19a.svelte-152z19a {
+  margin: 10px;
+  display: inline-block;
+}
+ul.svelte-152z19a.svelte-152z19a {
+  border: 1px black;
+  padding: 10px;
+  margin: 10px;
+  display: inline-block;
+}
+.panel.svelte-152z19a li.svelte-152z19a {
+  display: block;
+}
+.panel.svelte-152z19a.svelte-152z19a {
+  margin: 5px;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/ExpandList.esbuild-svelte-fake-css */
+.svelte-18eb8y2.svelte-18eb8y2 {
+  box-sizing: border-box;
+}
+div.svelte-18eb8y2.svelte-18eb8y2 {
+  margin: 2px;
+  padding: 2px;
+}
+div.svelte-18eb8y2 p.svelte-18eb8y2 {
+  cursor: pointer;
+  position: relative;
+  padding: 12px;
+  border: 1px solid black;
+  border-radius: 5px;
+  list-style-type: none;
+  background: #eee;
+  font-size: 16px;
+  transition: 0.2s;
+  width: 100%;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+div.svelte-18eb8y2 p.svelte-18eb8y2:nth-child(odd) {
+  background: #f9f9f9;
+}
+div.svelte-18eb8y2 p.svelte-18eb8y2:hover {
+  background: #ddd;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/SelectList.esbuild-svelte-fake-css */
+ul.svelte-84ijo1.svelte-84ijo1 {
+  list-style: none;
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+}
+.pill-nav.svelte-84ijo1 li.svelte-84ijo1 {
+  background-repeat: no-repeat;
+  background-position: 0px 5px;
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 14px;
+  text-decoration: none;
+  border-radius: 5px;
+  float: left;
+}
+.pill-nav.svelte-84ijo1 li.svelte-84ijo1:hover {
+  background-color: #ddd;
+  color: black;
+}
+.pill-nav.svelte-84ijo1 li.active.svelte-84ijo1 {
+  background-color: dodgerblue;
+  color: white;
+}
+section.svelte-84ijo1.svelte-84ijo1 {
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/RotateList.esbuild-svelte-fake-css */
+.svelte-q2f8jr.svelte-q2f8jr {
+  box-sizing: border-box;
+}
+div.svelte-q2f8jr.svelte-q2f8jr {
+  margin: 2px;
+  padding: 2px;
+}
+div.svelte-q2f8jr p.svelte-q2f8jr {
+  cursor: pointer;
+  position: relative;
+  padding: 12px;
+  border: 1px solid black;
+  border-radius: 5px;
+  list-style-type: none;
+  background: #eee;
+  font-size: 16px;
+  transition: 0.2s;
+  width: 100%;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+div.svelte-q2f8jr p.svelte-q2f8jr:nth-child(odd) {
+  background: #f9f9f9;
+}
+div.svelte-q2f8jr p.svelte-q2f8jr:hover {
+  background: #ddd;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/Files.esbuild-svelte-fake-css */
+.filename.svelte-hxkhy9 {
+  color: blue;
+  text-transform: uppercase;
+  font-size: 1em;
+  font-weight: 100;
+  max-width: 300px;
+  overflow-wrap: normal;
+}
+section.svelte-hxkhy9 {
+  overflow: scroll;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/DropSite.esbuild-svelte-fake-css */
+#drop_zone.svelte-ixc6v3 {
+  border: 5px solid blue;
+  width: 200px;
+  height: 100px;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/Pdf.esbuild-svelte-fake-css */
+iframe.svelte-87dvcj {
+  display: block;
+  background: #000;
+  border: none;
+  resize: height;
+  height: 70vh;
+  width: 95%;
+  overflow: auto;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/cell/textbox-cell.esbuild-svelte-fake-css */
+.textbox-cell.svelte-1bez19j {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 3;
+}
+input.svelte-1bez19j {
+  height: 100%;
+  width: 100%;
+  border: 0;
+  margin: 0;
+  padding: 0 5px;
+  box-sizing: border-box;
+}
+input.svelte-1bez19j:active,
+input.svelte-1bez19j:focus {
+  border: 1px solid lime;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/cell/select-cell.esbuild-svelte-fake-css */
+.select-cell.svelte-eq9bqq {
+  background: white;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+select.svelte-eq9bqq {
+  border: none;
+}
+select.svelte-eq9bqq {
+  width: 100%;
+  height: 100%;
+  padding: 0 5px;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/cell/checkbox-cell.esbuild-svelte-fake-css */
+.checkbox-cell.svelte-1kjf55o {
+  text-align: center;
+  background: white;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/DataGrid.esbuild-svelte-fake-css */
+.grid-wrap.svelte-10ftsu0 {
+  font-size: 14px;
+  width: 95%;
+  height: 50vh;
+  margin: 0 auto;
+  resize: inherit;
+  overflow: auto;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/EntryForm.esbuild-svelte-fake-css */
+input[type=number].svelte-17rnl1l {
+  width: 80%;
+  padding: 5px;
+}
+input[type=text].svelte-17rnl1l,
+select.svelte-17rnl1l,
+textarea.svelte-17rnl1l {
+  width: 80%;
+  padding: 5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 16px;
+  resize: vertical;
+}
+input[type=submit].svelte-17rnl1l {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+input[type=submit].svelte-17rnl1l:hover {
+  background-color: #45a049;
+}
+.container.svelte-17rnl1l {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+.slider.svelte-17rnl1l {
+  -webkit-appearance: none;
+  width: 80%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+.slider.svelte-17rnl1l:hover {
+  opacity: 1;
+}
+.slider.svelte-17rnl1l::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+.slider.svelte-17rnl1l::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/ImageGallery.esbuild-svelte-fake-css */
+.row.svelte-z741zk.svelte-z741zk {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 4px;
+}
+.column.svelte-z741zk.svelte-z741zk {
+  flex: 100%;
+  padding: 0 4px;
+}
+.column.svelte-z741zk img.svelte-z741zk {
+  margin-top: 8px;
+  vertical-align: middle;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/PkgEntry.esbuild-svelte-fake-css */
+.visibility-button.svelte-346eva.svelte-346eva {
+  border-radius: 2px;
+  border: 1px solid black;
+  padding: 0.5em;
+  margin: 0.5em;
+}
+.small.svelte-346eva.svelte-346eva {
+  border: 1px solid black;
+}
+.large.svelte-346eva.svelte-346eva {
+  border: 1px dotted blue;
+}
+.tag-box.svelte-346eva.svelte-346eva {
+  border-radius: 2px;
+  border: 1px solid black;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0.5em;
+  margin: 0.25em;
+  font-size: 0.7em;
+  color: blue;
+  background-color: #EEE;
+}
+.container.svelte-346eva.svelte-346eva {
+  width: 97%;
+  border-radius: 2px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1em;
+  margin: 0 0 1em 0;
+  flex-direction: column;
+}
+.container.svelte-346eva h2.svelte-346eva,
+span.svelte-346eva.svelte-346eva {
+  text-transform: uppercase;
+  font-size: 1em;
+  color: #ff3e00;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/PkgIndex.esbuild-svelte-fake-css */
+table.svelte-l8zbvb {
+  text-align: left;
+}
+tr.svelte-l8zbvb {
+  color: black;
+  font-size: 0.7em;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/Wizard.esbuild-svelte-fake-css */
+.svelte-om5pol {
+  box-sizing: border-box;
+}
+#regForm.svelte-om5pol {
+  background-color: #ffffff;
+  margin: 100px auto;
+  font-family: Raleway;
+  padding: 40px;
+  width: 70%;
+  min-width: 300px;
+}
+.tab.svelte-om5pol {
+  display: none;
+}
+button.svelte-om5pol {
+  background-color: #4CAF50;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 17px;
+  font-family: Raleway;
+  cursor: pointer;
+}
+button.svelte-om5pol:hover {
+  opacity: 0.8;
+}
+#prevBtn.svelte-om5pol {
+  background-color: #bbbbbb;
+}
+.step.svelte-om5pol {
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbbbbb;
+  border: none;
+  border-radius: 50%;
+  display: inline-block;
+  opacity: 0.5;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/LayoutGridMoveResize.esbuild-svelte-fake-css */
+.svlt-grid-item.svelte-dwiwbn {
+  overflow: scroll;
+  touch-action: none;
+  position: absolute;
+  background: #f1f1f1;
+  z-index: 1;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.svlt-grid-resizer.svelte-dwiwbn {
+  user-select: none;
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  cursor: se-resize;
+}
+.svlt-grid-resizer.svelte-dwiwbn::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 5px;
+  height: 5px;
+  border-right: 2px solid rgba(0, 0, 0, 0.4);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+}
+.no-user.svelte-dwiwbn {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  -o-backface-visibility: hidden;
+  -ms-backface-visibility: hidden;
+  -webkit-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  user-select: none;
+}
+.active.svelte-dwiwbn {
+  z-index: 3;
+  cursor: grabbing;
+}
+.svlt-grid-shadow.svelte-dwiwbn {
+  position: absolute;
+  background: red;
+  z-index: -1;
+  will-change: transform;
+  background: pink;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.transition.svelte-dwiwbn {
+  transition: all 0.2s;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/LayoutGrid.esbuild-svelte-fake-css */
+.svlt-grid-container.svelte-p0xk9p {
+  position: relative;
+}
+
+/* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/App.esbuild-svelte-fake-css */
+main.svelte-18z0dj1.svelte-18z0dj1 {
+  margin: 0 0 0 0;
+  font-size: 16px;
+  padding: 0px 2px;
+}
+section.svelte-18z0dj1 > div.svelte-18z0dj1 {
+  display: block;
+  overflow: auto;
+  min-height: 100%;
+  min-width: 100%;
+  transform: translate(-50%, -50%);
+}

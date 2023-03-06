@@ -1,0 +1,115 @@
+{
+    "manifest_version": 2,
+    "name": "eLOS Connect",
+    "version": "0.0.12",
+    "description": "eLOS Connect",
+    "applications": {
+        "gecko": {
+            "id": "1ps0@users.noreply.github.com"
+        }
+    },
+    "icons": {
+        "48": "img/icons/bookmark-it.png",
+        "96": "img/icons/bookmark-it@2x.png"
+    },
+    "permissions": [
+        "<all_urls>",
+        "tabs",
+        "activeTab",
+        "clipboardWrite",
+        "storage",
+        "notifications",
+        "theme",
+        "find",
+        "sessions",
+        "topSites",
+        "history",
+        "identity",
+        "bookmarks",
+        "menus"
+        //"downloads",
+        //"contextualIdentities",
+        //"cookies"
+        //"search",
+        //"devtools",
+
+    ],
+    "commands": {
+        "_execute_sidebar_action": {
+            "suggested_key": {
+                "default": "Alt+Shift+G",
+                "mac": "MacCtrl+E"
+            },
+            "description": "eLOS Connect - open sidebar"
+        },
+        "_execute_browser_action": {
+            "suggested_key": {
+                "default": "Alt+Shift+F",
+                "mac": "MacCtrl+F"
+            },
+            "description": "eLOS Connect - activate commandline"
+        },
+        "reload": {
+            "suggested_key": {
+                "default": "Alt+Shift+R",
+                "mac": "MacCtrl+R"
+            },
+            "description": "elos.cmds.reload"
+        }
+    },
+    "sidebar_action": {
+        "default_icon": "img/icons/star-empty-38.png",
+        "default_title": "eLOS Connect",
+        "default_panel": "index.html",
+        "open_at_install": false
+    },
+    "background": {
+        "scripts": [
+            "build/background.js"
+        ]
+    },
+    "user_scripts": {},
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "match_about_blank": true,
+        "all_frames": true,
+        "js": ["build/content_actions.js"]
+      },
+      {
+        "matches": ["https://news.ycombinator.com/*"],
+        "match_about_blank": false,
+        "all_frames": true,
+        "css": ["build/css/site/hackernews.css"]
+      },
+      {
+        "matches": ["https://fansly.com/*"],
+        "js": ["content_accessibility.js"],
+        "css" : ["style.css"],
+        "all_frames": true
+      }
+    ],
+    "options_ui": {
+        "page": "index.html"
+    },
+    "omnibox": {
+        "keyword" : "elos"
+    },
+    "panels": {
+        "default": [
+            "panel-mainmenu",
+            "panel-web-players",
+            "panel-playlists",
+            "panel-actionmenu",
+            "panel-config"
+
+        ]
+    },
+    "os_env": {
+        "archive": {
+            "path": "/media/admin/ARCHIVE/unsorted/",
+            "subset": []
+        },
+        "auto_dark": true
+    }
+}

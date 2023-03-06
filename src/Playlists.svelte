@@ -13,7 +13,7 @@ remote stores are grouped by playlist storekey
 import { onMount } from 'svelte';
 import { writable, get, derived } from 'svelte/store';
 
-import * as proxy from "./lib/apis.js";
+import * as proxy from "./lib/apis/proxy.js";
 
 import ItemList from "./ItemList.svelte";
 

@@ -1,15 +1,4 @@
 <script>
-/*
-TODO -
-1. action buttons
-2. badges
-3. dynamic customization (via in-page editor)
-4. sortable
-5. quick add
-6. mass select/actions
-7. filterable
-*/
-
 import { createEventDispatcher, onMount } from 'svelte';
 
 const dispatch = createEventDispatcher();

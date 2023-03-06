@@ -14,28 +14,34 @@ and send that event through config structure to the target component
 import { onMount, createEventDispatcher } from 'svelte';
 
 import { icons } from "./lib/icons.js";
-import { _fetch, print } from "./lib/apis.js";
+import * as network from "./lib/network.js";
+import * as proxy from "./lib/apis/proxy.js";
 import { stores } from "./lib/stores.js"
 
 const dispatch = createEventDispatcher();
 
 export let eventName = "menuToggle";
 export let source = null;
+
 export let transform = (e) => {
-  return e.name.slice(10).toUpperCase()
+  return Promise.resolve(e)
+    .then(_e => _e.name)
+    .then(_name => _name.slice(30))
+    .then(toUpperCase)
+    .catch(proxy.print_failure_transform)
 };
 
 export let data = {};
 export let items = [];
 
 const updateFromSource = async (source) => {
-  if (source !== null) {
-    let response = await _fetch({ uri: source});
-    // console.log('getting data from', source, response);
-    items = response.data;
-  }
+  Promise.resolve(source)
+  .then(_source => { uri: source})
+  .then(network._fetch)
+  .then(_response => items = _response.data)
+  .catch(proxy.print.failure_update_from_source)
 };
-$: source !== null ? updateFromSource(source) : null;
+// $: source !== null ? updateFromSource(source) : null;
 
 
 let visibleItems = [];
@@ -70,7 +76,7 @@ function _sendEvent(item) {
 }
 
 onMount(async () => {
-  print.success_SelectList_mounted();
+  proxy.print.success_SelectList_mounted();
 
   updateFromSource(source);
   dispatch("didMount", data);

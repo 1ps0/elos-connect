@@ -44,15 +44,15 @@ export const removeBookmarksOnTabRemoval = (tabId) => {
     browser.bookmarks.remove(tabId);
 }
 
-Promise.resolve("monitoring")
-    .then(windows.getTabsByWindowValue)
-    .then(create)
-    .then(() => {
-        browser.tabs.onUpdated.addListener(update);
-        browser.tabs.onCreated.addListener(createBookmarksOnTabCreation);
-        browser.tabs.onRemoved.addListener(removeBookmarksOnTabRemoval);
-    })
-    .catch(proxy.print.failure_remove_bookmarks_on_tab_removal);
+// Promise.resolve("monitoring")
+//     .then(windows.getTabsByWindowValue)
+//     .then(create)
+//     .then(() => {
+//         browser.tabs.onUpdated.addListener(update);
+//         browser.tabs.onCreated.addListener(createBookmarksOnTabCreation);
+//         browser.tabs.onRemoved.addListener(removeBookmarksOnTabRemoval);
+//     })
+//     .catch(proxy.print.failure_remove_bookmarks_on_tab_removal);
 
 // --------
 
@@ -155,6 +155,64 @@ export const getAll = (args) => {
 }
 
 export const search = (args) => {}
+
+export const bookmarkApi = (() => {
+  if (typeof browser !== "undefined" && browser.bookmarks) {
+    return browser.bookmarks;
+  } else if (typeof chrome !== "undefined" && chrome.bookmarks) {
+    return chrome.bookmarks;
+  } else {
+    throw new Error("Bookmark API not supported");
+  }
+})();
+
+export const apis = {
+  bookmarks: bookmarkApi
+}
+
+function setBookmarkAnnotation(id, annotation) {
+  return Promise.resolve([id, annotation])
+    .then(([id, annotation]) => apis.bookmarks.update(id, { meta: { annotation } }))
+    .catch(proxy.print.failure);
+}
+
+function getBookmarkAnnotations(id) {
+  const fallbackAnnotations = [];
+
+  return Promise.resolve(id)
+    .then((id) => apis.bookmarks.get(id))
+    .then((nodes) => nodes[0]?.meta?.annotations ?? fallbackAnnotations)
+    .catch(proxy.print.failure);
+}
+
+// // Example usage:
+// setBookmarkAnnotation("bookmark-id-1", "My annotation")
+//   .then(() => getBookmarkAnnotations("bookmark-id-1"))
+//   .then((annotations) => console.log(annotations))
+//   .catch(proxy.print.failure_bookmark_annotation_set);
+
+
+export const fetchById = (job) => {
+  return browser.bookmarks.get(job.id)
+    .then((bookmarks) => {
+      if (!Array.isArray(bookmarks) || bookmarks.length < 1) {
+        throw new Error(`Bookmark with ID ${job.id} not found`);
+      }
+      return bookmarks[0];
+    })
+    .catch(proxy.print.failure_fetch_bookmark_by_id);
+}
+
+export const fetchAnnotations = (bookmark) => {
+  return browser.bookmarks.getAnnotation(bookmark.id, META_ANNOTATION_KEY)
+    .then((value) => {
+      if (!value) {
+        throw new Error(`Meta annotation for bookmark ${bookmark.id} not found`);
+      }
+      return value;
+    })
+    .catch(proxy.print.failure_fetch_annotations);
+}
 
 export const importFromStash = (args) => {
   return browser.storage.local.get("stash")

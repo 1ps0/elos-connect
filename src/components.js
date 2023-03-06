@@ -1,7 +1,6 @@
 
 // import Tagset from "./Tagset.svelte";
 import Timer from "./Timer.svelte";
-import Profile from "./Profile.svelte";
 import Todo from "./Todo.svelte";
 import Config from "./Config.svelte";
 
@@ -21,7 +20,6 @@ export const components = {
     "dashboard": Dashboard,
     "focus": Focus,
     "timer": Timer,
-    "profile": Profile,
     "config": Config,
     "todo": Todo,
     "expandlist": ExpandList,

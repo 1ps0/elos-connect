@@ -59,7 +59,7 @@ export const panelTypes = {
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*11,),
     h: 2,
     componentName: "selectlist",
-    event: { name: 'layoutAction', callback: "alighPanel" },
+    event: { name: 'layoutAction', callback: "alignPanel" },
     props: {
       showIn: "sidebar",
       eventName: "layoutAction",
@@ -112,7 +112,7 @@ export const panelTypes = {
       callback: 'updateLocations'
     },
     props: {
-      eventName: "playPause",
+      eventName: "media.playPause",
       transform: ((e) => e)
     }
   },
@@ -122,9 +122,6 @@ export const panelTypes = {
     w: columnForConfig(layoutConfig),
     h: 4,
     componentName: "playlists",
-    // props: {
-    //   storeKey: 'stash',
-    // }
   },
   "panel-timer": {
     target: "panel-timer",
@@ -140,16 +137,6 @@ export const panelTypes = {
     h: 5,
     componentName: "todo",
   },
-  "panel-entryform": {
-    target: "panel-entryform",
-    name: "entryform",
-    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*6,),
-    h: 5,
-    componentName: "entryform",
-    props: {
-      dataStore: "profile"
-    }
-  },
   "panel-eventlog": {
     target: "panel-eventlog",
     name: "eventlog",
@@ -164,31 +151,6 @@ export const panelTypes = {
         title: (x) => `${x.name} @ ${x.at[1]} `,
         api: (x) => x,
       }
-    }
-  },
-  "panel-actionhistory": {
-    target: "panel-actionhistory",
-    name: "actionhistory",
-    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*8,),
-    h: 3,
-    componentName: "chart",
-    props: {
-      readonly: true,
-      dataStore: "actionHistory"
-    }
-  },
-  "panel-journal": {
-    target: "panel-journal",
-    name: "journal",
-    w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier*6,),
-    h: 4,
-    componentName: "expandlist",
-    props: {
-      readonly: true,
-      dataStore: "profile",
-      dataKey: "metrics",
-      titleKey: "title",
-      transform: ((x) => x)
     }
   },
 };

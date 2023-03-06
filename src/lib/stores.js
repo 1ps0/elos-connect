@@ -13,15 +13,75 @@ then writable calls readable's values for those datasets
 
 import { writable } from 'svelte/store';
 
+import * as network from "./network.js";
+
 import * as bookmarks from "./apis/bookmarks.js";
 import * as proxy from "./apis/proxy.js";
 import * as tabs from "./apis/tabs.js";
 
-import * as network from "./network.js";
-
-
 import { workspaceConfig } from "../workspace.js";
 
+// -----
+// Experiment: source abstraction
+/*
+- get_all
+- get_path
+- get_query
+- get_json_from_obj
+- get_uri_from_obj
+- structure: {
+  uri: "file://, http://, bookmark://",
+  parent: "folder/subfolder",
+
+}
+*/
+
+// export const _ = () => {};
+
+export const getAllTree = () => {};
+export const getAllFlat = () => {};
+export const getAll = getAllTree;
+
+export const setAtPath = (key, value) => {};
+export const setJsonAtPath = (key, jsonValue) => {};
+
+export const addToPath = (key, value) => {};
+export const addChildToPath = (key, value) => {};
+
+export const removeAtPath = () => {};
+export const removeFromPath = () => {};
+
+export const watchPath = (path) => monitorBookmarksAt(path);
+
+// -----
+
+export const setupBookmarkListeners = (bookmarkTreeNodes) => {
+  // Register change listeners
+  browser.bookmarks.onCreated.addListener((id, bookmark) => {
+    console.log("Bookmark created:", bookmark);
+  });
+
+  browser.bookmarks.onRemoved.addListener((id, removeInfo) => {
+    console.log("Bookmark removed:", removeInfo);
+  });
+
+  browser.bookmarks.onChanged.addListener((id, changeInfo) => {
+    console.log("Bookmark changed:", changeInfo);
+  });
+
+  return bookmarkTreeNodes;
+};
+
+export const monitorBookmarksAt = (folderId) => {
+  return Promise.resolve(folderId)
+    .then(folderId => browser.bookmarks.getSubTree(
+      folderId,
+      setupBookmarkListeners
+    ))
+    .catch(proxy.print.failure_setup_subtree_listener);
+}
+
+// -----
 
 export const localStorageFor = (name, otherwise={}) => {
   return Promise.resolve(`${name}`)

@@ -3,7 +3,7 @@
 import { onMount } from 'svelte';
 import { writable, readable, derived, get } from "svelte/store";
 import { timerAction, formatTime, minutesToSeconds } from "./lib/clock.js";
-import { notify } from "./lib/apis.js";
+import * as proxy from "./lib/apis/proxy.js";
 /* --- */
 
 let timerInterval;
@@ -26,7 +26,7 @@ let timerArgs = {
   store: null,
   data: {},
   onEnd: () => {
-    notify({
+    proxy.notify({
       title: 'Timer Completed!',
       message: `Pomodoro interval of ${interval} is complete.`
     });

@@ -9,10 +9,11 @@ TODO -
 6. mass select/actions
 7. filterable
 */
-import TreeNode from "./TreeNode.svelte";
 import { createEventDispatcher, onMount } from 'svelte';
 import { writable, get } from 'svelte/store';
-import { _fetch, print } from "./lib/apis.js";
+
+import * as network from "./lib/network.js";
+import * as proxy from "./lib/apis/proxy.js";
 
 const dispatch = createEventDispatcher();
 
@@ -26,7 +27,6 @@ export let buttons = [];
 
 let dataSource = null;
 let queue = [];
-// $: console.log('queue -->', queue, dataStore);
 
 // TODO make this part of the toolbar
 // TODO make 'add' trigger a writable
@@ -34,9 +34,8 @@ let queue = [];
 export let buttonName = "Add";
 export let inputEvent = null;
 export let titleKey = null;
-export let stashStack = [];
 $: readonly = !buttonName || !inputEvent;
-$: titleKey, stashStack;
+$: titleKey;
 
 
 // when we click a list item
@@ -45,59 +44,58 @@ function didClick(e) {
   dispatch("didClick", e );
 }
 
+export const didClickButton = (item) => {
+  return Promise.resolve(item)
+    .then(_item => _item.prop.action(_item))
+    .catch(proxy.print.failure_item_list)
+}
 
 function close(e) {
-  // TODO remove from queue
-  console.log("removing item", e);
-  queue.remove(e.detail)
-  dispatch('removed', e);
+  return Promise.resolve(e)
+    .then(proxy.print.status_close_remove_queue)
+    .then(_e => _e.detail)
+    .then(queue.remove)
+    .catch(proxy.print.failure_close_remove_queue)
 }
 
 onMount(() => {
-  print.success_ItemList_mounted();
+  proxy.print.success_ItemList_mounted();
 
-  if (dataStore) {
-    dataStore.subscribe((val) => {
-      if (val) {
-        // console.log("ItemList update", val);
-        if (dataKey) {
-          queue = val[dataKey];
-        } else {
-          queue = val;
-        }
-      } else {
-        queue = [];
-      }
-    });
-    // .catch(print.failure_itemlist_datastore_update);
-    print.success_dataStore_mounted();
-  }
+  Promise.resolve(source)
+    .then(_source => _source)
+    .catch(proxy.print.failure_load_source)
+    // dataStore.subscribe((val) => {
+    //   if (val) {
+    //     // console.log("ItemList update", val);
+    //     if (dataKey) {
+    //       queue = val[dataKey];
+    //     } else {
+    //       queue = val;
+    //     }
+    //   } else {
+    //     queue = [];
+    //   }
+    // });
+    // .catch(proxy.print.failure_itemlist_datastore_update);
 
-  if (dataSourcePath) {
-    console.log("running dataSourcePath fetch", dataSourcePath);
-    // queue = dataStore.update((n) => _fetch(dataSourcePath));
-    Promise.resolve(dataSourcePath)
-      .then({
-        uri: dataSourcePath
-      })
-      .then(_fetch)
-      .then((result) => {
-        queue = result
-        return result;
-      })
-      .then((result) => {
-        dataStore ? dataStore.update(n => result) : null;
-      })
-      .catch(print.failure_itemlist_data_source_path)
-  }
+  // Pull from a configured backend that conforms to given api
+  // Promise.resolve(source)
+  //   .then(_path => { uri: _path })
+  //   .then(network._fetch)
+  //   .then((result) => {
+  //     queue = result
+  //     return result;
+  //   })
+  //   .then((result) => {
+  //     dataStore ? dataStore.update(n => result) : null;
+  //   })
+  //   .catch(proxy.print.failure_itemlist_data_source_path)
 
+  proxy.print.success_source();
 });
 
 const squashItem = (title, length) => {
-  let maxTitle = (title || "").slice(0,length);
-  let minTitle = (title || "").slice(length - maxTitle.length - 3, length);
-
-  return maxTitle;
+  return (title || "").slice(0,length);
 }
 
 </script>
@@ -133,7 +131,10 @@ const squashItem = (title, length) => {
           {#each buttons as prop (prop.name)}
             <div
               class="item-button"
-              on:click|preventDefault={(e) => Promise.resolve(_item).then(prop.action).catch(print.failure_item_list)}
+              on:click|preventDefault={(e) => didClickButton({
+                item: _item,
+                button: prop
+              })}
             >
               {prop.icon(_item)}
             </div>

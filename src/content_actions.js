@@ -16,7 +16,7 @@ const isElementVisible = (element) => {
   return visible;
 }
 
-const handleMediaMessage = (obj) => {
+const handleMediaMessage = (obj, sendResponse) => {
   return Promise.resolve(obj)
     .then(obj => ({ 
       ...obj,
@@ -37,7 +37,7 @@ const handleMessage = (request, sender, sendResponse) => {
   const obj = { request, sender, sendResponse };
 
   if ('media' in request.message) {
-    return handleMediaMessage(obj);
+    return handleMediaMessage(obj, sendResponse);
 
   } else if (request.message === "set.darkMode") {
     return Promise.resolve(content.elementHexMap) // chesterish
