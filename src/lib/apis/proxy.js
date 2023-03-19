@@ -2,32 +2,68 @@ import { get } from 'svelte/store';
 
 export const print = new Proxy(() => {}, {
   get(target, name) {
-    return (args) => {
-      let _name = name.toUpperCase().split('_');
-      console.log(`[${_name[0]}][${_name.slice(1).join('_')}]`, args);
-      return args;
+    return (_args) => {
+      return splitUpperString(name)
+        .then(_name => `[${_name[0]}][${_name.slice(1).join('_')}]`, args)
+        .then(console.log)
+        .catch(console.error)
+        .finally(() => _args);
     }
   }
 });
 
+const splitUpperString = (name) => {
+  return Promise.resolve(name)
+    .then(toUpperCase)
+    .then(_n => _n.split('_'))
+    .catch(console.error); // possible cyclical error if we use print
+}
+
 export const notify = new Proxy(() => {}, {
   // TODO set alert level filtering based on _name[0]
   get(target, name) {
-    let _name = name.toUpperCase().split('_');
-    console.log("NOTIFYING", name, target);
-    return (args) => {
-      const state = _name[0];
-      return browser.notifications.create({
-        type: "basic",
-        title: _name[0],
-        message: _name.slice(1).join('_'),
-        // buttons: params.buttons || []
-      })
-      .catch(print.failure_notify)
-      .finally(() => args);
+    return (_args) => {
+      return splitUpperString(name)
+        .then(_name => ({
+          ..._args,
+          state: _name[0],
+          type: "basic",
+          title: _name[0],
+          message: _name.slice(1).join('_'),
+          // buttons: params.buttons || []
+        }))
+        .then(browser.notifications.create)
+        .catch(print.failure_notify)
+        .finally(() => _args);
     }
   }
 });
+
+const _default_env = {
+  baseURL: (args) => `http://localhost:${args.port || 3000}`,
+  url: (args) => new URL(args.uri, args.baseUrl),
+  headers: (args) => ({
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }),
+};
+
+export const default_value = new Proxy(() => {}, {
+  // an atomic action within the chains, smaller chains are atomic and leaf only.
+  // monad?
+  get(target, name) {
+    return (_args) => {
+      return splitUpperString(name)
+        .then(_name => ({
+          ..._args,
+          _name[0]: _default_env[_name.slice(1)](_args),
+        }))
+        .catch(print.failure_default_value);
+        // .finally(() => _args);
+    }
+  }
+});
+
 
 //.then(register.success_last_message)
 export const register = new Proxy(() => {}, {

@@ -1,52 +1,44 @@
 
 import { get } from 'svelte/store';
-import { stores } from "./stores.js";
+import * as proxy from './proxy.js';
 
 // -- primitive functions
 
-export const handleResponse = (response) => {
-  if (response.ok) { // if HTTP-status is 200-299
-    return response.json();
-  } else {
-    console.log("HTTP-Error: ", response.status);
-    return null;
-  }
-}
-
 export const _fetch = (args) => {
   // let baseUrl = "http://localhost:3000";
-  let baseUrl = get(stores.config).hosts.local.uri;
-  return Promise.resolve(new URL(args.uri, baseUrl))
-    .then((url) => {
-      for (let arg in args.args) {
+  // let baseUrl = get(stores.config).hosts.local.uri;
+  return Promise.resolve(args)
+    .then(proxy.default_value.baseURL)
+    .then(proxy.default_value.url)
+    .then(_args => {
+      const url = _args.url;
+      for (let arg in _args.args) {
         url.searchargs.append(arg, args.args[arg]);
       }
       return url;
     })
     .then(fetch)
-    .then(handleResponse)
+    .then(response.json)
     .then(register.success_last_message)
-    .catch(print.failure_fetch);
+    .catch(proxy.print.failure_fetch);
 };
 
 export const _send = (args) => {
   // let baseUrl = "http://localhost:3000";
-  let baseUrl = get(stores.config).hosts.local.uri;
-  return Promise.resolve(new URL(args.uri, baseUrl))
-    .then((url) => {
+  return Promise.resolve(args)
+    .then(proxy.default_value.baseURL)
+    .then(proxy.default_value.url)
+    .then(proxy.default_value.headers)
+    .then(_args => {
       return {
-        url: url,
+        ...args,
         method: "POST",
         credentials: "omit",
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify(args.body)
       }
     })
     .then((args) => fetch(args.url, args))
-    .then(handleResponse)
+    .then(response.json)
     .then(register.success_last_message)
-    .catch(print.failure_send);
+    .catch(proxy.print.failure_send);
 }
