@@ -12,7 +12,7 @@ import * as tabs from "./apis/tabs.js";
 import * as windows from "./apis/windows.js";
 
 import * as actions from "./actions.js";
-import * as network from "./network.js";
+import * as network from "./apis/network.js";
 import * as send from "./send.js";
 import { stores } from "./stores.js";
 

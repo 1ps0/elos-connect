@@ -118,7 +118,7 @@ export let icons = {
   "delete": Delete16,
 
   // filetypes
-  "jpg": Jpg16,
+  // "jpg": Jpg16,
   "json": Json16,
   "pdf": Pdf16,
   "txt": Txt16,

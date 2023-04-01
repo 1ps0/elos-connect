@@ -1,6 +1,6 @@
 
 import { print, notify, register } from "./apis/proxy.js";
-import { _send, _fetch } from "./network.js";
+import { _send, _fetch } from "./apis/network.js";
 import { getCurrentActive } from "./apis/tabs.js";
 
 // ------- Send to webpage content_inject.js

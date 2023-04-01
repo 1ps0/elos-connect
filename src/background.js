@@ -2,7 +2,7 @@
 // import browser from "webextension-polyfill";
 import { writable, get } from 'svelte/store';
 import { setContext, getContext } from 'svelte';
-import * as network from "./lib/network.js";
+import * as network from "./lib/apis/network.js";
 
 import * as proxy from "./lib/apis/proxy.js";
 import * as theme from "./lib/apis/theme.js";

@@ -1,10 +1,9 @@
-import { get } from 'svelte/store';
 
 export const print = new Proxy(() => {}, {
   get(target, name) {
     return (_args) => {
-      return splitUpperString(name)
-        .then(_name => `[${_name[0]}][${_name.slice(1).join('_')}]`, args)
+      return splitAndUpperCaseString(name)
+        .then(_name => `[${_name[0]}][${_name.slice(1).join('_')}]`)
         .then(console.log)
         .catch(console.error)
         .finally(() => _args);
@@ -12,18 +11,18 @@ export const print = new Proxy(() => {}, {
   }
 });
 
-const splitUpperString = (name) => {
-  return Promise.resolve(name)
-    .then(toUpperCase)
+const splitAndUpperCaseString = (_name) => {
+  return Promise.resolve(_name)
+    .then(name => name.toUpperCase())
     .then(_n => _n.split('_'))
-    .catch(console.error); // possible cyclical error if we use print
+    .catch(console.error) // possible cyclical error if we use print
 }
 
 export const notify = new Proxy(() => {}, {
   // TODO set alert level filtering based on _name[0]
   get(target, name) {
     return (_args) => {
-      return splitUpperString(name)
+      return splitAndUpperCaseString(name)
         .then(_name => ({
           ..._args,
           state: _name[0],
@@ -53,10 +52,10 @@ export const default_value = new Proxy(() => {}, {
   // monad?
   get(target, name) {
     return (_args) => {
-      return splitUpperString(name)
+      return splitAndUpperCaseString(name)
         .then(_name => ({
           ..._args,
-          _name[0]: _default_env[_name.slice(1)](_args),
+          [_name[0]]: _default_env[_name.slice(1)](_args),
         }))
         .catch(print.failure_default_value);
         // .finally(() => _args);

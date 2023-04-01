@@ -13,7 +13,7 @@ then writable calls readable's values for those datasets
 
 import { writable } from 'svelte/store';
 
-import * as network from "./network.js";
+import * as network from "./apis/network.js";
 
 import * as bookmarks from "./apis/bookmarks.js";
 import * as proxy from "./apis/proxy.js";

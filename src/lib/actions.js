@@ -2,7 +2,7 @@
 
 import * as send from "./send.js";
 import * as proxy from "./apis/proxy.js";
-import * as network from "./network.js";
+import * as network from "./apis/network.js";
 import * as tabs from "./apis/tabs.js";
 
 // ---------- Actions

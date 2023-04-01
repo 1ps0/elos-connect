@@ -6,9 +6,10 @@ import { writable, get } from 'svelte/store';
 import {
   bringToFront,
   updatePlaying,
-  sendPlayPause,
-  sendToggleLoop,
 } from "./lib/actions.js";
+
+import * as send from "./lib/send.js";
+
 import * as proxy from "./lib/apis/proxy.js";
 
 import ItemList from "./ItemList.svelte";
@@ -66,7 +67,7 @@ const buttonProps = [
     icon: (obj) => {
       return obj.playing ? 'Pause' : 'Play';
     },
-    action: sendPlayPause
+    action: send.playPause
   },
   {
     name: 'toggleLoop',
@@ -75,7 +76,7 @@ const buttonProps = [
     icon: (obj) => {
       return obj.loop ? 'LOOPING' : 'SINGLE';
     },
-    action: sendToggleLoop
+    action: send.toggleLoop
   }
 ];
 

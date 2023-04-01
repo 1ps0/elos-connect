@@ -14,7 +14,7 @@ and send that event through config structure to the target component
 import { onMount, createEventDispatcher } from 'svelte';
 
 import { icons } from "./lib/icons.js";
-import * as network from "./lib/network.js";
+import * as network from "./lib/apis/network.js";
 import * as proxy from "./lib/apis/proxy.js";
 import { stores } from "./lib/stores.js"
 

@@ -1,11 +1,25 @@
 import svelte from "rollup-plugin-svelte";
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
-// import livereload from "rollup-plugin-livereload";
-// import { terser } from "rollup-plugin-terser";
 import css from "rollup-plugin-css-only";
 
 const production = !process.env.ROLLUP_WATCH;
+
+function getCommonPlugins(cssOutput) {
+  return [
+    svelte({
+      compilerOptions: {
+        dev: !production,
+      },
+    }),
+    css({ output: cssOutput }),
+    resolve({
+      browser: true,
+      dedupe: ["svelte"],
+    }),
+    commonjs(),
+  ];
+}
 
 function serve() {
   let server;
@@ -43,42 +57,8 @@ export default [
       format: "iife",
       name: "app",
       file: "public/build/bundle.js",
-      globals: ['apis']
     },
-    plugins: [
-      svelte({
-        compilerOptions: {
-          // enable run-time checks when not in production
-          dev: !production,
-        },
-      }),
-      // we'll extract any component CSS out into
-      // a separate file - better for performance
-      css({ output: "css/bundle.css" }),
-
-      // If you have external dependencies installed from
-      // npm, you'll most likely need these plugins. In
-      // some cases you'll need additional configuration -
-      // consult the documentation for details:
-      // https://github.com/rollup/plugins/tree/master/packages/commonjs
-      resolve({
-        browser: true,
-        dedupe: ["svelte"],
-      }),
-      commonjs(),
-
-      // // In dev mode, call `npm run start` once
-      // // the bundle has been generated
-      // !production && serve(),
-
-      // // Watch the `public` directory and refresh the
-      // // browser on changes when not in production
-      // !production && livereload("public"),
-
-      // If we're building for production (npm run build
-      // instead of npm run dev), minify
-      // production && terser(),
-    ],
+    plugins: getCommonPlugins("css/bundle.css"),
     watch: {
       clearScreen: false,
     },
@@ -90,42 +70,8 @@ export default [
       sourcemap: true,
       format: "iife",
       file: "public/build/background.js",
-      globals: ['apis']
     },
-    plugins: [
-      svelte({
-        compilerOptions: {
-          // enable run-time checks when not in production
-          dev: !production,
-        },
-      }),
-      // we'll extract any component CSS out into
-      // a separate file - better for performance
-      css({ output: "css/background.css" }),
-
-      // If you have external dependencies installed from
-      // npm, you'll most likely need these plugins. In
-      // some cases you'll need additional configuration -
-      // consult the documentation for details:
-      // https://github.com/rollup/plugins/tree/master/packages/commonjs
-      resolve({
-        browser: true,
-        dedupe: ["svelte"],
-      }),
-      commonjs(),
-
-      // In dev mode, call `npm run start` once
-      // the bundle has been generated
-      // !production && serve(),
-
-      // Watch the `public` directory and refresh the
-      // browser on changes when not in production
-      // !production && livereload("public"),
-
-      // If we're building for production (npm run build
-      // instead of npm run dev), minify
-      // production && terser(),
-    ],
+    plugins: getCommonPlugins("css/background.css"),
     watch: {
       clearScreen: false,
     },
@@ -136,22 +82,8 @@ export default [
       sourcemap: true,
       format: "iife",
       file: "public/build/content_actions.js",
-      globals: ['apis']
     },
-    plugins: [
-      svelte({
-        compilerOptions: {
-          // enable run-time checks when not in production
-          dev: !production,
-        },
-      }),
-      css({ output: "css/content_actions.css" }),
-      resolve({
-        browser: true,
-        dedupe: ["svelte"],
-      }),
-      commonjs(),
-    ],
+    plugins: getCommonPlugins("css/content_actions.css"),
     watch: {
       clearScreen: false,
     }

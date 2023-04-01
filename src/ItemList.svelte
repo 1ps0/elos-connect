@@ -12,7 +12,7 @@ TODO -
 import { createEventDispatcher, onMount } from 'svelte';
 import { writable, get } from 'svelte/store';
 
-import * as network from "./lib/network.js";
+import * as network from "./lib/apis/network.js";
 import * as proxy from "./lib/apis/proxy.js";
 
 const dispatch = createEventDispatcher();
