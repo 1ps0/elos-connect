@@ -36,7 +36,7 @@ import Education16 from "carbon-icons-svelte/lib/Education16";
 import Exit16 from "carbon-icons-svelte/lib/Exit16";
 import Export16 from "carbon-icons-svelte/lib/Export16";
 import Image16 from "carbon-icons-svelte/lib/Image16";
-import Jpg16 from "carbon-icons-svelte/lib/Jpg16";
+// import Jpg16 from "carbon-icons-svelte/lib/Jpg16";
 import Json16 from "carbon-icons-svelte/lib/Json16";
 import Launch16 from "carbon-icons-svelte/lib/Launch16";
 import Layers16 from "carbon-icons-svelte/lib/Layers16";
@@ -57,11 +57,11 @@ import ViewMode_116 from "carbon-icons-svelte/lib/ViewMode_116";
 import ViewMode_216 from "carbon-icons-svelte/lib/ViewMode_216";
 import Warning16 from "carbon-icons-svelte/lib/Warning16";
 import WatsonHealthCutInHalf16 from "carbon-icons-svelte/lib/WatsonHealthCutInHalf16";
-import WatsonHealthStackedScrolling_116 from "carbon-icons-svelte/lib/WatsonHealthStackedScrolling_116";
-import WatsonHealthThumbnailPreview16 from "carbon-icons-svelte/lib/WatsonHealthThumbnailPreview16";
-import WifiOff16 from "carbon-icons-svelte/lib/WifiOff16";
-import Wifi16 from "carbon-icons-svelte/lib/Wifi16";
-import Zip16 from "carbon-icons-svelte/lib/Zip16";
+// import WatsonHealthStackedScrolling_116 from "carbon-icons-svelte/lib/WatsonHealthStackedScrolling_116";
+// import WatsonHealthThumbnailPreview16 from "carbon-icons-svelte/lib/WatsonHealthThumbnailPreview16";
+// import WifiOff16 from "carbon-icons-svelte/lib/WifiOff16";
+// import Wifi16 from "carbon-icons-svelte/lib/Wifi16";
+// import Zip16 from "carbon-icons-svelte/lib/Zip16";
 
 
 export let icons = {
@@ -88,8 +88,8 @@ export let icons = {
   "status-visible": AccessibilityColorFilled16,
   "status-checkmark": CheckmarkFilled16,
   "status-closemark": CloseFilled16,
-  "status-online": Wifi16,
-  "status-offline": WifiOff16,
+  // "status-online": Wifi16,
+  // "status-offline": WifiOff16,
   "status-pin": Pin16,
 
   "action-add": AddFilled16,
@@ -122,17 +122,17 @@ export let icons = {
   "json": Json16,
   "pdf": Pdf16,
   "txt": Txt16,
-  "zip": Zip16,
+  // "zip": Zip16,
 
   // mode settings
   "night-mode": Awake16,
   "view-modes": Switcher16,
   "view-mode-layers": Layers16,
-  "view-mode-workspaces": WatsonHealthStackedScrolling_116,
+  // "view-mode-workspaces": WatsonHealthStackedScrolling_116,
   "view-mode-1": ViewMode_116,
   "view-mode-2": ViewMode_216,
   "view-mode-3": WatsonHealthCutInHalf16,
-  "view-mode-4": WatsonHealthThumbnailPreview16,
+  // "view-mode-4": WatsonHealthThumbnailPreview16,
 
   // misc
   "menu": Menu16,

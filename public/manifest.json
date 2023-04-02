@@ -96,14 +96,7 @@
         "keyword" : "elos"
     },
     "panels": {
-        "default": [
-            "panel-mainmenu",
-            "panel-web-players",
-            "panel-playlists",
-            "panel-actionmenu",
-            "panel-config"
-
-        ]
+        "default": ["panel-mainmenu"]
     },
     "os_env": {
         "archive": {

@@ -1,10 +1,13 @@
 <script>
   import { onMount } from 'svelte';
-  import { components } from "./components.js";
+  import Grid from "svelte-grid";
+
   import { panelTypes, layoutConfig } from "./config/panels.js";
   import * as proxy from "./lib/apis/proxy.js";
   import { stores } from "./lib/stores.js"
-  import LayoutGrid from "./LayoutGrid.svelte";
+  import { components } from "./components.js";
+  import gridHelp from "svelte-grid/build/helper/index.mjs";
+  import ActionButton from './ActionButton.svelte';
 
   const genId = () => "_" + Math.random().toString(36).substr(2, 9);
 
@@ -39,15 +42,17 @@
   }
 
   function _newItem(options={}) {
-    const id = genId();
-    return hydrateParams({
+    return hydrateParams(gridHelp.item({
+      resizable: true,
+      draggable: true,
+      fixed: false,
       w: layoutConfig.columnCount,
       h: 7,
-      id,
+      id: genId(),
       ...options,
       x: 0,
       y: items.reduce((maxY, item) => Math.max(maxY, item.y + item.h), 0)
-    });
+    }));
   }
 
   function add(panelTarget, options={}) {
@@ -106,38 +111,56 @@
 </script>
 
 <main class="h-screen bg-gray-800 text-gray-300">
-<header>
-  <!-- <TopBar/> -->
-</header>
+  <header>
+    <!-- <TopBar/> -->
+  </header>
 
-<section class="relative h-full">
-  <LayoutGrid
-    cols={layoutConfig.columnCount}
-    gap={layoutConfig.panelGap}
-    rowHeight={layoutConfig.rowHeight}
-    bind:items
-    let:item
-    let:index
-  >
-    <div class="bg-gray-700 rounded shadow p-2">
-      <div class="flex justify-between">
-        <span class="font-semibold">
-          {item.target.replace("panel-", '').replace('-', ' ')}
-        </span>
-        <!-- TODO: Add buttons for pin, shift up, shift down, close, max/shrink vertical -->
-      </div>
-      <hr class="my-2"/>
-      <svelte:component
-        id={item.target}
-        this={components[item.componentName]}
-        bind:this={objects[item.target]}
-        on:didMount={onAdd}
-        data={item}
-        {...item.props}
-        {index}
-      />
-    </div>
-  </LayoutGrid>
-</section>
-
+  <section class="relative h-full">
+    <Grid
+      {items}
+      cols={layoutConfig.columnCount}
+      rowHeight={layoutConfig.rowHeight}
+      gutterWidth={layoutConfig.panelGap}
+      gutterHeight={layoutConfig.panelGap}
+    >
+      {#each items as item}
+        <div
+          class="bg-gray-700 rounded shadow p-2"
+          data-x={item.x}
+          data-y={item.y}
+          data-w={item.w}
+          data-h={item.h}
+          data-id={item.id}
+        >
+          <div class="flex justify-between">
+            <span class="font-semibold">
+              {item.target.replace("panel-", '').replace('-', ' ')}
+            </span>
+            <!-- TODO: Add buttons for pin, shift up, shift down, close, max/shrink vertical -->
+          </div>
+          <hr class="my-2"/>
+          <div class="flex space-x-2">
+            <!-- Pin -->
+            <ActionButton icon="pin" action={() => console.log("Pin action")} />
+            <!-- Shift Up -->
+            <ActionButton icon="arrow-up" action={() => console.log("Shift up action")} />
+            <!-- Shift Down -->
+            <ActionButton icon="arrow-down" action={() => console.log("Shift down action")} />
+            <!-- Close -->
+            <ActionButton icon="close" action={() => remove(item)} />
+            <!-- Max/Shrink Vertical -->
+            <ActionButton icon="maximize" action={() => console.log("Maximize/Shrink vertical action")} />
+          </div>
+          <svelte:component
+            id={item.target}
+            this={components[item.componentName]}
+            bind:this={objects[item.target]}
+            on:didMount={onAdd}
+            data={item}
+            {...item.props}
+          />
+        </div>
+      {/each}
+    </Grid>
+  </section>
 </main>

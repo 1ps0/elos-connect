@@ -1,9 +1,10 @@
 
-
-import * as send from "./send.js";
 import * as proxy from "./apis/proxy.js";
 import * as network from "./apis/network.js";
+import * as reduce from "./apis/reduce.js";
 import * as tabs from "./apis/tabs.js";
+
+import * as send from "./send.js";
 
 // ---------- Actions
 
@@ -43,8 +44,8 @@ export const updatePlaying = (store) => {
   .then((tabs) => {
     store.update((knownTabs) => {
       return Object.values(
-        reducePlaying(tabs, // second
-          reducePlaying(knownTabs, {}) // first
+        reduce.playing(tabs, // second
+          reduce.playing(knownTabs, {}) // first
         )
       );
     })

@@ -10,13 +10,13 @@ export const _fetch = (args) => {
   return Promise.resolve(args)
     .then(proxy.default_value.baseURL)
     .then(proxy.default_value.url)
-    .then(_args => {
-      const url = _args.url;
-      for (let arg in _args.args) {
-        url.searchargs.append(arg, args.args[arg]);
-      }
-      return url;
-    })
+    // .then(_args => {
+    //   const url = _args.url;
+    //   for (let arg in _args.args) {
+    //     url.searchargs.append(arg, _args.args[arg]);
+    //   }
+    //   return url;
+    // })
     .then(fetch)
     .then(response.json)
     .then(register.success_last_message)
@@ -31,13 +31,13 @@ export const _send = (args) => {
     .then(proxy.default_value.headers)
     .then(_args => {
       return {
-        ...args,
+        ..._args,
         method: "POST",
         credentials: "omit",
-        body: JSON.stringify(args.body)
+        body: JSON.stringify(_args.body)
       }
     })
-    .then((args) => fetch(args.url, args))
+    .then((_args) => fetch(_args.url, _args))
     .then(response.json)
     .then(register.success_last_message)
     .catch(proxy.print.failure_send);

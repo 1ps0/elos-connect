@@ -2,6 +2,7 @@
 .DS_Store
 node_modules
 public/bundle.*
+public/build/css/bundle.css
 public/build/*.js
 public/build/*.js.map
 package-lock.json

@@ -1,105 +1,76 @@
 <script>
+  import { onMount } from 'svelte';
+  import { writable } from 'svelte/store';
+  import { bringToFront, updatePlaying } from "./lib/actions.js";
+  import * as send from "./lib/send.js";
+  import * as proxy from "./lib/apis/proxy.js";
+  import ItemList from "./ItemList.svelte";
 
-import { onMount } from 'svelte';
-import { writable, get } from 'svelte/store';
+  let showType = ['audio', 'video'];
+  const tabStore = writable([]);
 
-import {
-  bringToFront,
-  updatePlaying,
-} from "./lib/actions.js";
-
-import * as send from "./lib/send.js";
-
-import * as proxy from "./lib/apis/proxy.js";
-
-import ItemList from "./ItemList.svelte";
-
-let showType = ['audio', 'video'];
-const tabStore = writable([]); // local to this panel/page only
-
-/*
-TODO
-
-1. ~add ItemList integration~
-2. ~add click response to play/pause~
-3. add click response to goto tab
-4. add "hide tab"
-5. add "pin tab"
-6. add "bookmark tab"
-7. add "download tab"
-*/
-
-
-const handlePlayerUpdate = (request, sender, sendResponse) => {
+  const handlePlayerUpdate = (request, sender, sendResponse) => {
   console.log("Message: ", request, sender);
-  return updatePlaying(tabStore)
-    .then((params) => ({
-      params: params,
-      response: "Response from WebPlayers"
-    }))
-    .then(sendResponse)
-    .catch(proxy.print.failure);
+  if (request.type === "playingStateChanged") {
+    // Update the playing state of the corresponding tab
+    tabStore.update((tabs) =>
+      tabs.map((tab) =>
+        tab.id === request.tabId ? { ...tab, playing: request.playing } : tab
+      )
+    );
+  } else {
+    return updatePlaying(tabStore)
+      .then((params) => ({
+        params: params,
+        response: "Response from WebPlayers"
+      }))
+      .then(sendResponse)
+      .catch(proxy.print.failure);
+  }
 };
 
-/*
-ADD state awareness:
-- daily cycles
--
 
-ADD FUNCTION BUTTONS:
-1. play/pause
-2. bring to front
-3. download
-*/
-
-const buttonProps = [
-  {
-    name: 'show',
-    description: '',
-    check: (obj) => true,
-    icon: () => 'Show',
-    action: bringToFront
-  },
-  {
-    name: 'playPause',
-    description: '',
-    check: (obj) => obj.playing,
-    icon: (obj) => {
-      return obj.playing ? 'Pause' : 'Play';
+  const buttonProps = [
+    {
+      name: 'show',
+      description: '',
+      check: (obj) => true,
+      icon: () => 'Show',
+      action: bringToFront
     },
-    action: send.playPause
-  },
-  {
-    name: 'toggleLoop',
-    description: '',
-    check: (obj) => obj.loop,
-    icon: (obj) => {
-      return obj.loop ? 'LOOPING' : 'SINGLE';
+    {
+      name: 'playPause',
+      description: '',
+      check: (obj) => obj.playing,
+      icon: (obj) => {
+        return obj.playing ? 'Pause' : 'Play';
+      },
+      action: send.playPause
     },
-    action: send.toggleLoop
-  }
-];
+    {
+      name: 'toggleLoop',
+      description: '',
+      check: (obj) => obj.loop,
+      icon: (obj) => {
+        return obj.loop ? 'LOOPING' : 'SINGLE';
+      },
+      action: send.toggleLoop
+    }
+  ];
 
-onMount(async () => {
-  proxy.print.success_WebPlayers_mounted()
-  browser.runtime.onMessage.addListener(handlePlayerUpdate);
-  // TODO on tab playing state changed, update
-  updatePlaying(tabStore);
-});
-
+  onMount(async () => {
+    proxy.print.success_WebPlayers_mounted();
+    browser.runtime.onMessage.addListener(handlePlayerUpdate);
+    updatePlaying(tabStore);
+  });
 </script>
 
-<section>
+<div class="w-full h-full">
   <ItemList
-    readonly=true
+    readonly
     dataStore={tabStore}
-
     on:didClick={bringToFront}
     titleKey="title"
     buttons={buttonProps}
   />
-</section>
-
-<style>
-
-</style>
+</div>

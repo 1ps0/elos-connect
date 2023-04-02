@@ -1,13 +1,11 @@
 <script>
 
-import { onMount, setContext, getContext, hasContext } from 'svelte';
-import { writable, readable, derived, get } from "svelte/store";
+import { onMount } from 'svelte';
+
+import * as load from "./lib/apis/load.js";
+import * as proxy from "./lib/apis/proxy.js";
 
 import { stores } from "./lib/stores.js";
-import * as load from "./lib/apis/load.js";
-import * as network from "./lib/apis/network.js";
-
-import { cmds } from "./lib/omnibox.js";
 import { workspaceConfig } from "./workspace.js";
 
 // suggested for OS

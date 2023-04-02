@@ -1,61 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html, body {
-	position: relative;
-	width: 100%;
-	height: 100%;
+  @apply h-full;
 }
 
 body {
-	color: #333;
-	margin: 0;
-	padding: 8px;
-	box-sizing: border-box;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  @apply text-gray-900 bg-gray-100 dark:bg-gray-800 dark:text-gray-100 m-0 p-2 box-border font-sans;
+}
+
+.layout {
+  @apply relative w-full h-full;
+}
+
+.pane {
+  @apply absolute bg-gray-200 dark:bg-gray-700 border border-gray-400 dark:border-gray-600 overflow-hidden;
 }
 
 a {
-	color: rgb(0,100,200);
-	text-decoration: none;
+  @apply text-blue-700 dark:text-blue-500 no-underline;
 }
 
 a:hover {
-	text-decoration: underline;
+  @apply underline;
 }
 
 a:visited {
-	color: rgb(0,80,160);
+  @apply text-blue-900 dark:text-blue-400;
 }
 
 label {
-	display: block;
+  @apply block;
 }
 
 input, button, select, textarea {
-	font-family: inherit;
-	font-size: inherit;
-	padding: 0.4em;
-	margin: 0 0 0.5em 0;
-	box-sizing: border-box;
-	border: 1px solid #ccc;
-	border-radius: 2px;
+  @apply font-inherit text-base py-1 px-2 m-0 mb-2 box-border border border-gray-300 dark:border-gray-500 rounded;
 }
 
 input:disabled {
-	color: #ccc;
+  @apply text-gray-300;
 }
 
 input[type="range"] {
-	height: 0;
+  @apply h-0;
 }
 
 button {
-	background-color: #f4f4f4;
-	outline: none;
+  @apply bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:focus:border-gray-400 outline-none;
 }
 
 button:active {
-	background-color: #ddd;
+  @apply bg-gray-300;
 }
 
 button:focus {
-	border-color: #666;
+  @apply border-gray-600;
 }

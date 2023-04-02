@@ -110,6 +110,13 @@ onMount(async () => {
 
 <style>
 
+  .pill-nav {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    max-height: 200px; /* Adjust this value according to your needs */
+  }
 
   /* Style the links inside the pill navigation menu */
   .pill-nav li {

@@ -3,14 +3,14 @@ import * as network from "./network.js";
 
 // ---------- Load composites
 
-export const loadTags = async () => {
+export const tags = async () => {
   return Promise.resolve({ uri:'api/analysis/tag'})
     .then(network._fetch)
     .then((results) => results.names.map((tag) => tag[1]))
     .catch(proxy.print.failure_load_tabs);
 };
 
-export const loadSites = async () => {
+export const sites = async () => {
   return browser.topSites.get()
     .then((sites) => {
       return sites;
@@ -30,7 +30,7 @@ export const loadSites = async () => {
     .catch(proxy.print.failure_load_sites);
 }
 
-export const loadSessions = async () => {
+export const sessions = async () => {
   return browser.sessions.getRecentlyClosed()
     .then((sessions) => {
       return sessions.map((session) => ({
@@ -41,12 +41,12 @@ export const loadSessions = async () => {
     .catch(proxy.print.failure_load_sessions);
 }
 
-export const loadVisits = async (params) => {
+export const visits = async (params) => {
   return browser.history.getVisits(params)
     .catch(proxy.print.failure_load_visits);
 }
 
-export const loadHistory = async (params) => {
+export const history = async (params) => {
   // params can only be { url: string }
   return browser.history.search({
       text: params && params.query ? params.query : "",
@@ -69,7 +69,7 @@ export const loadHistory = async (params) => {
 // web_accessible_resources
 // browser.extension.getURL("beasts/frog.jpg");
 
-export const loadCommands = (params) => {
+export const commands = async (params) => {
   return browser.commands.getAll()
     .then((cmds) => {
       return cmds.map((cmd) => ({
