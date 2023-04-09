@@ -16,7 +16,6 @@ import { onMount, createEventDispatcher } from 'svelte';
 import { icons } from "./lib/icons.js";
 import * as network from "./lib/apis/network.js";
 import * as proxy from "./lib/apis/proxy.js";
-import { stores } from "./lib/stores.js"
 
 const dispatch = createEventDispatcher();
 
@@ -28,7 +27,7 @@ export let transform = (e) => {
     .then(_e => _e.name)
     .then(_name => _name.slice(30))
     .then(toUpperCase)
-    .catch(proxy.print_failure_transform)
+    .catch(proxy.print.failure_transform)
 };
 
 export let data = {};
@@ -97,7 +96,7 @@ onMount(async () => {
         title={item.value.highlight}
       >
         {#if item.value.icon}
-          <svelte:component this={icons[item.value.icon]}/>
+          <svelte:component this={icons[item.value.icon]} size={16} class="icon"/>
         {:else}
           {transform(item)}
         {/if}

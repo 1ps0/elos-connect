@@ -16,7 +16,7 @@ function getCommonPlugins(cssOutput) {
     resolve({
       browser: true,
       dedupe: ["svelte"],
-      exportConditions: ['svelte', 'browser', 'module', 'import', 'default']
+      exportConditions: ['svelte', 'module']
     }),
     commonjs(),
   ];

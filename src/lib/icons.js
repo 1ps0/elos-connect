@@ -7,138 +7,138 @@ we can give the user a simple primer on this and make the primer available for r
 panel type: Reference
 */
 
-import AccessibilityColor16 from "carbon-icons-svelte/lib/AccessibilityColor16";
-import AccessibilityColorFilled16 from "carbon-icons-svelte/lib/AccessibilityColorFilled16";
-import AddFilled16 from "carbon-icons-svelte/lib/AddFilled16";
-import Alarm16 from "carbon-icons-svelte/lib/Alarm16";
-import AlarmAdd16 from "carbon-icons-svelte/lib/AlarmAdd16";
-import AlarmSubtract16 from "carbon-icons-svelte/lib/AlarmSubtract16";
-import Api_116 from "carbon-icons-svelte/lib/Api_116";
-import App16 from "carbon-icons-svelte/lib/App16";
-import AudioConsole16 from "carbon-icons-svelte/lib/AudioConsole16";
-import Awake16 from "carbon-icons-svelte/lib/Awake16";
-import Categories16 from "carbon-icons-svelte/lib/Categories16";
-import CheckmarkFilled16 from "carbon-icons-svelte/lib/CheckmarkFilled16";
-import CollapseCategories16 from "carbon-icons-svelte/lib/CollapseCategories16";
-import ClosedCaptionAlt16 from "carbon-icons-svelte/lib/ClosedCaptionAlt16";
-import CloseFilled16 from "carbon-icons-svelte/lib/CloseFilled16";
-import Code16 from "carbon-icons-svelte/lib/Code16";
-import CodeReference16 from "carbon-icons-svelte/lib/CodeReference16";
-import Compare16 from "carbon-icons-svelte/lib/Compare16";
-import Crossroads16 from "carbon-icons-svelte/lib/Crossroads16";
-import CrossTab16 from "carbon-icons-svelte/lib/CrossTab16";
-import Cut16 from "carbon-icons-svelte/lib/Cut16";
-import Delete16 from "carbon-icons-svelte/lib/Delete16";
-import DataVis_416 from "carbon-icons-svelte/lib/DataVis_416";
-import DeployRules16 from "carbon-icons-svelte/lib/DeployRules16";
-import Download16 from "carbon-icons-svelte/lib/Download16";
-import Education16 from "carbon-icons-svelte/lib/Education16";
-import Exit16 from "carbon-icons-svelte/lib/Exit16";
-import Export16 from "carbon-icons-svelte/lib/Export16";
-import Image16 from "carbon-icons-svelte/lib/Image16";
-// import Jpg16 from "carbon-icons-svelte/lib/Jpg16";
-import Json16 from "carbon-icons-svelte/lib/Json16";
-import Launch16 from "carbon-icons-svelte/lib/Launch16";
-import Layers16 from "carbon-icons-svelte/lib/Layers16";
-import Login16 from "carbon-icons-svelte/lib/Login16";
-import Maximize16 from "carbon-icons-svelte/lib/Maximize16";
-import Menu16 from "carbon-icons-svelte/lib/Menu16";
-import ModelAlt16 from "carbon-icons-svelte/lib/ModelAlt16";
-import Pdf16 from "carbon-icons-svelte/lib/Pdf16";
-import Pin16 from "carbon-icons-svelte/lib/Pin16";
-import Settings16 from "carbon-icons-svelte/lib/Settings16";
-import Switcher16 from "carbon-icons-svelte/lib/Switcher16";
-import Sql16 from "carbon-icons-svelte/lib/Sql16";
-import Terminal16 from "carbon-icons-svelte/lib/Terminal16";
-import ToolsAlt16 from "carbon-icons-svelte/lib/ToolsAlt16";
-import Txt16 from "carbon-icons-svelte/lib/Txt16";
-import UserAvatarFilled16 from "carbon-icons-svelte/lib/UserAvatarFilled16";
-import ViewMode_116 from "carbon-icons-svelte/lib/ViewMode_116";
-import ViewMode_216 from "carbon-icons-svelte/lib/ViewMode_216";
-import Warning16 from "carbon-icons-svelte/lib/Warning16";
-import WatsonHealthCutInHalf16 from "carbon-icons-svelte/lib/WatsonHealthCutInHalf16";
-// import WatsonHealthStackedScrolling_116 from "carbon-icons-svelte/lib/WatsonHealthStackedScrolling_116";
-// import WatsonHealthThumbnailPreview16 from "carbon-icons-svelte/lib/WatsonHealthThumbnailPreview16";
-// import WifiOff16 from "carbon-icons-svelte/lib/WifiOff16";
-// import Wifi16 from "carbon-icons-svelte/lib/Wifi16";
-// import Zip16 from "carbon-icons-svelte/lib/Zip16";
+import AccessibilityColor from "carbon-icons-svelte/lib/AccessibilityColor.svelte";
+import AccessibilityColorFilled from "carbon-icons-svelte/lib/AccessibilityColorFilled.svelte";
+import AddFilled from "carbon-icons-svelte/lib/AddFilled.svelte";
+import Alarm from "carbon-icons-svelte/lib/Alarm.svelte";
+import AlarmAdd from "carbon-icons-svelte/lib/AlarmAdd.svelte";
+import AlarmSubtract from "carbon-icons-svelte/lib/AlarmSubtract.svelte";
+import Api_1 from "carbon-icons-svelte/lib/Api_1.svelte";
+import App from "carbon-icons-svelte/lib/App.svelte";
+import AudioConsole from "carbon-icons-svelte/lib/AudioConsole.svelte";
+import Awake from "carbon-icons-svelte/lib/Awake.svelte";
+import Categories from "carbon-icons-svelte/lib/Categories.svelte";
+import CheckmarkFilled from "carbon-icons-svelte/lib/CheckmarkFilled.svelte";
+import CollapseCategories from "carbon-icons-svelte/lib/CollapseCategories.svelte";
+import ClosedCaptionAlt from "carbon-icons-svelte/lib/ClosedCaptionAlt.svelte";
+import CloseFilled from "carbon-icons-svelte/lib/CloseFilled.svelte";
+import Code from "carbon-icons-svelte/lib/Code.svelte";
+import CodeReference from "carbon-icons-svelte/lib/CodeReference.svelte";
+import Compare from "carbon-icons-svelte/lib/Compare.svelte";
+import Crossroads from "carbon-icons-svelte/lib/Crossroads.svelte";
+import CrossTab from "carbon-icons-svelte/lib/CrossTab.svelte";
+import Cut from "carbon-icons-svelte/lib/Cut.svelte";
+import DataVis_4 from "carbon-icons-svelte/lib/DataVis_4.svelte";
+import DeployRules from "carbon-icons-svelte/lib/DeployRules.svelte";
+import Download from "carbon-icons-svelte/lib/Download.svelte";
+import Education from "carbon-icons-svelte/lib/Education.svelte";
+import Exit from "carbon-icons-svelte/lib/Exit.svelte";
+import Export from "carbon-icons-svelte/lib/Export.svelte";
+import Image from "carbon-icons-svelte/lib/Image.svelte";
+import Jpg from "carbon-icons-svelte/lib/Jpg.svelte";
+import Json from "carbon-icons-svelte/lib/Json.svelte";
+import Launch from "carbon-icons-svelte/lib/Launch.svelte";
+import Layers from "carbon-icons-svelte/lib/Layers.svelte";
+import Login from "carbon-icons-svelte/lib/Login.svelte";
+import Maximize from "carbon-icons-svelte/lib/Maximize.svelte";
+import Menu from "carbon-icons-svelte/lib/Menu.svelte";
+import ModelAlt from "carbon-icons-svelte/lib/ModelAlt.svelte";
+import Pdf from "carbon-icons-svelte/lib/Pdf.svelte";
+import Pin from "carbon-icons-svelte/lib/Pin.svelte";
+import Settings from "carbon-icons-svelte/lib/Settings.svelte";
+import Switcher from "carbon-icons-svelte/lib/Switcher.svelte";
+import Sql from "carbon-icons-svelte/lib/Sql.svelte";
+import Terminal from "carbon-icons-svelte/lib/Terminal.svelte";
+import ToolsAlt from "carbon-icons-svelte/lib/ToolsAlt.svelte";
+import TrashCan from "carbon-icons-svelte/lib/TrashCan.svelte";
+import Txt from "carbon-icons-svelte/lib/Txt.svelte";
+import UserAvatarFilled from "carbon-icons-svelte/lib/UserAvatarFilled.svelte";
+import ViewMode_1 from "carbon-icons-svelte/lib/ViewMode_1.svelte";
+import ViewMode_2 from "carbon-icons-svelte/lib/ViewMode_2.svelte";
+import Warning from "carbon-icons-svelte/lib/Warning.svelte";
+import WatsonHealthCutInHalf from "carbon-icons-svelte/lib/WatsonHealthCutInHalf.svelte";
+import WatsonHealthStackedScrolling_1 from "carbon-icons-svelte/lib/WatsonHealthStackedScrolling_1.svelte";
+import WatsonHealthThumbnailPreview from "carbon-icons-svelte/lib/WatsonHealthThumbnailPreview.svelte";
+import WifiOff from "carbon-icons-svelte/lib/WifiOff.svelte";
+import Wifi from "carbon-icons-svelte/lib/Wifi.svelte";
+import Zip from "carbon-icons-svelte/lib/Zip.svelte";
 
 
 export let icons = {
   // main menu
-  "alarm": Alarm16,
-  "cli": Terminal16,
-  "code": Code16,
-  "list": CollapseCategories16,
-  "table": CrossTab16,
-  "image": Image16,
-  "files": Categories16,
-  "packages": ModelAlt16,
-  "education": Education16,
-  "profile": UserAvatarFilled16,
-  "settings": Settings16,
-  "preferences": AudioConsole16,
-  "polls": DeployRules16,
+  "alarm": Alarm,
+  "cli": Terminal,
+  "code": Code,
+  "list": CollapseCategories,
+  "table": CrossTab,
+  "image": Image,
+  "files": Categories,
+  "packages": ModelAlt,
+  "education": Education,
+  "profile": UserAvatarFilled,
+  "settings": Settings,
+  "preferences": AudioConsole,
+  "polls": DeployRules,
 
   // dataviz
-  "composite": DataVis_416,
+  "composite": DataVis_4,
 
   // toolbar
-  "status-hidden": AccessibilityColor16,
-  "status-visible": AccessibilityColorFilled16,
-  "status-checkmark": CheckmarkFilled16,
-  "status-closemark": CloseFilled16,
-  // "status-online": Wifi16,
-  // "status-offline": WifiOff16,
-  "status-pin": Pin16,
+  "status-hidden": AccessibilityColor,
+  "status-visible": AccessibilityColorFilled,
+  "status-checkmark": CheckmarkFilled,
+  "status-closemark": CloseFilled,
+  "status-online": Wifi,
+  "status-offline": WifiOff,
+  "status-pin": Pin,
 
-  "action-add": AddFilled16,
-  "action-popout": Launch16,
-  "action-fullscreen": Maximize16,
-  "action-login": Login16,
-  "action-logout": Exit16,
+  "action-add": AddFilled,
+  "action-popout": Launch,
+  "action-fullscreen": Maximize,
+  "action-login": Login,
+  "action-logout": Exit,
 
-  "action-open-code": CodeReference16,
+  "action-open-code": CodeReference,
 
-  "task-add": AlarmAdd16,
-  "task-remove": AlarmSubtract16,
-  "task-merge": Compare16,
+  "task-add": AlarmAdd,
+  "task-remove": AlarmSubtract,
+  "task-merge": Compare,
 
   // configuration
-  "apis": Api_116,
-  "apps": App16,
+  "apis": Api_1,
+  "apps": App,
 
   //
-  "transript": ClosedCaptionAlt16,
-  "download": Download16,
-  "upload": Export16,
+  "transript": ClosedCaptionAlt,
+  "download": Download,
+  "upload": Export,
 
-  "directions": Crossroads16,
-  "cut": Cut16,
-  "delete": Delete16,
+  "directions": Crossroads,
+  "cut": Cut,
+  "TrashCan": TrashCan,
 
   // filetypes
-  // "jpg": Jpg16,
-  "json": Json16,
-  "pdf": Pdf16,
-  "txt": Txt16,
-  // "zip": Zip16,
+  "jpg": Jpg,
+  "json": Json,
+  "pdf": Pdf,
+  "txt": Txt,
+  "zip": Zip,
 
   // mode settings
-  "night-mode": Awake16,
-  "view-modes": Switcher16,
-  "view-mode-layers": Layers16,
-  // "view-mode-workspaces": WatsonHealthStackedScrolling_116,
-  "view-mode-1": ViewMode_116,
-  "view-mode-2": ViewMode_216,
-  "view-mode-3": WatsonHealthCutInHalf16,
-  // "view-mode-4": WatsonHealthThumbnailPreview16,
+  "night-mode": Awake,
+  "view-modes": Switcher,
+  "view-mode-layers": Layers,
+  "view-mode-workspaces": WatsonHealthStackedScrolling_1,
+  "view-mode-1": ViewMode_1,
+  "view-mode-2": ViewMode_2,
+  "view-mode-3": WatsonHealthCutInHalf,
+  "view-mode-4": WatsonHealthThumbnailPreview,
 
   // misc
-  "menu": Menu16,
-  "sql": Sql16,
-  "tools": ToolsAlt16,
-  "warning": Warning16,
+  "menu": Menu,
+  "sql": Sql,
+  "tools": ToolsAlt,
+  "warning": Warning,
 
 
 };
