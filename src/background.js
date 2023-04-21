@@ -316,17 +316,17 @@ try {
   // OMNIBOX END
 
 
-  // CONTEXT MENUS
-  browser.contextMenus.create({
-    id: "root",
-    title: "WebExtension Commands",
-    contexts: ["browser_action"],
-  });
+  // // CONTEXT MENUS
+  // browser.contextMenus.create({
+  //   id: "root",
+  //   title: "WebExtension Commands",
+  //   contexts: ["browser_action"],
+  // });
 
-  const contextMenus = new CommandsContextMenu(cmds);
-  contextMenus.create().forEach((menu) => {
-    browser.contextMenus.create(menu);
-  });
+  // const contextMenus = new CommandsContextMenu(cmds);
+  // contextMenus.create().forEach((menu) => {
+  //   browser.contextMenus.create(menu);
+  // });
 
 } catch (e) {
   console.log("Caught background.js init error", e);

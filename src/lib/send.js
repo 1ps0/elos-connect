@@ -102,8 +102,51 @@ export const toContentScript = async (params) => {
     .catch(print.failure_send_to_content_script);
 }
 
-
 // ------- Send composites
+
+export const openAIApi = (prompt) => {
+  const apiKey = 'your_openai_api_key_here';
+  const apiUrl = 'https://api.openai.com/v1/chat/completions';
+  const model = 'gpt-4';
+
+  const headers = new Headers({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${apiKey}`,
+  });
+
+  const body = JSON.stringify({
+    model,
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.7,
+  });
+
+  const response = fetch(apiUrl, {
+    method: 'POST',
+    headers,
+    body,
+  });
+
+  const data = response.json();
+  return data.choices[0].message.content;
+}
+
+export const extractSemanticObjectsAndGroupingsFromDOM = () => {
+  const prompt = `Given a browser document, write a JavaScript function that extracts semantic objects and groupings from the DOM. The function should return an object or array containing the extracted information.`;
+
+  try {
+    const gpt4Response = callOpenAIAPI(prompt);
+
+    // Create a new function from the GPT-4 response
+    const extractedFunction = new Function('document', gpt4Response);
+
+    // Execute the function and return the extracted data
+    return extractedFunction(document);
+  } catch (error) {
+    console.error('Error in extractSemanticObjectsAndGroupingsFromDOM:', error);
+  }
+}
+
+
 
 export const sendTag = (params) => {
   // TODO normalize params interface and validation of values
