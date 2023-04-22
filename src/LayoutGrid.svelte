@@ -1,0 +1,138 @@
+<style>
+  .svlt-grid-container {
+    position: relative;
+  }
+</style>
+
+<div class="svlt-grid-container" style="height: {containerHeight}px" bind:this={container}>
+  {#each items as item, i (item.id)}
+    <MoveResize
+      on:load={handleRepaint}
+      on:repaint={handleRepaint}
+      id={item.id}
+      resizable={item.resizable}
+      draggable={item.draggable}
+      {xPerPx}
+      {yPerPx}
+      width={Math.min(getComputedCols, item.w) * xPerPx - gap * 2}
+      height={item.h * yPerPx - gap * 2}
+      top={item.y * yPerPx + gap}
+      left={item.x * xPerPx + gap}
+      {gap}
+      {item}
+      min={item.min}
+      max={item.max}
+      {dynamic}
+      cols={getComputedCols}>
+      <slot {item} index={i}/>
+    </MoveResize>
+  {/each}
+</div>
+
+<script>
+  import { getContainerHeight } from "./lib/layout_grid/container.js";
+  import { responsiveItems, moveItem, getItemById } from "./lib/layout_grid/item.js";
+  import { onMount, createEventDispatcher } from "svelte";
+  import { debounce, getColumnFromBreakpoints } from "./lib/layout_grid/other.js";
+
+  import MoveResize from "./LayoutGridMoveResize.svelte";
+
+  const dispatch = createEventDispatcher();
+
+  export let items;
+  export let rowHeight;
+  export let cols;
+  export let gap = 10;
+  export let breakpoints = [];
+  export let dynamicCols = true;
+
+  export let debounceUpdate = 100;
+  export let debounceResize = 100;
+  export let dynamic = false;
+
+  let getComputedCols;
+
+  let container;
+
+  let xPerPx = 0;
+  let yPerPx = rowHeight;
+
+  let documentWidth;
+
+  let containerWidth;
+
+  $: containerHeight = getContainerHeight(items, yPerPx);
+
+  let prevCols;
+
+  $: {
+    if (prevCols !== cols && dynamicCols) {
+      xPerPx = containerWidth / cols;
+    }
+    prevCols = cols;
+  }
+
+  const onResize = debounce(() => {
+    if (breakpoints.length) {
+      items = responsiveItems(items, getComputedCols);
+    }
+
+    dispatch("resize", {
+      cols: getComputedCols,
+      xPerPx,
+      yPerPx,
+      width: containerWidth,
+    });
+  }, debounceResize);
+
+
+  onMount(() => {
+    const sizeObserver = new ResizeObserver(entries => {
+      let width = entries[0].contentRect.width;
+
+      if (width === containerWidth) return;
+
+      getComputedCols = getColumnFromBreakpoints(breakpoints, width, cols);
+
+      xPerPx = width / getComputedCols;
+
+      if (!containerWidth) {
+        if (breakpoints.length) {
+          items = responsiveItems(items, getComputedCols);
+        }
+
+        dispatch("mount", {
+          cols: getComputedCols,
+          xPerPx,
+          yPerPx, // same as rowHeight
+        });
+      } else {
+        onResize();
+      }
+
+      containerWidth = width;
+    });
+
+    sizeObserver.observe(container);
+
+    return () => sizeObserver.disconnect();
+  });
+
+  const updateMatrix = ({ detail }) => {
+    let activeItem = getItemById(detail.id, items).item;
+
+    if (activeItem) {
+      activeItem = Object.assign(activeItem, detail.shadow);
+      items = moveItem(activeItem, items, getComputedCols, detail.clone);
+      console.log("updateMatrix", detail);
+      if (detail.onUpdate) detail.onUpdate();
+
+      dispatch("change", {
+        unsafeItem: activeItem,
+        id: activeItem.id,
+      });
+    }
+  };
+
+  export const handleRepaint = debounce(updateMatrix, debounceUpdate);
+</script>

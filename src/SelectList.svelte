@@ -33,7 +33,7 @@ export let transform = (e) => {
 export let data = {};
 export let items = [];
 
-const updateFromSource = async (source) => {
+const updateFromSource = (source) => {
   Promise.resolve(source)
   .then(_source => { uri: source})
   .then(network._fetch)
@@ -77,7 +77,9 @@ function _sendEvent(item) {
 onMount(async () => {
   proxy.print.success_SelectList_mounted();
 
-  updateFromSource(source);
+  if (source) {
+    updateFromSource(source);
+  }
   dispatch("didMount", data);
 });
 

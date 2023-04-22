@@ -1,12 +1,38 @@
 
+const logKeywords = {
+  success: (_args) => { _args },
+  failure: (_args) => { _args },
+  status: (_args) => { _args },
+  debug: (_args) => { _args },
+  verbose: (_args) => { _args },
+}
+
+// export const print = new Proxy(() => {}, {
+//   get(target, name) {
+//     return (_args) => {
+//       try {
+//         const parts = name.toUpperCase().split('_');
+//         console.log(`[${parts[0]}][${parts.slice(1).join('_')}]`, _args);
+//         if (parts[0] == "debug") {
+//           console.trace();
+//         }
+//       }
+//       catch(_err) {
+//         console.error(name, _err);
+//       }
+//       return _args;
+//     }
+//   }
+// });
+
 export const print = new Proxy(() => {}, {
   get(target, name) {
     return (_args) => {
       return splitAndUpperCaseString(name)
         .then(_name => `[${_name[0]}][${_name.slice(1).join('_')}]`)
-        .then(console.log)
+        .then(_name => console.log(_name, _args))
         .catch(console.error)
-        .finally(() => _args);
+        .then(_ => _args);
     }
   }
 });
@@ -33,7 +59,7 @@ export const notify = new Proxy(() => {}, {
         }))
         .then(browser.notifications.create)
         .catch(print.failure_notify)
-        .finally(() => _args);
+        .then(_ => _args);
     }
   }
 });

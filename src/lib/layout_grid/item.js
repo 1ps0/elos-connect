@@ -25,6 +25,7 @@ export function getItemById(id, items) {
 }
 
 export function findFreeSpaceForItem(matrix, item, items = []) {
+  // console.log("[findFreeSpaceForItem] matrix:", matrix);
   const cols = matrix[0].length;
   const w = Math.min(cols, item.w);
   let xNtime = cols - w;

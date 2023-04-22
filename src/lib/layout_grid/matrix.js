@@ -1,9 +1,24 @@
 import { getRowsCount } from "./other.js";
 
-export const makeMatrix = (rows, cols) => Array.from(Array(rows), () => new Array(cols)); // make 2d array
+export const makeMatrix = (rows, cols) => {
+  try {
+    return Array.from(
+      { length: rows }, 
+      () => Array.from({ length: cols })
+    ); // make 2d array
+  } catch (_err) {
+    console.error("[FAILURE][makeMatrix]", _err);
+    console.trace();
+  }
+}
 
 export function makeMatrixFromItems(items, _row = getRowsCount(items), _col) {
   let matrix = makeMatrix(_row, _col);
+  // console.log("[makeMatrixFromItems] items:", items);
+  // console.log("[makeMatrixFromItems] rows:", _row);
+  // console.log("[makeMatrixFromItems] cols:", _col);
+  // console.log("[makeMatrixFromItems] matrix:", matrix);
+
   for (var i = 0; i < items.length; i++) {
     const value = items[i];
     const { x, y, h } = value;

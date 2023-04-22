@@ -17,25 +17,14 @@ function makeItem(item) {
   };
 }
 
-const gridHelp = {
-  normalize(items, col, rows) {
-    return normalize(items, col, rows);
-  },
+export const findSpace = (item, items, cols) => {
+  // console.log("[findSpace] item:", item);
+  // console.log("[findSpace] items:", items);
+  // console.log("[findSpace] cols:", cols);
 
-  adjust(items, col) {
-    return adjust(items, col);
-  },
-
-  item(obj) {
-    return makeItem(obj);
-  },
-
-  findSpace(item, items, cols) {
-    let matrix = makeMatrixFromItems(items, getRowsCount(items), cols);
-
-    let position = findFreeSpaceForItem(matrix, item, items);
-    return position;
-  },
+  let matrix = makeMatrixFromItems(items, getRowsCount(items), cols);
+  let position = findFreeSpaceForItem(matrix, item, items);
+  return position;
 };
 
-export default gridHelp;
+export default { normalize, adjust, makeItem, findSpace };

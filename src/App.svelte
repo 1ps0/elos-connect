@@ -1,15 +1,14 @@
 <script>
   import { onMount } from 'svelte';
   import { derived } from 'svelte/store';
-  import Grid from "svelte-grid";
+  import LayoutGrid from "./LayoutGrid.svelte";
+  import layoutGridHelp from "./lib/layout_grid/helper.js";
 
   import { panelTypes, layoutConfig } from "./config/panels.js";
   import * as proxy from "./lib/apis/proxy.js";
   import { stores } from "./lib/stores.js"
   import { components } from "./components.js";
-  import gridHelp from "svelte-grid/build/helper/index.mjs";
   import ActionButton from './ActionButton.svelte';
-    import { getColumnFromBreakpoints } from './lib/layout_grid/other.js';
 
   const genId = () => "_" + Math.random().toString(36).substr(2, 9);
 
@@ -43,28 +42,42 @@
     return item;
   }
 
-  function _newItem(options={}) {
-    return {
-      [layoutConfig.columnCount]: hydrateParams(gridHelp.item({
-        resizable: true,
-        draggable: true,
-        fixed: false,
-        w: layoutConfig.columnCount,
-        h: 7,
-        id: genId(),
-        ...options,
-        x: 0,
-        y: items.reduce((maxY, item) => Math.max(maxY, item.y + item.h), 0)
+  function positionItem(item) {
+    return Promise.resolve(item)
+      .then(_item => ({
+        ..._item,
+        ...layoutGridHelp.findSpace(_item, items, layoutConfig.columnCount)
       }))
-    };
+      .catch(proxy.print.failure_panels_position_item)
+  }
+  function _newItem(options={}) {
+    return Promise.resolve(options)
+      .then(_opts => ({
+        ...hydrateParams(_opts),
+        w: layoutConfig.columnCount,
+        h: 7, // FIXME add default height
+        id: genId(),
+      }))
+      .then(proxy.print.status_panels_new_item)
+      .then(layoutGridHelp.makeItem)
+      .then(positionItem)
+      .catch(proxy.print.failure_panels_new_item)
   }
 
-  function add(panelTarget, options={}) {
-    options = {...panelTypes[panelTarget], ...options};
-    let rootItem = _newItem(options);
-    items = [...items, rootItem];
-    return true;
-  };
+function add(panelTarget, options={}) {
+  // TODO render icons into menuItems
+  // TODO render source/dataStore props into actual stores
+  if (!panelTypes.hasOwnProperty(panelTarget)) {
+    // console.log("MISSING PANEL", panelTarget);
+  }
+  Promise.resolve(panelTarget)
+    .then(_target => panelTypes[_target])
+    .then(_type => ({..._type, ...options}))
+    .then(_newItem)
+    .then(_item => [...items, _item])
+    .then(_items => items = _items)
+    .catch(proxy.print.failure_panels_add_item)
+};
 
   const onAdd = (val) => {
     let item = val.detail;
@@ -105,9 +118,9 @@
       "panel-actionmenu",
       // "panel-config",
     ]).forEach((name) => {
-      panels = panels.then((prev) => {
-        return add(name)
-      });
+      panels = panels
+        .then((prev) => add(name))
+        .catch(proxy.print.failure_panel);
     });
     let result = await panels.catch(proxy.print.failure_panels);
     return result;
@@ -121,7 +134,7 @@
   </header>
 
   <section class="relative h-full">
-    <Grid
+    <LayoutGrid
       bind:items={items}
       cols={[[layoutConfig.columnCount * layoutConfig.columnMultiplier, layoutConfig.columnCount]]}
       rowHeight={layoutConfig.rowHeight}
@@ -165,6 +178,6 @@
           {...item.props}
         />
       </div>
-    </Grid>
+    </LayoutGrid>
   </section>
 </main>
