@@ -1,7 +1,6 @@
 // This file is actionsed into and runs this code in the browser tab.
 
 import * as proxy from "./lib/apis/proxy.js";
-import * as actions from "./lib/actions.js";
 import * as content from "./lib/content.js";
 import * as send from "./lib/send.js";
 proxy.print.load_elos_connect_content_actions();
@@ -36,12 +35,12 @@ const handleMessage = (request, sender, sendResponse) => {
 
   const obj = { request, sender, sendResponse };
 
-  if ('media' in request.message) {
+  if (request.message.indexOf('media') != -1) {
     return handleMediaMessage(obj, sendResponse);
 
   } else if (request.message === "set.darkMode") {
     return Promise.resolve(content.elementHexMap) // chesterish
-      .then(actions.applyDarkMode)
+      .then(content.applyDarkMode)
       .then((response) => ({
         response: response,
         success: true 

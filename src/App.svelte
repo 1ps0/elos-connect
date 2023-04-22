@@ -55,7 +55,7 @@
       .then(_opts => ({
         ...hydrateParams(_opts),
         w: layoutConfig.columnCount,
-        h: 7, // FIXME add default height
+        h: 5, // FIXME add default height
         id: genId(),
       }))
       .then(proxy.print.status_panels_new_item)
@@ -109,15 +109,15 @@ function add(panelTarget, options={}) {
   onMount(async () => {
     proxy.print.success_App_mounted();
 
-    let defaults = browser.runtime.getManifest().panels.default;
+    // let defaults = browser.runtime.getManifest().panels.default;
     let panels = Promise.resolve([]);
-    (defaults || [
+    [
       "panel-mainmenu",
       "panel-web-players",
       // "panel-playlists",
       "panel-actionmenu",
       // "panel-config",
-    ]).forEach((name) => {
+    ].forEach((name) => {
       panels = panels
         .then((prev) => add(name))
         .catch(proxy.print.failure_panel);

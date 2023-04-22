@@ -27,6 +27,16 @@ export const menuItems = [
     group: "1"
   },
   {
+    name: "panel-dashboard",
+    value: { icon: "composite", highlight: "Dashboard"},
+    group: "1"
+  },
+  {
+    name: "panel-config",
+    value: { icon: "settings", highlight: "Settings and Config"},
+    group: "1"
+  },
+  {
     name: "panel-web-players",
     value: { icon: "view-modes", highlight: "Web Players" },
     group: "1"
@@ -52,33 +62,8 @@ export const menuItems = [
     group: "1"
   },
   {
-    name: "panel-dashboard",
-    value: { icon: "composite", highlight: "Dashboard"},
-    group: "1"
-  },
-  {
-    name: "panel-config",
-    value: { icon: "settings", highlight: "Settings and Config"},
-    group: "1"
-  },
-  {
     name: "panel-todo",
     value: { icon: "list", highlight: "TODO List"},
     group: "1"
-  },
-  {
-    name: "panel-journal",
-    value: { icon: "polls", highlight: "Journal"},
-    group: "1"
-  },
-  {
-    name: "panel-eventhistory",
-    value: { icon: "view-mode-1", highlight: "Event History"},
-    group: "1"
-  },
-  {
-    name: "panel-actionhistory",
-    value: { icon: "view-mode-2", highlight: "Action History"},
-    group: "2"
   },
 ];

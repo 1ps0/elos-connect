@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
-  import { bringToFront, updatePlaying } from "./lib/actions.js";
+  import * as actions from "./lib/actions.js";
   import * as send from "./lib/send.js";
   import * as proxy from "./lib/apis/proxy.js";
   import ItemList from "./ItemList.svelte";
@@ -10,25 +10,24 @@
   const tabStore = writable([]);
 
   const handlePlayerUpdate = (request, sender, sendResponse) => {
-  console.log("Message: ", request, sender);
-  if (request.type === "playingStateChanged") {
-    // Update the playing state of the corresponding tab
-    tabStore.update((tabs) =>
-      tabs.map((tab) =>
-        tab.id === request.tabId ? { ...tab, playing: request.playing } : tab
-      )
-    );
-  } else {
-    return updatePlaying(tabStore)
-      .then((params) => ({
-        params: params,
-        response: "Response from WebPlayers"
-      }))
-      .then(sendResponse)
-      .catch(proxy.print.failure);
-  }
-};
-
+    console.log("Message: ", request, sender);
+    if (request.type === "playingStateChanged") {
+      // Update the playing state of the corresponding tab
+      tabStore.update((tabs) =>
+        tabs.map((tab) =>
+          tab.id === request.tabId ? { ...tab, playing: request.playing } : tab
+        )
+      );
+    } else {
+      return actions.updatePlaying(tabStore)
+        .then((params) => ({
+          params: params,
+          response: "Response from WebPlayers"
+        }))
+        .then(sendResponse)
+        .catch(proxy.print.failure);
+    }
+  };
 
   const buttonProps = [
     {
@@ -36,7 +35,7 @@
       description: '',
       check: (obj) => true,
       icon: () => 'Show',
-      action: bringToFront
+      action: actions.bringToFront
     },
     {
       name: 'playPause',
@@ -61,7 +60,7 @@
   onMount(async () => {
     proxy.print.success_WebPlayers_mounted();
     browser.runtime.onMessage.addListener(handlePlayerUpdate);
-    updatePlaying(tabStore);
+    actions.updatePlaying(tabStore);
   });
 </script>
 
@@ -69,7 +68,7 @@
   <ItemList
     readonly
     dataStore={tabStore}
-    on:didClick={bringToFront}
+    on:didClick={actions.bringToFront}
     titleKey="title"
     buttons={buttonProps}
   />

@@ -1,53 +1,29 @@
 <script>
 import { onMount } from 'svelte';
 
-
-import { 
-  selectedCopy,
-  downloadVideo,
-  reloadSystem,
-  applyDarkMode,
-  extractReaderText,
-} from "./lib/actions.js";
+import * as actions from "./lib/actions.js";
 import * as proxy from "./lib/apis/proxy.js";
-
-
-// let savePDFButton = document.querySelector('#save-pdf');
-// let courseDataElement = document.querySelector('#active-course-data');
-
-let enabledCourseSites = [
-  "coursera.org",
-  "edx.org",
-  "udemy.com",
-  "khanacademy.org"
-];
-
-
-// --------
-
-
-// --------
 
 let items = [
   {
     title: 'Reload eLOS',
-    click: reloadSystem
+    click: actions.reloadSystem,
   },
   {
     title: 'Set Dark mode 1',
-    click: applyDarkMode,
+    click: actions.applyDarkMode,,
   },
   {
     title: 'Extract Text',
-    click: extractReaderText,
+    click: actions.extractReaderText,,
   },
   {
     title: 'Copy Selected Tabs',
-    click: selectedCopy
+    click: actions.selectedCopy,
   },
   {
     title: 'Download Video',
-    click: downloadVideo
+    click: actions.downloadVideo,
   },
 ]
 onMount(async () => {
@@ -57,18 +33,7 @@ onMount(async () => {
 
 
 <section>
-
-  <!-- <p><button id="save-pdf" on:click={extractReaderText}>Save Reader PDF</button></p> -->
   {#each items as item (item.title)}
     <p><button on:click={item.click}>{item.title}</button></p>
   {/each}
-
-  <div class="panel-section-separator"></div>
-  <div class="panel-section panel-section-header">
-    <div class="text-section-header">Window manipulator</div>
-  </div>
-
 </section>
-
-<style>
-</style>

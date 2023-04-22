@@ -37,9 +37,10 @@ export const reloadSystem = (args) => {
 // ---
 
 export const updatePlaying = (store) => {
-  return browser.tabs.query({
+  return Promise.resolve({
     audible: true
   })
+  .then(browser.tabs.query)
   .then(reduce.tabs)
   .then((tabs) => {
     store.update((knownTabs) => {
@@ -52,8 +53,9 @@ export const updatePlaying = (store) => {
   }).catch(proxy.print.failure_update_playing);
 };
 
-export const selectedCopy = async (e) => {
-  return tabs.getHighlighted()
+export const selectedCopy = (e) => {
+  return Promise.resolve(e)
+    .then(tabs.getHighlighted)
     .then(proxy.print.status_selected_copy)
     .then((tabs) => {
       return tabs.map((tab) => `${tab.title},${tab.url}`).join('\n');
@@ -63,8 +65,9 @@ export const selectedCopy = async (e) => {
     .catch(proxy.print.failure_selected_copy);
 }
 
-export const downloadVideo = (params) => {
-  return tabs.getCurrentActive()
+export const downloadVideo = (e) => {
+  return Promise.resolve(e)
+    .then(tabs.getCurrentActive)
     .then((tab) => ({
       uri: "api/action/download/video",
       body: {
@@ -97,7 +100,8 @@ export const updateClipboard = (newClip) => {
 // --- 
 
 export const applyDarkMode = (e) => {
-  return getCurrentActive()
+  return Promise.resolve(e)
+    .then(tabs.getCurrentActive)
     .then(send.setDarkMode)
     .then(proxy.print.success_apply_dark_mode)
     .catch(proxy.print.failure_apply_dark_mode)
@@ -108,12 +112,11 @@ export const applyDarkMode = (e) => {
 
 
 export const _updateLog = (val) => {
-  const date = dateStringFromDate(new Date());
   return Promise.resolve(val)
     .then((_val) => ({
       ...val,
       at: Math.floor(Date.now() / 1000),
-      timestamp: date
+      timestamp: dateStringFromDate(new Date())
     }))
     .then((_val) => {
       stores.eventLog.update((n) => [...(n.length ? n : (n ? [n] : [])), _val])
@@ -133,7 +136,8 @@ export const updateLog = (e) => {
 
 export const extractReaderText = (e) => {
   // browser.runtime.onMessage.addListener(registerScript);
-  return tabs.getCurrentActive()
+  return Promise.resolve(e)
+    .then(tabs.getCurrentActive)
     .then((_tabs) => {
       return _tabs.filter((tab) => tab.isArticle)[0];
     })
@@ -173,7 +177,8 @@ export const startPlaylist = (name) => {
   10. operations for the current playlist item, the current cursor location
   11. location is by object, as location is over time and object resulting from action
   */
-  return browser.storage.local.get('stash')
+  return Promise.resolve('stash')
+    .then(browser.storage.local.get)
     .then((_stash) => _stash.stash)
     .then((data) => data[name])
     .then((playlist) => {

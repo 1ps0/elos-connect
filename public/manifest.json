@@ -95,9 +95,9 @@
     "omnibox": {
         "keyword" : "elos"
     },
-    "panels": {
-        "default": ["panel-mainmenu"]
-    },
+    // "panels": {
+    //     "default": ["panel-mainmenu"]
+    // },
     "os_env": {
         "archive": {
             "path": "/media/admin/ARCHIVE/unsorted/",
