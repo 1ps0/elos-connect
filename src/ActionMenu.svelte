@@ -11,11 +11,11 @@ let items = [
   },
   {
     title: 'Set Dark mode 1',
-    click: actions.applyDarkMode,,
+    click: actions.applyDarkMode, // this is content-side via message passing
   },
   {
     title: 'Extract Text',
-    click: actions.extractReaderText,,
+    click: actions.extractReaderText, // FIXME this is content-side via message passing
   },
   {
     title: 'Copy Selected Tabs',
@@ -23,7 +23,7 @@ let items = [
   },
   {
     title: 'Download Video',
-    click: actions.downloadVideo,
+    click: actions.downloadVideo, 
   },
 ]
 onMount(async () => {

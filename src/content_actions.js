@@ -58,7 +58,7 @@ const handleMessage = (request, sender, sendResponse) => {
       .then(sendResponse)
       .catch(proxy.print.failure_zip_images_and_text);
 
-  } else if (request.message === 'action.find') {
+  } else if (request.message === 'content.find') {
     return Promise.resolve(request)
       .then(content.getTextForRanges)
       .then(proxy.print.status_find)
@@ -68,8 +68,8 @@ const handleMessage = (request, sender, sendResponse) => {
       .then(sendResponse)
       .catch(proxy.print.failure_handle_message_find);
 
-  } else if (request.message = "action.extractReaderText") {
-    return extractReaderText()
+  } else if (request.message = "content.extractReaderText") {
+    return content.extractReaderText()
       .then(sendResponse)
       .catch(proxy.print.failure_handle_message_extract_reader_text);
   }
