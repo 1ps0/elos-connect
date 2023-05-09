@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html,
+body {
   @apply h-full;
 }
 
@@ -34,7 +35,10 @@ label {
   @apply block;
 }
 
-input, button, select, textarea {
+input,
+button,
+select,
+textarea {
   @apply font-inherit text-base py-1 px-2 m-0 mb-2 box-border border border-gray-300 dark:border-gray-500 rounded;
 }
 

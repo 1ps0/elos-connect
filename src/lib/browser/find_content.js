@@ -2,9 +2,14 @@
  * Get all the text nodes into a single array
  */
 function getNodes() {
-  let walker = document.createTreeWalker(document, window.NodeFilter.SHOW_TEXT, null, false);
+  let walker = document.createTreeWalker(
+    document,
+    window.NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
   let nodes = [];
-  while(node = walker.nextNode()) {
+  while ((node = walker.nextNode())) {
     nodes.push(node);
   }
 
@@ -18,7 +23,6 @@ function getNodes() {
  * of each node.
  */
 function getContexts(ranges) {
-
   let contexts = [];
   let nodes = getNodes();
 
@@ -49,8 +53,8 @@ function redactRect(rect) {
   redaction.style.position = "absolute";
   redaction.style.top = `${rect.top}px`;
   redaction.style.left = `${rect.left}px`;
-  redaction.style.width = `${rect.right-rect.left}px`;
-  redaction.style.height = `${rect.bottom-rect.top}px`;
+  redaction.style.width = `${rect.right - rect.left}px`;
+  redaction.style.height = `${rect.bottom - rect.top}px`;
   document.body.appendChild(redaction);
 }
 

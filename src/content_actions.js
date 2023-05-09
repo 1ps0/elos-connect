@@ -8,46 +8,50 @@ proxy.print.load_elos_connect_content_actions();
 // ----- Util
 
 const isElementVisible = (element) => {
-  let visible = element.offsetWidth ||
+  let visible =
+    element.offsetWidth ||
     element.offsetHeight ||
     element.getClientRects().length > 0;
   console.log("testing element visibility:", visible, element);
   return visible;
-}
+};
 
 const handleMediaMessage = (obj, sendResponse) => {
   return Promise.resolve(obj)
-    .then(obj => ({ 
+    .then((obj) => ({
       ...obj,
-      message: obj.request.message, 
-      tabId: obj.sender.tab.id, 
-      tab: obj.sender.tab 
+      message: obj.request.message,
+      tabId: obj.sender.tab.id,
+      tab: obj.sender.tab,
     }))
     .then(send.toContent)
     .then(content.getPlayingInfo)
     .then(content.renderPlayingStatus)
     .then(sendResponse)
-    .catch(proxy.print.failure_handle_media_message)  
-}
+    .catch(proxy.print.failure_handle_media_message);
+};
 
 const handleMessage = (request, sender, sendResponse) => {
-  console.log("[CONTENT] Message from the page script:", request, sender, sendResponse);
+  console.log(
+    "[CONTENT] Message from the page script:",
+    request,
+    sender,
+    sendResponse
+  );
 
   const obj = { request, sender, sendResponse };
 
-  if (request.message.indexOf('media') != -1) {
+  if (request.message.indexOf("media") != -1) {
     return handleMediaMessage(obj, sendResponse);
-
   } else if (request.message === "set.darkMode") {
     return Promise.resolve(content.elementHexMap) // chesterish
       .then(content.applyDarkMode)
       .then((response) => ({
         response: response,
-        success: true 
+        success: true,
       }))
       .then(sendResponse)
-      .catch(proxy.print.failure_handle_message_set_dark_mode)
-
+      .catch(proxy.print.failure_handle_message_set_dark_mode);
   } else if (message.action === "set.readerMode") {
     return Promise.resolve()
       .then(zipImagesAndText)
@@ -57,8 +61,7 @@ const handleMessage = (request, sender, sendResponse) => {
       }))
       .then(sendResponse)
       .catch(proxy.print.failure_zip_images_and_text);
-
-  } else if (request.message === 'content.find') {
+  } else if (request.message === "content.find") {
     return Promise.resolve(request)
       .then(content.getTextForRanges)
       .then(proxy.print.status_find)
@@ -67,18 +70,18 @@ const handleMessage = (request, sender, sendResponse) => {
       })
       .then(sendResponse)
       .catch(proxy.print.failure_handle_message_find);
-
-  } else if (request.message = "content.extractReaderText") {
-    return content.extractReaderText()
+  } else if ((request.message = "content.extractReaderText")) {
+    return content
+      .extractReaderText()
       .then(sendResponse)
       .catch(proxy.print.failure_handle_message_extract_reader_text);
   }
-}
+};
 
 try {
   proxy.print.success_content_actions_js_mounted();
   browser.runtime.onMessage.addListener(handleMessage);
-  console.log("content_actions.js finished mounting")
+  console.log("content_actions.js finished mounting");
 } catch (e) {
   console.log("Caught content_actions.js init error", e);
-};
+}

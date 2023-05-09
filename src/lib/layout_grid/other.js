@@ -1,6 +1,6 @@
 export const debounce = (fn, ms = 0) => {
   let timeoutId;
-  return function(...args) {
+  return function (...args) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn.apply(this, args), ms);
   };
@@ -9,7 +9,7 @@ export const debounce = (fn, ms = 0) => {
 export function getRowsCount(items) {
   // console.log("[getRowsCount] items:", items)
   // console.log("[getRowsCount] row count: ", Math.max(...items.map(val => val.y + val.h), 1));
-  return Math.max(...items.map(val => val.y + val.h), 1);
+  return Math.max(...items.map((val) => val.y + val.h), 1);
 }
 
 export const getColumnFromBreakpoints = (breakpoints, windowWidth, cols) => {

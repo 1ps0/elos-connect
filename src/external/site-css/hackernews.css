@@ -1,5 +1,5 @@
 body {
-  background-color: #1F2430;
+  background-color: #1f2430;
 }
 
 #hnmain {
@@ -7,7 +7,7 @@ body {
 }
 
 a:link.storylink,
-#hnmain>tbody>tr:first-child>td a,
+#hnmain > tbody > tr:first-child > td a,
 .commtext,
 .commtext a:link,
 td,
@@ -15,7 +15,7 @@ b {
   color: #fafafa;
 }
 
-.comment>.commtext {
+.comment > .commtext {
   color: #fafafa;
 }
 
@@ -23,7 +23,7 @@ td.title {
   color: #fafafa;
 }
 
-#hnmain>tbody>tr:first-child>td {
+#hnmain > tbody > tr:first-child > td {
   background-color: #333a4a;
 }
 
@@ -36,12 +36,11 @@ a:link,
 a.morelink,
 .pagetop,
 .yclinks a,
-.yclinks>a:link,
+.yclinks > a:link,
 .comhead a:link,
 .comhead,
 .hnmore a:link,
-.reply a:link,
-{
+.reply a:link {
   color: #8c96ac;
 }
 
@@ -49,39 +48,39 @@ td .pagetop {
   color: #8c96ac;
 }
 
-td>a:link {
+td > a:link {
   color: #8c96ac;
 }
 
-.titleline>a:link {
+.titleline > a:link {
   color: #8c96ac;
 }
 
-a>u {
+a > u {
   color: #8c96ac;
 }
 
-.comment .reply u>a {
+.comment .reply u > a {
   color: #8c96ac;
 }
 
-.titleline>a:visited {
+.titleline > a:visited {
   color: #979cf4;
 }
 
-.commtext>p>a:link {
+.commtext > p > a:link {
   color: #fafafa;
 }
 
-.comment .commtext>a:link {
+.comment .commtext > a:link {
   color: #fafafa;
 }
 
-.comment .commtext>a:visited {
+.comment .commtext > a:visited {
   color: #979cf4;
 }
 
-.commtext>p>a:visited {
+.commtext > p > a:visited {
   color: #979cf4;
 }
 
@@ -90,12 +89,12 @@ a>u {
   position: relative;
 }
 
-.yclinks>a,
-.yclinks>a:link {
+.yclinks > a,
+.yclinks > a:link {
   color: #8c96ac;
 }
 
-.yclinks>a:visited {
+.yclinks > a:visited {
   color: #979cf4;
 }
 
@@ -112,17 +111,17 @@ a>u {
   border-bottom: 7px solid #bebfd1;
 }
 
-input[type=text],
+input[type="text"],
 textarea {
   background-color: #333a4a;
   color: #fafafa;
-  border: 1px solid #1F2430;
+  border: 1px solid #1f2430;
 }
 
-input[type=submit] {
+input[type="submit"] {
   background-color: #333a4a;
   color: #fafafa;
-  border: 1px solid #1F2430;
+  border: 1px solid #1f2430;
 }
 
 b {

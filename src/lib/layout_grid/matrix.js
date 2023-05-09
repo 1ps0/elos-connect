@@ -2,15 +2,12 @@ import { getRowsCount } from "./other.js";
 
 export const makeMatrix = (rows, cols) => {
   try {
-    return Array.from(
-      { length: rows }, 
-      () => Array.from({ length: cols })
-    ); // make 2d array
+    return Array.from({ length: rows }, () => Array.from({ length: cols })); // make 2d array
   } catch (_err) {
     console.error("[FAILURE][makeMatrix]", _err);
     console.trace();
   }
-}
+};
 
 export function makeMatrixFromItems(items, _row = getRowsCount(items), _col) {
   let matrix = makeMatrix(_row, _col);
@@ -43,7 +40,12 @@ export function findCloseBlocks(items, matrix, curObject) {
   let result = [];
   for (var i = 0; i < tempR.length; i++) {
     let tempA = tempR[i].slice(x, x + w);
-    result = [...result, ...tempA.map(val => val.id && val.id !== curObject.id && val.id).filter(Boolean)];
+    result = [
+      ...result,
+      ...tempA
+        .map((val) => val.id && val.id !== curObject.id && val.id)
+        .filter(Boolean),
+    ];
   }
 
   return [...new Set(result)];
@@ -53,7 +55,7 @@ export function makeMatrixFromItemsIgnore(
   items,
   ignoreList,
   _row, //= getRowsCount(items)
-  _col,
+  _col
 ) {
   let matrix = makeMatrix(_row, _col);
   for (var i = 0; i < items.length; i++) {
@@ -76,5 +78,5 @@ export function makeMatrixFromItemsIgnore(
 }
 
 export function findItemsById(closeBlocks, items) {
-  return items.filter(value => closeBlocks.indexOf(value.id) !== -1);
+  return items.filter((value) => closeBlocks.indexOf(value.id) !== -1);
 }

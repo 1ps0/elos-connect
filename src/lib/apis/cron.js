@@ -1,30 +1,30 @@
 const createAlarm = (alarmName, intervalInDays) => {
-    chrome.alarms.create(alarmName, { periodInDays: intervalInDays });
-}
-
-const clearAlarm = (alarmName) => {
-    chrome.alarms.clear(alarmName);
-}
-
-const isAlarmActive = (alarmName) => {
-    chrome.alarms.get(alarmName, (alarm) => {
-        if (alarm) {
-            console.log(`${alarmName} is active`);
-        } else {
-            console.log(`${alarmName} is not active`);
-        }
-    });
-}
-
-const alarms = {
-    "flashcard-review-alarm": () => createAlarm("flashcard-review-alarm", 1),
-    "content-curation-alarm": () => createAlarm("content-curation-alarm", 7),
-    "knowledge-map-generation": () => createAlarm("knowledge-map-generation", 30),
-    "adaptive-learning-alarm": () => createAlarm("adaptive-learning-alarm", 7),
-    "feedback-loop-alarm": () => createAlarm("feedback-loop-alarm", 1)
+  chrome.alarms.create(alarmName, { periodInDays: intervalInDays });
 };
 
-const cronJob = require('cron-job');
+const clearAlarm = (alarmName) => {
+  chrome.alarms.clear(alarmName);
+};
+
+const isAlarmActive = (alarmName) => {
+  chrome.alarms.get(alarmName, (alarm) => {
+    if (alarm) {
+      console.log(`${alarmName} is active`);
+    } else {
+      console.log(`${alarmName} is not active`);
+    }
+  });
+};
+
+const alarms = {
+  "flashcard-review-alarm": () => createAlarm("flashcard-review-alarm", 1),
+  "content-curation-alarm": () => createAlarm("content-curation-alarm", 7),
+  "knowledge-map-generation": () => createAlarm("knowledge-map-generation", 30),
+  "adaptive-learning-alarm": () => createAlarm("adaptive-learning-alarm", 7),
+  "feedback-loop-alarm": () => createAlarm("feedback-loop-alarm", 1),
+};
+
+const cronJob = require("cron-job");
 
 let cronJobs = [];
 
@@ -39,7 +39,7 @@ const registerCronEvent = (cronExpression, eventToFire) => {
 
 const deleteCronEvent = (jobToDelete) => {
   jobToDelete.stop();
-  cronJobs = cronJobs.filter(job => job !== jobToDelete);
+  cronJobs = cronJobs.filter((job) => job !== jobToDelete);
   return Promise.resolve();
 };
 
@@ -47,16 +47,19 @@ const getCronEvents = () => {
   return Promise.resolve(cronJobs);
 };
 
-
 // ----
 
 const getBookmarkAnnotations = (bookmarkId) => {
-  return browser.bookmarks.get(bookmarkId)
+  return browser.bookmarks
+    .get(bookmarkId)
     .then(([bookmark]) => {
       if (!bookmark || !bookmark.url) {
-        throw new Error(`Bookmark ${bookmarkId} not found or doesn't have a URL`);
+        throw new Error(
+          `Bookmark ${bookmarkId} not found or doesn't have a URL`
+        );
       }
-      return browser.bookmark.getTree()
+      return browser.bookmark
+        .getTree()
         .then(([tree]) => {
           const node = findBookmarkNodeById(tree, bookmarkId);
           if (!node) {
@@ -73,12 +76,16 @@ const getBookmarkAnnotations = (bookmarkId) => {
 };
 
 const setBookmarkAnnotations = (bookmarkId, annotations) => {
-  return browser.bookmarks.get(bookmarkId)
+  return browser.bookmarks
+    .get(bookmarkId)
     .then(([bookmark]) => {
       if (!bookmark || !bookmark.url) {
-        throw new Error(`Bookmark ${bookmarkId} not found or doesn't have a URL`);
+        throw new Error(
+          `Bookmark ${bookmarkId} not found or doesn't have a URL`
+        );
       }
-      return browser.bookmark.getTree()
+      return browser.bookmark
+        .getTree()
         .then(([tree]) => {
           const node = findBookmarkNodeById(tree, bookmarkId);
           if (!node) {
@@ -87,7 +94,7 @@ const setBookmarkAnnotations = (bookmarkId, annotations) => {
           return browser.bookmarks.update(bookmarkId, {
             title: bookmark.title,
             url: bookmark.url,
-            annotations: annotations
+            annotations: annotations,
           });
         })
         .catch(printError);
@@ -116,7 +123,8 @@ const scheduleCronJob = (bookmarkId, callback) => {
   return getCronConfig(bookmarkId)
     .then((config) => {
       const alarmConfig = cronToAlarmConfig(config);
-      return browser.alarms.create(bookmarkId, alarmConfig)
+      return browser.alarms
+        .create(bookmarkId, alarmConfig)
         .then(() => {
           browser.alarms.onAlarm.addListener((alarm) => {
             if (alarm.name === bookmarkId) {
@@ -136,8 +144,9 @@ const scheduleCronJob = (bookmarkId, callback) => {
  *                           or rejects with an error message
  */
 function initCron() {
-  return browser.bookmarks.search({title: "cron-config"})
-    .then(bookmarkNodes => {
+  return browser.bookmarks
+    .search({ title: "cron-config" })
+    .then((bookmarkNodes) => {
       if (bookmarkNodes.length === 0) {
         throw new Error("Cron config not found");
       }
@@ -161,15 +170,16 @@ function initCron() {
  *                          cleared or rejects with an error message
  */
 function clearCronConfig() {
-  return browser.bookmarks.search({title: "cron-config"})
-    .then(bookmarkNodes => {
+  return browser.bookmarks
+    .search({ title: "cron-config" })
+    .then((bookmarkNodes) => {
       if (bookmarkNodes.length === 0) {
         throw new Error("Cron config not found");
       }
 
       return browser.bookmarks.remove(bookmarkNodes[0].id);
     })
-    .catch(error => {
+    .catch((error) => {
       console.error(error);
       throw new Error("Failed to clear cron configuration");
     });
@@ -183,18 +193,18 @@ function clearCronConfig() {
 function onAlarm(alarm) {
   if (alarm.name === "cron") {
     return Promise.resolve(alarm)
-        .then(proxy.print.status_on_alarm)
-        .then(_alarm => _alarm.name)
-        .then(executeCronJob)
-        .catch(proxy.print.failure_execute_cron);
+      .then(proxy.print.status_on_alarm)
+      .then((_alarm) => _alarm.name)
+      .then(executeCronJob)
+      .catch(proxy.print.failure_execute_cron);
   }
 }
 
 function createAlarm(name, delayInMinutes, periodInMinutes) {
-  return browser.alarms.create(name, { delayInMinutes, periodInMinutes })
+  return browser.alarms
+    .create(name, { delayInMinutes, periodInMinutes })
     .catch(proxy.print.failure_create_alarm);
 }
-
 
 function executeCronJob(job) {
   return Promise.resolve(job)
@@ -208,26 +218,25 @@ function executeCronJob(job) {
 }
 
 function validateCronJob(job) {
-  if (!job || typeof job !== 'object') {
-    throw new Error('Invalid cron job object');
+  if (!job || typeof job !== "object") {
+    throw new Error("Invalid cron job object");
   }
-  if (!job.id || typeof job.id !== 'string') {
-    throw new Error('Cron job must have a valid bookmark ID');
+  if (!job.id || typeof job.id !== "string") {
+    throw new Error("Cron job must have a valid bookmark ID");
   }
-  if (!job.action || typeof job.action !== 'string') {
-    throw new Error('Cron job must have a valid action');
+  if (!job.action || typeof job.action !== "string") {
+    throw new Error("Cron job must have a valid action");
   }
-  if (!job.config || typeof job.config !== 'string') {
-    throw new Error('Cron job must have a valid cron configuration');
+  if (!job.config || typeof job.config !== "string") {
+    throw new Error("Cron job must have a valid cron configuration");
   }
   return job;
 }
 
-
 function parseCronConfig(config) {
   const cron = new CronJob(config);
   if (!cron) {
-    throw new Error('Invalid cron configuration');
+    throw new Error("Invalid cron configuration");
   }
   return cron;
 }
@@ -236,7 +245,7 @@ function runCronAction(cron) {
   return Promise.resolve()
     .then(() => {
       if (cron.running) {
-        throw new Error('Cron job already running');
+        throw new Error("Cron job already running");
       }
       cron.start();
     })
@@ -245,8 +254,8 @@ function runCronAction(cron) {
         cron.addCallback(() => {
           try {
             const actionFn = eval(cron.action);
-            if (typeof actionFn !== 'function') {
-              throw new Error('Invalid action function');
+            if (typeof actionFn !== "function") {
+              throw new Error("Invalid action function");
             }
             actionFn();
           } catch (err) {

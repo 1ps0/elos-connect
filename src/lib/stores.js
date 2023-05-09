@@ -11,7 +11,7 @@ so readable(value) internally updates
 then writable calls readable's values for those datasets
 */
 
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
 import * as network from "./apis/network.js";
 
@@ -74,35 +74,35 @@ export const setupBookmarkListeners = (bookmarkTreeNodes) => {
 
 export const monitorBookmarksAt = (folderId) => {
   return Promise.resolve(folderId)
-    .then(folderId => browser.bookmarks.getSubTree(
-      folderId,
-      setupBookmarkListeners
-    ))
+    .then((folderId) =>
+      browser.bookmarks.getSubTree(folderId, setupBookmarkListeners)
+    )
     .catch(proxy.print.failure_setup_subtree_listener);
-}
+};
 
 // -----
 
-export const localStorageFor = (name, otherwise={}) => {
+export const localStorageFor = (name, otherwise = {}) => {
   return Promise.resolve(`${name}`)
     .then(browser.storage.local.get)
-    .catch(print.failure_storage_for)
+    .catch(print.failure_storage_for);
 };
 
-export const bookmarksFor = (name, otherwise={}) => {
+export const bookmarksFor = (name, otherwise = {}) => {
   return Promise.resolve(name)
     .then(bookmarks.search)
-    .catch(proxy.print.failure_bookmarks_for)
+    .catch(proxy.print.failure_bookmarks_for);
 };
 
 const configWritable = writable(workspaceConfig);
-const layoutItemsWritable = writable(bookmarksFor("layoutItems", { items: [], add: [] }));
+const layoutItemsWritable = writable(
+  bookmarksFor("layoutItems", { items: [], add: [] })
+);
 
 export const stores = {
   config: configWritable,
   layoutItems: layoutItemsWritable,
 };
-
 
 Object.entries(stores).forEach((entry) => {
   let name = entry[0];
@@ -118,7 +118,6 @@ Object.entries(stores).forEach((entry) => {
 });
 
 // --- Approach for localStorage
-
 
 // export const stores = {
 //   config: configWritable,
@@ -164,8 +163,6 @@ Object.entries(stores).forEach((entry) => {
 //   });
 // });
 
-
-
 // -- subscriptions
 
 // stores.layoutItems.subscribe(val => {
@@ -186,6 +183,5 @@ Object.entries(stores).forEach((entry) => {
 // stores.actionHistory.subscribe((val) => {
 //   console.log("[update] stores.actionHistory update", val);
 // });
-
 
 export { stores as default };

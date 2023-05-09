@@ -1,7 +1,5 @@
-
 // ------ Commands
 // for commands invoked by omnibox or configured shortcut
-
 
 /*
     "MediaNextTrack"
@@ -15,6 +13,4 @@ export const setupCommands = (params) => {
       console.log("Toggling the feature!");
     }
   });
-
-}
-
+};

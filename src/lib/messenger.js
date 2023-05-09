@@ -1,4 +1,3 @@
-
 /*
 
 messenger control
@@ -14,22 +13,16 @@ action = (node: HTMLEelement, parameters: any) => {
 }
 */
 
-import { createEventDispatcher } from 'svelte';
-import { onMount, setContext, getContext, hasContext } from 'svelte';
+import { createEventDispatcher } from "svelte";
+import { onMount, setContext, getContext, hasContext } from "svelte";
 import { writable, readable, derived, get } from "svelte/store";
 
-import {
-  bringToFront,
-  updatePlaying,
-  print
-} from "./lib/actions.js";
+import { bringToFront, updatePlaying, print } from "./lib/actions.js";
 
 export function messenger(node, params) {
-
   const dispatch = createEventDispatcher();
 
   const _handle = (request, sender, sendResponse) => {
-
     return sendResponse(True);
   };
 
@@ -40,17 +33,15 @@ export function messenger(node, params) {
     //   source: "fileset",
     //   data: file
     // });
-
-  }
-  node.addEventListener('click', handleMsg);
-
+  };
+  node.addEventListener("click", handleMsg);
 
   const handlePlayerUpdate = (request, sender, sendResponse) => {
     console.log("Message: ", request, sender);
     return updatePlaying(tabStore)
       .then((params) => ({
         params: params,
-        response: "Response from WebPlayers"
+        response: "Response from WebPlayers",
       }))
       .then(sendResponse)
       .catch(print.failure);
@@ -63,7 +54,7 @@ export function messenger(node, params) {
     },
     destroy() {
       console.log("messenger is destroyed");
-      node.removeListener('click', handleMsg);
-    }
+      node.removeListener("click", handleMsg);
+    },
   };
 }

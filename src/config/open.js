@@ -1,4 +1,3 @@
-
 export const openWith = {
   "panel-editor": ["md", "txt", "json", "py", "js"],
   "panel-pdf": "pdf",

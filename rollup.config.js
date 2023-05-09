@@ -16,7 +16,7 @@ function getCommonPlugins(cssOutput) {
     resolve({
       browser: true,
       dedupe: ["svelte"],
-      exportConditions: ['svelte', 'module']
+      exportConditions: ["svelte", "module"],
     }),
     commonjs(),
   ];
@@ -87,6 +87,6 @@ export default [
     plugins: getCommonPlugins("css/content_actions.css"),
     watch: {
       clearScreen: false,
-    }
-  }
+    },
+  },
 ];

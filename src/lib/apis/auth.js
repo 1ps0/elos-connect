@@ -1,4 +1,3 @@
-
 // --- browser impl
 
 /*global getAccessToken*/
@@ -15,4 +14,4 @@ const setupAuth = () => {
       .catch(print.failure);
   */
   browser.identity.getRedirectURL();
-}
+};

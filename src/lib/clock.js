@@ -1,13 +1,12 @@
-
-import { readable } from 'svelte/store';
+import { readable } from "svelte/store";
 
 export const minutesToSeconds = (minutes) => minutes * 60;
 export const secondsToMinutes = (seconds) => Math.floor(seconds / 60);
-export const padWithZeroes = (number) => number.toString().padStart(2, '0');
+export const padWithZeroes = (number) => number.toString().padStart(2, "0");
 export const capitalize = (phrase) => {
   return phrase.replace(/^\w/, (c) => {
     return c.toUpperCase();
-  })
+  });
 };
 
 // render functions for content
@@ -17,35 +16,37 @@ export const formatTime = (timeInSeconds) => {
   return `${padWithZeroes(minutes)}:${padWithZeroes(remainingSeconds)}`;
 };
 
-export const clockFormatter = new Intl.DateTimeFormat('en', {
+export const clockFormatter = new Intl.DateTimeFormat("en", {
   hour12: true,
-  hour: 'numeric',
-  minute: '2-digit',
-  second: '2-digit'
+  hour: "numeric",
+  minute: "2-digit",
+  second: "2-digit",
 });
 
 export const dateStringFromDate = (date) => date.toLocaleDateString();
 export const dateStringNow = () => dateStringFromDate(new Date());
 
 export const clockStore = readable(new Date(), function start(set) {
-    const interval = setInterval(() => {
-        set(new Date());
-    }, 1000);
+  const interval = setInterval(() => {
+    set(new Date());
+  }, 1000);
 
-    return function stop() {
-        clearInterval(interval);
-    };
+  return function stop() {
+    clearInterval(interval);
+  };
 });
 
 export const clockAction = (node, args) => {
   clockStore.subscribe((val) => {
-    node.innerHTML = `${dateStringFromDate(val)} | ${clockFormatter.format(val)}`;
+    node.innerHTML = `${dateStringFromDate(val)} | ${clockFormatter.format(
+      val
+    )}`;
   });
 
   return {
     update(val) {},
-    destroy() {}
-  }
+    destroy() {},
+  };
 };
 
 // import { clockStore } from "./clock.js"
@@ -55,12 +56,18 @@ export const timerAction = (node, args) => {
   let started = false;
   let interval = _args.interval;
   let timerP = node.querySelector("p.timer");
-  console.log("Loading TIMERACTION", node, '|', _args, '|', timerP);
+  console.log("Loading TIMERACTION", node, "|", _args, "|", timerP);
 
   let unsubscribe = clockStore.subscribe((val) => {
     let doc = document.querySelector("p.timer");
     if (doc && started) {
-      console.log("p.timer", doc, interval, formatTime(interval), doc.innerHTML);
+      console.log(
+        "p.timer",
+        doc,
+        interval,
+        formatTime(interval),
+        doc.innerHTML
+      );
       doc.innerHTML = formatTime(interval);
       interval -= 1;
       args.onEnd ? args.onEnd() : null;
@@ -68,7 +75,7 @@ export const timerAction = (node, args) => {
   });
 
   node.querySelectorAll("button").forEach((button) => {
-    switch(button.name) {
+    switch (button.name) {
       case "start":
         button.addEventListener("click", (e) => {
           started = true;
@@ -104,9 +111,6 @@ export const timerAction = (node, args) => {
     update(val) {},
     destroy() {
       unsubscribe();
-    }
-  }
+    },
+  };
 };
-
-
-

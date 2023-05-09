@@ -1,4 +1,3 @@
-
 // import Tagset from "./Tagset.svelte";
 import Timer from "./Timer.svelte";
 import Todo from "./Todo.svelte";
@@ -17,17 +16,16 @@ import EntryForm from "./EntryForm.svelte";
 import Dashboard from "./Dashboard.svelte";
 
 export const components = {
-    "dashboard": Dashboard,
-    "focus": Focus,
-    "timer": Timer,
-    "config": Config,
-    "todo": Todo,
-    "expandlist": ExpandList,
-    "itemlist": ItemList,
-    "selectlist": SelectList,
-    "actionmenu": ActionMenu,
-    "web_players": WebPlayers,
-    "playlists": Playlists,
-    "entryform": EntryForm,
+  dashboard: Dashboard,
+  focus: Focus,
+  timer: Timer,
+  config: Config,
+  todo: Todo,
+  expandlist: ExpandList,
+  itemlist: ItemList,
+  selectlist: SelectList,
+  actionmenu: ActionMenu,
+  web_players: WebPlayers,
+  playlists: Playlists,
+  entryform: EntryForm,
 };
-

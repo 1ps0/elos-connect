@@ -63,25 +63,24 @@ import WifiOff from "carbon-icons-svelte/lib/WifiOff.svelte";
 import Wifi from "carbon-icons-svelte/lib/Wifi.svelte";
 import Zip from "carbon-icons-svelte/lib/Zip.svelte";
 
-
 export let icons = {
   // main menu
-  "alarm": Alarm,
-  "cli": Terminal,
-  "code": Code,
-  "list": CollapseCategories,
-  "table": CrossTab,
-  "image": Image,
-  "files": Categories,
-  "packages": ModelAlt,
-  "education": Education,
-  "profile": UserAvatarFilled,
-  "settings": Settings,
-  "preferences": AudioConsole,
-  "polls": DeployRules,
+  alarm: Alarm,
+  cli: Terminal,
+  code: Code,
+  list: CollapseCategories,
+  table: CrossTab,
+  image: Image,
+  files: Categories,
+  packages: ModelAlt,
+  education: Education,
+  profile: UserAvatarFilled,
+  settings: Settings,
+  preferences: AudioConsole,
+  polls: DeployRules,
 
   // dataviz
-  "composite": DataVis_4,
+  composite: DataVis_4,
 
   // toolbar
   "status-hidden": AccessibilityColor,
@@ -105,24 +104,24 @@ export let icons = {
   "task-merge": Compare,
 
   // configuration
-  "apis": Api_1,
-  "apps": App,
+  apis: Api_1,
+  apps: App,
 
   //
-  "transript": ClosedCaptionAlt,
-  "download": Download,
-  "upload": Export,
+  transript: ClosedCaptionAlt,
+  download: Download,
+  upload: Export,
 
-  "directions": Crossroads,
-  "cut": Cut,
-  "TrashCan": TrashCan,
+  directions: Crossroads,
+  cut: Cut,
+  TrashCan: TrashCan,
 
   // filetypes
-  "jpg": Jpg,
-  "json": Json,
-  "pdf": Pdf,
-  "txt": Txt,
-  "zip": Zip,
+  jpg: Jpg,
+  json: Json,
+  pdf: Pdf,
+  txt: Txt,
+  zip: Zip,
 
   // mode settings
   "night-mode": Awake,
@@ -135,10 +134,8 @@ export let icons = {
   "view-mode-4": WatsonHealthThumbnailPreview,
 
   // misc
-  "menu": Menu,
-  "sql": Sql,
-  "tools": ToolsAlt,
-  "warning": Warning,
-
-
+  menu: Menu,
+  sql: Sql,
+  tools: ToolsAlt,
+  warning: Warning,
 };

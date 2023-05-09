@@ -1,8 +1,9 @@
-
 // import { stores } from "./stores.js";
 
-export const selectedFile = (item) => item ? item['locations'][0].split('/Volumes/ARCHIVE/')[1] : "";
-export const selectedFilePath = (item) => `/api/load?filepath=${selectedFile(item)}`;
+export const selectedFile = (item) =>
+  item ? item["locations"][0].split("/Volumes/ARCHIVE/")[1] : "";
+export const selectedFilePath = (item) =>
+  `/api/load?filepath=${selectedFile(item)}`;
 
 export const fileList = async (params) => {
   // _fetch("/api/file/search", params).then( (data) => {
@@ -14,22 +15,19 @@ export const fileList = async (params) => {
 };
 
 export const openFile = (e) => {
-  console.log('open file', e);
+  console.log("open file", e);
   let data = e.detail;
   return _openFile(data);
 };
 
-
 export const _openFile = (data) => {
   let target;
 
-  if (["md", "txt", "json", "py", "js"].indexOf(data['file.ext']) != -1) {
+  if (["md", "txt", "json", "py", "js"].indexOf(data["file.ext"]) != -1) {
     target = "panel-editor";
-  }
-  else if (data['file.ext'] === "pdf") {
+  } else if (data["file.ext"] === "pdf") {
     target = "panel-pdf";
-  }
-  else if (["jpg", "gif", "png"].indexOf(data['file.ext']) != -1) {
+  } else if (["jpg", "gif", "png"].indexOf(data["file.ext"]) != -1) {
     target = "panel-gallery";
   }
 
@@ -38,10 +36,10 @@ export const _openFile = (data) => {
       target_name: target,
       props: {
         data: selectedFilePath(data),
-        language: data['file.ext'] || 'markdown',
-        theme: 'vs-light',
-        features: ['wordWrap',]
-      }
+        language: data["file.ext"] || "markdown",
+        theme: "vs-light",
+        features: ["wordWrap"],
+      },
     };
     console.log("data for open file", options);
 
@@ -57,4 +55,4 @@ export const _openFile = (data) => {
     //   return n;
     // });
   }
-}
+};

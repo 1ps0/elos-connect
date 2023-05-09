@@ -33,7 +33,7 @@ div.control.svelte-ie0v0j {
 }
 .tag.svelte-15zcbkn.svelte-15zcbkn {
   top: 20px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
 }
 
 /* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/AutoComplete.esbuild-svelte-fake-css */
@@ -45,14 +45,14 @@ div.control.svelte-ie0v0j {
 input.svelte-z3l8tr.svelte-z3l8tr {
   height: 2.25rem;
   min-width: 200px;
-  padding: .25rem .5rem;
+  padding: 0.25rem 0.5rem;
   font-size: 1rem;
   color: #333;
-  border-radius: .25rem;
+  border-radius: 0.25rem;
   box-shadow: inset 0 1px 2px rgba(10, 10, 10, 0.1);
 }
 input.modified-search.svelte-z3l8tr.svelte-z3l8tr {
-  padding: .25rem 2rem .25rem var(--modifier-label-width);
+  padding: 0.25rem 2rem 0.25rem var(--modifier-label-width);
 }
 input.svelte-z3l8tr.svelte-z3l8tr,
 .results-list.svelte-z3l8tr.svelte-z3l8tr {
@@ -61,12 +61,12 @@ input.svelte-z3l8tr.svelte-z3l8tr,
 .search-modifier.svelte-z3l8tr.svelte-z3l8tr {
   display: block;
   position: absolute;
-  left: .25rem;
-  top: .25rem;
-  height: calc(100% - .5rem);
+  left: 0.25rem;
+  top: 0.25rem;
+  height: calc(100% - 0.5rem);
   display: flex;
   align-items: center;
-  padding: .25rem;
+  padding: 0.25rem;
   border-radius: 3px;
   background-color: var(--theme);
   color: var(--highlightTextColor);
@@ -103,7 +103,7 @@ input.svelte-z3l8tr.svelte-z3l8tr,
   border: none;
 }
 .results-list.svelte-z3l8tr li.svelte-z3l8tr {
-  padding: .5rem;
+  padding: 0.5rem;
   user-select: none;
 }
 .results-list li span {
@@ -118,11 +118,11 @@ input.svelte-z3l8tr.svelte-z3l8tr,
 .search-label.svelte-z3l8tr.svelte-z3l8tr {
   border: 1px solid var(--theme);
   background-color: var(--theme);
-  border-radius: .25rem;
-  padding: .25rem;
-  margin-right: .25rem;
+  border-radius: 0.25rem;
+  padding: 0.25rem;
+  margin-right: 0.25rem;
   color: var(--highlightTextColor);
-  font-size: .5rem;
+  font-size: 0.5rem;
   font-weight: 500;
 }
 .highlight.svelte-z3l8tr .search-label.svelte-z3l8tr {
@@ -139,8 +139,8 @@ input.svelte-z3l8tr.svelte-z3l8tr,
 .svelte-autocomplete svg {
   width: 1.5rem;
   position: absolute;
-  top: .25rem;
-  right: .35rem;
+  top: 0.25rem;
+  right: 0.35rem;
   fill: var(--theme);
 }
 
@@ -321,10 +321,7 @@ ul.svelte-84ijo1.svelte-84ijo1 {
   color: white;
 }
 section.svelte-84ijo1.svelte-84ijo1 {
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 /* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/RotateList.esbuild-svelte-fake-css */
@@ -442,11 +439,11 @@ select.svelte-eq9bqq {
 }
 
 /* fakecss:/Volumes/FATMAN/projects/elos-plugin/elos-web/src/EntryForm.esbuild-svelte-fake-css */
-input[type=number].svelte-17rnl1l {
+input[type="number"].svelte-17rnl1l {
   width: 80%;
   padding: 5px;
 }
-input[type=text].svelte-17rnl1l,
+input[type="text"].svelte-17rnl1l,
 select.svelte-17rnl1l,
 textarea.svelte-17rnl1l {
   width: 80%;
@@ -458,15 +455,15 @@ textarea.svelte-17rnl1l {
   margin-bottom: 16px;
   resize: vertical;
 }
-input[type=submit].svelte-17rnl1l {
-  background-color: #4CAF50;
+input[type="submit"].svelte-17rnl1l {
+  background-color: #4caf50;
   color: white;
   padding: 12px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
-input[type=submit].svelte-17rnl1l:hover {
+input[type="submit"].svelte-17rnl1l:hover {
   background-color: #45a049;
 }
 .container.svelte-17rnl1l {
@@ -481,8 +478,8 @@ input[type=submit].svelte-17rnl1l:hover {
   background: #d3d3d3;
   outline: none;
   opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
 }
 .slider.svelte-17rnl1l:hover {
   opacity: 1;
@@ -492,13 +489,13 @@ input[type=submit].svelte-17rnl1l:hover {
   appearance: none;
   width: 25px;
   height: 25px;
-  background: #4CAF50;
+  background: #4caf50;
   cursor: pointer;
 }
 .slider.svelte-17rnl1l::-moz-range-thumb {
   width: 25px;
   height: 25px;
-  background: #4CAF50;
+  background: #4caf50;
   cursor: pointer;
 }
 
@@ -538,7 +535,7 @@ input[type=submit].svelte-17rnl1l:hover {
   margin: 0.25em;
   font-size: 0.7em;
   color: blue;
-  background-color: #EEE;
+  background-color: #eee;
 }
 .container.svelte-346eva.svelte-346eva {
   width: 97%;
@@ -580,7 +577,7 @@ tr.svelte-l8zbvb {
   display: none;
 }
 button.svelte-om5pol {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: #ffffff;
   border: none;
   padding: 10px 20px;

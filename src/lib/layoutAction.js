@@ -1,33 +1,32 @@
-
-import { createEventDispatcher } from 'svelte';
-import { onMount, setContext, getContext, hasContext } from 'svelte';
+import { createEventDispatcher } from "svelte";
+import { onMount, setContext, getContext, hasContext } from "svelte";
 import { writable, readable, derived, get } from "svelte/store";
 
-export function _() {};
+export function _() {}
 
 let config = {
   dataKey: "",
   dataSourcePath: "",
   dataStorePath: "",
   "panel-locations": {
-      target: "panel-locations",
-      name: "locations",
-      w: 60,
-      componentName: "itemlist",
-      props: {
-        readonly: true,
-        dataStore: "links",
-        dataSourcePath: "/api/location/search",
-        titleKey: "label",
-        transform: ((x) => x)
-      },
-      inputs: {
-        "panel-tags": 'value',
-      }
+    target: "panel-locations",
+    name: "locations",
+    w: 60,
+    componentName: "itemlist",
+    props: {
+      readonly: true,
+      dataStore: "links",
+      dataSourcePath: "/api/location/search",
+      titleKey: "label",
+      transform: (x) => x,
     },
-}
+    inputs: {
+      "panel-tags": "value",
+    },
+  },
+};
 
-let dataStore = writable({})
+let dataStore = writable({});
 
 // action = (node: HTMLElement, parameters: any) => {
 //   update?: (parameters: any) => void,
@@ -35,9 +34,8 @@ let dataStore = writable({})
 // }
 export function _layoutAction(node, items) {
   let _items = writable(items);
-  _items.subscribe(val => {
+  _items.subscribe((val) => {
     if (!val || val.length === 0 || !val.dirty) return;
-
 
     let __items = [];
     for (let x = 0; x < val.add.length; x++) {
@@ -45,9 +43,8 @@ export function _layoutAction(node, items) {
       __items.push(add(pendingItem[0], pendingItem[1]));
     }
     // items = val.items;
-    _items.update( n => ({...n.items, add: [], dirty: false }));
+    _items.update((n) => ({ ...n.items, add: [], dirty: false }));
   });
-
 
   const onAdd = (val) => {
     console.log("did onAdd", val);
@@ -72,22 +69,18 @@ export function _layoutAction(node, items) {
 
   function _togglePanel(itemName) {
     let _layout = items.filter((value) => value.target === itemName);
-    if (_layout.length > 0)
-      remove(itemName);
-    else
-      add(itemName);
-  };
-
-
+    if (_layout.length > 0) remove(itemName);
+    else add(itemName);
+  }
 
   const dispatch = createEventDispatcher();
   const clickHandler = (e) => {
     e.preventDefault();
-    dispatch('activateItem', {
+    dispatch("activateItem", {
       source: node.name,
-      data: item
+      data: item,
     });
-  }
+  };
 
   // node.addEventListener('click', openProfile);
 
@@ -97,6 +90,6 @@ export function _layoutAction(node, items) {
     },
     destroy() {
       console.log("widget was destroyed");
-    }
-  }
-};
+    },
+  };
+}
