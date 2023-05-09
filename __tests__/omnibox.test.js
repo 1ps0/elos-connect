@@ -1,19 +1,23 @@
-import { _cmds} from "../lib/omnibox.js";
+import { _cmds } from "../lib/omnibox.js";
 
 _cmds.forEach((item, key) => {
-  if ('action' in item) {};
-  if ('content' in item) {};
-  if ('description' in item) {};
-  if ('suggestions' in item) {};
+  if ("action" in item) {
+  }
+  if ("content" in item) {
+  }
+  if ("description" in item) {
+  }
+  if ("suggestions" in item) {
+  }
 });
 
-test('browser.omnibox.setDefaultSuggestion', () => {
+test("browser.omnibox.setDefaultSuggestion", () => {
   expect(jest.isMockFunction(browser.omnibox.setDefaultSuggestion)).toBe(true);
-  browser.omnibox.setDefaultSuggestion({ description: 'mocking things' });
+  browser.omnibox.setDefaultSuggestion({ description: "mocking things" });
   expect(browser.omnibox.setDefaultSuggestion).toBeCalled();
 });
 
-test('browser.omnibox.onInputStarted.addListener', () => {
+test("browser.omnibox.onInputStarted.addListener", () => {
   expect(jest.isMockFunction(browser.omnibox.onInputStarted.addListener)).toBe(
     true
   );
@@ -21,7 +25,7 @@ test('browser.omnibox.onInputStarted.addListener', () => {
   expect(browser.omnibox.onInputStarted.addListener).toBeCalled();
 });
 
-test('browser.omnibox.onInputChanged.addListener', () => {
+test("browser.omnibox.onInputChanged.addListener", () => {
   expect(jest.isMockFunction(browser.omnibox.onInputChanged.addListener)).toBe(
     true
   );
@@ -29,7 +33,7 @@ test('browser.omnibox.onInputChanged.addListener', () => {
   expect(browser.omnibox.onInputStarted.addListener).toBeCalled();
 });
 
-test('browser.omnibox.onInputEntered.addListener', () => {
+test("browser.omnibox.onInputEntered.addListener", () => {
   expect(jest.isMockFunction(browser.omnibox.onInputEntered.addListener)).toBe(
     true
   );

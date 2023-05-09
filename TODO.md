@@ -1,23 +1,21 @@
-
 # TODO
 
 > updated 12-4-2022
 > https://jasmine.github.io/
 
-
 - build tests
 
 - bookmarks as storage
-    - topics/
-    - daily/
-    - in-progress/
+  - topics/
+  - daily/
+  - in-progress/
 -
 
 - daily:
-    - daily journal document (mm-dd-yyyy.md)
-    - daily recurring items (todo, schedule reminders)
-    - daily work items (gmail, duolingo, coursera)
-    -
+  - daily journal document (mm-dd-yyyy.md)
+  - daily recurring items (todo, schedule reminders)
+  - daily work items (gmail, duolingo, coursera)
+  -
 
 ---
 
@@ -39,34 +37,35 @@
 14. package/playlist builder
 15. sync options
 
-
 stash
-  select:
-    current
-    window
-  as:
-    taglist
+select:
+current
+window
+as:
+taglist
 
 capture
-  type:
-    video
-    audio
-  as:
-    pip
-    save
-
+type:
+video
+audio
+as:
+pip
+save
 
 Steps
+
 1. Input type: Url or File
 2. Add urls or files
 3. list some simple actions that are validated as possible
 
 actions:
+
 - apply template
 - detect content type: mime, extract images, guess textbook/other
 -
 
 templates/processing actions:
+
 - extract: {format: textbook, type: lecture 1}
 - website: [site for site in extract_children_links(url)]
 - video: transcript and audio extraction. timeline it.
@@ -82,8 +81,9 @@ templates/processing actions:
 ## Items
 
 - move tab to window
-    - specify which window
-    - each object is a primitive, alias or lookup
+
+  - specify which window
+  - each object is a primitive, alias or lookup
 
 - move selected to window
 
@@ -100,12 +100,12 @@ idea: key combo to switch between sections of the application
 
 - ex: cmd+L focus on url bar
 
-
 ---
 
 idea: autostash
 
 lifecycle events for tabs
+
 - discard after x time inactive
 - hide after y time inactive (skip this, out of band)
 - stash after z time inactive
@@ -114,37 +114,36 @@ lifecycle events for tabs
 - stash autosort, enqueue,
 - determine "completeness" of viewing (video %, page #, etc)
 - feature: article queue,
-    - top word text vectors
-        - grouped into n clusters depending on proximal distances within the known space
-    - vs semantics of generated/manual tag phrases in static lists
+  - top word text vectors
+    - grouped into n clusters depending on proximal distances within the known space
+  - vs semantics of generated/manual tag phrases in static lists
 - 'rescue' stashed tabs, can we capture session state?
 
 - lifecycle cron/windowing:
-    - decrement a "life point" every x time units
-    - reset or downgrade tab/window state
-    - select by tags for different effects (ex: "test" window having more permanence, or get trimmed by default)
+
+  - decrement a "life point" every x time units
+  - reset or downgrade tab/window state
+  - select by tags for different effects (ex: "test" window having more permanence, or get trimmed by default)
 
 - lifecycle schemes customizable and premade
-    - autostash
-    - daily cull
-    - consolidate to one window
-    -
+  - autostash
+  - daily cull
+  - consolidate to one window
+  -
 
 ---
 
 identifiers
 areas = {
-    browser: {  },
-    tabGroup: { this, here, window, selected, all },
-    displayTypes: {
-        webAction: { toggle playing, toggle loop, edit playing list, toggle playing list },
-        browserAction: {},
-        remoteAction: { sync pull, sync push, search remote, }
-    },
-
+browser: { },
+tabGroup: { this, here, window, selected, all },
+displayTypes: {
+webAction: { toggle playing, toggle loop, edit playing list, toggle playing list },
+browserAction: {},
+remoteAction: { sync pull, sync push, search remote, }
+},
 
 }
-
 
 components for the parent child relationship between settings and implementation structure
 settings are seeds
@@ -153,40 +152,40 @@ structure is the set of steps from those seeds
 profile:
 
 - user:
-    - inspiration picture
-    - mantra
-    - reminders
-    - recent
-    - new session
+
+  - inspiration picture
+  - mantra
+  - reminders
+  - recent
+  - new session
 
 - profile: (personaset)
-    - persona name
-    - goals
-    - keywords and interests
-    - past education topics
-    - affinities
-    - backlog import/export (function)
-    - study level
-    - statistics:
-        - top timer items
-        - study session count and duration desc
-        - goals met
-        - achivements
-        -
-    - preferred learning methods
-        - visual / auditory / text-only
-        - level of metadata/processing extracted (summaries, keywords, etc)
-        -
-    - scans:
-        - scan archives
-        - rescan every: schedule
-        - scan git repos
-        -
-    - processing:
-        - extract pdfs
-        - thumbnail images
-        - rasterize images
-    - display:
-        - render markdown files
-        -
-
+  - persona name
+  - goals
+  - keywords and interests
+  - past education topics
+  - affinities
+  - backlog import/export (function)
+  - study level
+  - statistics:
+    - top timer items
+    - study session count and duration desc
+    - goals met
+    - achivements
+    -
+  - preferred learning methods
+    - visual / auditory / text-only
+    - level of metadata/processing extracted (summaries, keywords, etc)
+    -
+  - scans:
+    - scan archives
+    - rescan every: schedule
+    - scan git repos
+    -
+  - processing:
+    - extract pdfs
+    - thumbnail images
+    - rasterize images
+  - display:
+    - render markdown files
+    -

@@ -8,9 +8,9 @@ beforeEach(() => {
   browser.runtime.onMessageExternal.hasListener.mockClear();
 });
 
-describe('browser.runtime', () => {
-  test('connect', () => {
-    const name = 'CONNECT_NAME';
+describe("browser.runtime", () => {
+  test("connect", () => {
+    const name = "CONNECT_NAME";
     expect(jest.isMockFunction(browser.runtime.connect)).toBe(true);
     const connection = browser.runtime.connect({ name });
     expect(connection.name).toEqual(name);
@@ -20,36 +20,36 @@ describe('browser.runtime', () => {
     expect(jest.isMockFunction(connection.disconnect)).toBe(true);
     expect(browser.runtime.connect).toHaveBeenCalledTimes(1);
   });
-  test('connect.onMessage listener', (done) => {
-    const name = 'CONNECT_NAME';
+  test("connect.onMessage listener", (done) => {
+    const name = "CONNECT_NAME";
     const listener = jest.fn();
     browser.runtime.connect(name).onMessage.addListener(listener);
-    browser.runtime.sendMessage({ test: 'message' }, done);
-    expect(listener).toHaveBeenCalledWith({ test: 'message' });
+    browser.runtime.sendMessage({ test: "message" }, done);
+    expect(listener).toHaveBeenCalledWith({ test: "message" });
   });
-  test('getURL', () => {
-    const path = 'TEST_PATH';
+  test("getURL", () => {
+    const path = "TEST_PATH";
     expect(jest.isMockFunction(browser.runtime.getURL)).toBe(true);
     const respPath = browser.runtime.getURL(path);
     expect(respPath).toEqual(path);
     expect(browser.runtime.getURL).toHaveBeenCalledTimes(1);
   });
-  test('sendMessage', (done) => {
+  test("sendMessage", (done) => {
     const callback = jest.fn(() => done());
     expect(jest.isMockFunction(browser.runtime.sendMessage)).toBe(true);
-    browser.runtime.sendMessage({ test: 'message' }, callback);
+    browser.runtime.sendMessage({ test: "message" }, callback);
     expect(browser.runtime.sendMessage).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledTimes(1);
-    browser.runtime.sendMessage({ test: 'message' });
+    browser.runtime.sendMessage({ test: "message" });
     expect(browser.runtime.sendMessage).toHaveBeenCalledTimes(2);
   });
-  test('sendMessage listener', (done) => {
+  test("sendMessage listener", (done) => {
     const listener = jest.fn();
     browser.runtime.onMessage.addListener(listener);
-    browser.runtime.sendMessage({ test: 'message' }, done);
-    expect(listener).toHaveBeenCalledWith({ test: 'message' });
+    browser.runtime.sendMessage({ test: "message" }, done);
+    expect(listener).toHaveBeenCalledWith({ test: "message" });
   });
-  test('sendMessage promise', () => {
+  test("sendMessage promise", () => {
     return expect(browser.runtime.sendMessage({})).resolves.toBeUndefined();
   });
   test(`onMessage.addListener`, () => {
@@ -84,35 +84,41 @@ describe('browser.runtime', () => {
   });
   test(`onMessageExternal.addListener`, () => {
     const callback = jest.fn();
-    expect(jest.isMockFunction(browser.runtime.onMessageExternal.addListener)).toBe(
-      true
-    );
+    expect(
+      jest.isMockFunction(browser.runtime.onMessageExternal.addListener)
+    ).toBe(true);
     browser.runtime.onMessageExternal.addListener(callback);
-    expect(browser.runtime.onMessageExternal.addListener).toHaveBeenCalledTimes(1);
+    expect(browser.runtime.onMessageExternal.addListener).toHaveBeenCalledTimes(
+      1
+    );
     expect(callback).toHaveBeenCalledTimes(0);
   });
   test(`onMessageExternal.removeListener`, () => {
     const callback = jest.fn();
-    expect(jest.isMockFunction(browser.runtime.onMessageExternal.removeListener)).toBe(
-      true
-    );
+    expect(
+      jest.isMockFunction(browser.runtime.onMessageExternal.removeListener)
+    ).toBe(true);
     browser.runtime.onMessageExternal.removeListener(callback);
     expect(browser.runtime.onMessageExternal.hasListener(callback)).toBe(false);
-    expect(browser.runtime.onMessageExternal.removeListener).toHaveBeenCalledTimes(1);
+    expect(
+      browser.runtime.onMessageExternal.removeListener
+    ).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledTimes(0);
   });
   test(`onMessageExternal.hasListener`, () => {
     const callback = jest.fn();
-    expect(jest.isMockFunction(browser.runtime.onMessageExternal.hasListener)).toBe(
-      true
-    );
+    expect(
+      jest.isMockFunction(browser.runtime.onMessageExternal.hasListener)
+    ).toBe(true);
     browser.runtime.onMessageExternal.addListener(callback);
     const returnVal = browser.runtime.onMessageExternal.hasListener(callback);
     expect(returnVal).toBe(true);
-    expect(browser.runtime.onMessageExternal.hasListener).toHaveBeenCalledTimes(1);
+    expect(browser.runtime.onMessageExternal.hasListener).toHaveBeenCalledTimes(
+      1
+    );
     expect(callback).toHaveBeenCalledTimes(0);
   });
-  ['addListener', 'removeListener', 'hasListener'].forEach((method) => {
+  ["addListener", "removeListener", "hasListener"].forEach((method) => {
     test(`onConnect.${method}`, () => {
       const callback = jest.fn();
       expect(jest.isMockFunction(browser.runtime.onConnect[method])).toBe(true);
@@ -121,7 +127,7 @@ describe('browser.runtime', () => {
       expect(callback).toHaveBeenCalledTimes(0);
     });
   });
-  ['addListener', 'removeListener', 'hasListener'].forEach((method) => {
+  ["addListener", "removeListener", "hasListener"].forEach((method) => {
     test(`onInstalled.${method}`, () => {
       const callback = jest.fn();
       expect(jest.isMockFunction(browser.runtime.onInstalled[method])).toBe(
@@ -132,12 +138,12 @@ describe('browser.runtime', () => {
       expect(callback).toHaveBeenCalledTimes(0);
     });
   });
-  test('openOptionsPage', () => {
+  test("openOptionsPage", () => {
     expect(jest.isMockFunction(browser.runtime.openOptionsPage)).toBe(true);
     browser.runtime.openOptionsPage();
     expect(browser.runtime.openOptionsPage).toHaveBeenCalledTimes(1);
   });
-  test('getManifest', () => {
+  test("getManifest", () => {
     expect(jest.isMockFunction(browser.runtime.getManifest)).toBe(true);
     expect(browser.runtime.getManifest()).toEqual({ manifest_version: 3 });
     expect(browser.runtime.getManifest).toHaveBeenCalledTimes(1);

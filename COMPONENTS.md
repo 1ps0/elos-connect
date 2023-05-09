@@ -1,4 +1,3 @@
-
 # COMPONENTS
 
 > a document and description of the components, their configs, and dependencies
@@ -25,11 +24,13 @@
 ## --
 
 ## 1. What is a Component
+
 - using svelte
 - intended to be used in the LayoutGrid
 - has configured width, height, events, props, dependents
 
 ## 2. How are Components combined
+
 - using LayoutGrid and dependents
 - some components are higher orders of lower level components
 
@@ -57,10 +58,3 @@
 - `_fetch` - wrapper for pure-json calls to localhost using `fetch`
 
 ## 6. Planned List of Component
-
-
-
-
-
-
-

@@ -1,4 +1,3 @@
-
 ## eLOS Connect
 
 eLOS Connect is a browser plugin extension of the eLOS web project.
@@ -81,6 +80,7 @@ In the mean-time, the structure is as below:
 3. eLOS unified api/processing server
 
 The eLOS server can:
+
 - be run on the local machine
 - facilitate filesystem-level operations
 - run processing jobs
@@ -88,32 +88,33 @@ The eLOS server can:
 -
 
 The eLOS UI can:
+
 - provide a faux desktop environment
 - uses a panel system to contain function widgets
 - provide deep and rich data display, interaction, and collection
 -
 
 The eLOS connect plugin can:
+
 - provide a sidebar space for the eLOS UI
 - provide deeper access to the data and capabilities available to the browser
 - directly interact with a website
 - enable the eLOS UI to monitor the status of active elements in a website.
-
 
 ---
 
 The eLOS connect plugin is the current entrypoint and focus driving the project.
 The plugin should be able to connect and interact with the server
 
-
 ## Features
 
 1. Send activetab's url to localhost:3000/api/location/add via POST with format
+
 ```json
 {
   "title": "...",
   "url": "...",
-  "tag": "...",
+  "tag": "..."
 }
 ```
 
@@ -126,5 +127,3 @@ The plugin should be able to connect and interact with the server
 5. A button to render page as Firefox Reader state, then save the current page as PDF (in lieu of article content preprocessing).
 
 6. IN PROGRESS: send reader rendered html to local server for handling.
-
-

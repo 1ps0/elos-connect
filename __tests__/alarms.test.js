@@ -32,11 +32,13 @@ describe("alarms API", () => {
     return Promise.all([
       alarms.set("test-alarm-1", { when: Date.now() + 1000 }),
       alarms.set("test-alarm-2", { when: Date.now() + 2000 }),
-    ]).then(() => alarms.getAll()).then((alarms) => {
-      expect(alarms.length).toEqual(2);
-      expect(alarms[0].name).toEqual("test-alarm-1");
-      expect(alarms[1].name).toEqual("test-alarm-2");
-    });
+    ])
+      .then(() => alarms.getAll())
+      .then((alarms) => {
+        expect(alarms.length).toEqual(2);
+        expect(alarms[0].name).toEqual("test-alarm-1");
+        expect(alarms[1].name).toEqual("test-alarm-2");
+      });
   });
 
   it("deletes an alarm", () => {

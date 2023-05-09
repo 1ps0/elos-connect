@@ -1,5 +1,5 @@
-describe('browser.webNavigation', () => {
-  test('onCompleted listener', () => {
+describe("browser.webNavigation", () => {
+  test("onCompleted listener", () => {
     expect(
       jest.isMockFunction(browser.webNavigation.onCompleted.addListener)
     ).toBe(true);
@@ -12,7 +12,7 @@ describe('browser.webNavigation', () => {
     );
   });
 
-  test('onHistoryStateUpdated listener', () => {
+  test("onHistoryStateUpdated listener", () => {
     expect(
       jest.isMockFunction(
         browser.webNavigation.onHistoryStateUpdated.addListener
