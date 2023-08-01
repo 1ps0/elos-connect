@@ -177,7 +177,7 @@ $:{
     <li>
       <title>Active Page (update demo)</title>
       <p>
-        {#await tabs.getCurrentActive()}
+        {#await tabs.currentActive()}
           Loading current Active Tab
         {:then tabs}
           {#each tabs as tab}

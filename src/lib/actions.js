@@ -69,7 +69,7 @@ export const selectedCopy = (e) => {
 
 export const downloadVideo = (e) => {
   return Promise.resolve(e)
-    .then(tabs.getCurrentActive)
+    .then(tabs.currentActive)
     .then((tab) => ({
       uri: "api/action/download/video",
       body: {
@@ -101,7 +101,7 @@ export const updateClipboard = (newClip) => {
 
 export const applyDarkMode = (e) => {
   return Promise.resolve(e)
-    .then(tabs.getCurrentActive)
+    .then(tabs.currentActive)
     .then(send.setDarkMode)
     .then(proxy.print.success_apply_dark_mode)
     .catch(proxy.print.failure_apply_dark_mode);
@@ -134,7 +134,7 @@ export const updateLog = (e) => {
 export const extractReaderText = (e) => {
   // browser.runtime.onMessage.addListener(registerScript);
   return Promise.resolve(e)
-    .then(tabs.getCurrentActive)
+    .then(tabs.currentActive)
     .then((_tabs) => {
       return _tabs.filter((tab) => tab.isArticle)[0];
     })

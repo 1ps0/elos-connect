@@ -1,6 +1,6 @@
 import { print, notify, register } from "./apis/proxy.js";
 import { _send, _fetch } from "./apis/network.js";
-import { getCurrentActive } from "./apis/tabs.js";
+import * as tabs from "./apis/tabs.js";
 
 // ------- Send to webpage content_inject.js
 
@@ -168,7 +168,7 @@ export const sendTag = (params) => {
 };
 
 export const sendLink = async (tagName) => {
-  return getCurrentActive()
+  return tabs.currentActive()
     .then((tabs) => tabs[0])
     .then((tab) => {
       return {

@@ -3,7 +3,7 @@ import * as proxy from "./proxy.js";
 // --- tab ops
 // NOTE: all 'get' types dont have a catch failure by design
 
-export const getAll = (args) => {
+export const all = (args) => {
   return Promise.resolve(args)
     .then(browser.tabs.query)
     .then((tabs) => {
@@ -12,7 +12,7 @@ export const getAll = (args) => {
     .catch(proxy.print.failure_get_all_tabs);
 };
 
-export const getCurrentWindow = () => {
+export const currentWindow = () => {
   return Promise.resolve({
     windowId: browser.windows.WINDOW_ID_CURRENT,
   })
@@ -23,7 +23,7 @@ export const getCurrentWindow = () => {
     .catch(proxy.print.failure_get_current_window_tabs);
 };
 
-export const getCurrentActive = () => {
+export const currentActive = () => {
   return Promise.resolve({
     active: true,
     windowId: browser.windows.WINDOW_ID_CURRENT,
@@ -34,7 +34,7 @@ export const getCurrentActive = () => {
     .catch(proxy.print.failure_get_current_tab);
 };
 
-export const getHighlighted = (args) => {
+export const highlighted = (args) => {
   return Promise.resolve(args)
     .then((_args) => ({
       // args: _args,
@@ -45,7 +45,7 @@ export const getHighlighted = (args) => {
     .catch(proxy.print.failure_get_highlighted_tabs);
 };
 
-export const getPlaying = (args) => {
+export const playing = (args) => {
   return browser.tabs
     .query({ audible: true })
     .catch(proxy.print.failure_get_playing_tabs);
@@ -133,13 +133,13 @@ export const setPinned = async (args) => {
 export const queries = (arg) => {
   return {
     // objects: all, window, this
-    here: getCurrentActive,
-    this: getCurrentActive,
-    tab: getCurrentActive,
-    window: getCurrentWindowTabs,
-    selected: getHighlightedTabs,
-    all: getAllTabs,
-    playing: getPlayingTabs,
+    here: currentActive,
+    this: currentActive,
+    tab: currentActive,
+    window: currentWindow,
+    selected: highlighted,
+    all: all,
+    playing: playing,
   }[arg];
 };
 

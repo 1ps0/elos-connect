@@ -81,6 +81,15 @@ const handleMessage = (request, sender, sendResponse) => {
 try {
   proxy.print.success_content_actions_js_mounted();
   browser.runtime.onMessage.addListener(handleMessage);
+  // Promise.resolve(content)
+  //   .then(_content => _content.elementHexMap) // chesterish
+  //   .then(content.applyDarkMode)
+  //   .then((response) => ({
+  //     response: response,
+  //     success: true,
+  //   }))
+  //   .then(sendResponse)
+  //   .catch(proxy.print.failure_handle_message_set_dark_mode);
   console.log("content_actions.js finished mounting");
 } catch (e) {
   console.log("Caught content_actions.js init error", e);

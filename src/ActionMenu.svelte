@@ -1,9 +1,27 @@
+
 <script>
 import { onMount } from 'svelte';
 
 import * as actions from "./lib/actions.js";
 import * as proxy from "./lib/apis/proxy.js";
+import { cmds } from './lib/omnibox.js';
 
+function generateItems(cmds, prefix = '') {
+  const result = [];
+
+  for (const key in cmds) {
+    const cmd = cmds[key];
+    const title = prefix + cmd.content;
+    const click = () => cmd.action && cmd.action();
+    result.push({ title, click });
+
+    if (cmd.hasOwnProperty('children')) {
+      result.push(...generateItems(cmd.children, title + '_'));
+    }
+  }
+
+  return result;
+}
 let items = [
   {
     title: 'Reload eLOS',
@@ -25,6 +43,7 @@ let items = [
     title: 'Download Video',
     click: actions.downloadVideo, 
   },
+  ...generateItems(cmds)
 ]
 onMount(async () => {
   proxy.print.success_ActionMenu_mounted();

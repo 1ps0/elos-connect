@@ -504,8 +504,7 @@ try {
           "Tells the remote server to download the video in this tab.",
         action: (args) => {
           console.log("HIT save_video, running doDownloadVideo", args);
-          return tabs
-            .getCurrentActive()
+          return tabs.currentActive()
             .then((tab) => ({
               uri: "api/action/download/video",
               body: {
@@ -525,8 +524,7 @@ try {
           "Tells the remote server to download the music in this tab.",
         action: (args) => {
           console.log("HIT save_audio, running doDownloadAudio", args);
-          return tabs
-            .getCurrentActive()
+          return tabs.currentActive()
             .then((tab) => ({
               uri: "api/action/download/audio",
               body: {
@@ -743,8 +741,7 @@ try {
       description: "add this tab's location with a given tag (or none)",
       action: (args) => {
         // return sendLink(args ? args : 'unsorted');
-        return tabs
-          .getCurrentActive()
+        return tabs.currentActive()
           .then((tab) => {
             // let tag = (args && args.length > 0) ? args[1] : 'unsorted'; // TODO make this default the calendar day or something
             // let store = stores[tag];
@@ -759,8 +756,7 @@ try {
       tag: {
         action: (args) => {
           console.log("HIT ", "set tag", args);
-          return tabs
-            .getCurrentActive()
+          return tabs.currentActive()
             .then((tab) => {
               // browser.sessions.removeTabValue(tabId, key)
               browser.sessions.setTabValue(tab.id, args[1]);
@@ -771,8 +767,7 @@ try {
       group: {
         action: (args) => {
           console.log("HIT ", "set group", args);
-          return tabs
-            .getCurrentActive()
+          return tabs.currentActive()
             .then((tab) => {
               // browser.sessions.removeTabValue(tabId, key)
               browser.sessions.setTabValue(tab.id, args[1]);
