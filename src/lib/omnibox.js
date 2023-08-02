@@ -60,7 +60,7 @@ try {
         Promise.resolve(args)
           .then((_args) => (args.length > 1 ? args.slice(1) : ["popout"]))
           .then(getWindowByPrefix)
-          .then((_window) => tabs.getAll({ window: _window.id }))
+          .then((_window) => tabs.all({ window: _window.id }))
           .then((_tabs) => tabs.move(_tabs))
           .then(proxy.notify.success_move)
           .catch(proxy.print.failure_move);
@@ -266,7 +266,7 @@ try {
         console.log("HIT ", "split", args);
         // elos split selected tile column,
         return Promise.resolve(args)
-          .then(tabs.getHighlighted)
+          .then(tabs.highlighted)
           .then((tabs) => {
             return {
               width: Math.floor(window.screen.width / max(3, tabs.length + 1)),
@@ -299,7 +299,7 @@ try {
         // TODO browser.tabs.unload this/selection/tabs/window
         return (
           Promise.resolve(args)
-            .then(tabs.getHighlighted)
+            .then(tabs.highlighted)
             .then(actions.unloadTabs)
             // use tabs.warmup() to undo this/prime a tab
             .catch(proxy.print.failure_unload)

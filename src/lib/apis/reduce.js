@@ -1,6 +1,7 @@
-``;
 
 import * as proxy from "./proxy.js";
+import * as _tabs from "./tabs.js"; // _tabs for function name collision
+
 // -- render functions
 
 const walkNodes = (walker) => {
@@ -20,12 +21,9 @@ export const CSVToJSON = (data) => {
 
 export const playing = (tabs, obj) => {
   if (!tabs) {
-    return null;
+    return {};
   }
-  if (!obj) {
-    obj = {};
-  }
-  return tabs.reduce((_out, curr) => {
+  return _tabs.reduce((_out, curr) => {
     if (!_out[curr.name]) {
       _out[curr.name] = curr;
     }
@@ -42,29 +40,10 @@ export const documentText = () => {
     .catch(proxy.print.failure_reduce_document_text);
 };
 
-export const tab = (tab) => {
-  return Promise.resolve(tab)
-    .then((_tab) => ({
-      uri: tab.url,
-      url: tab.url,
-      label: tab.title,
-      title: tab.title,
-      tabId: tab.id,
-      windowId: tab.windowId,
-      muted: tab.mutedInfo.muted,
-      playing: tab.audible,
-      article: tab.isArticle,
-      timestamp: Date.now(),
-      // icon: tab.favIconUrl, // spammy base64 rendering
-      // language: browser.tabs.detectLanguage(tab.id)
-    }))
-    .catch(proxy.print.failure_reduce_tab);
-};
-
 // tabtab tab: tab tabity, tabbbbbbbb;
 export const tabs = (_tabs) => {
   return Promise.resolve(_tabs)
-    .then((_tabs) => _tabs.map(tab))
+    .then((_tabs) => _tabs.map(_tabs.reduce))
     .then(Promise.all)
     .catch(proxy.print.failure_reduce_tabs);
 };

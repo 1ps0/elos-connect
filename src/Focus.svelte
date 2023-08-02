@@ -29,7 +29,7 @@ let focusStore = writable({});
 const activeTab = {};
 
 const updateStoreFromPinned = (store) => {
-  return tabs.getAll()
+  return tabs.all()
     .then((tabs) => {
       return tabs.map((tab) => ({
         title: tab.title,
@@ -45,7 +45,7 @@ const updateStoreFromPinned = (store) => {
 };
 
 const updateStoreFromTabs = (store) => {
-  return tabs.getAll()
+  return tabs.all()
     .then((tabs) => {
       return tabs.map((tab) => ({
         title: tab.title,

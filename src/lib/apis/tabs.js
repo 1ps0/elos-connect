@@ -12,6 +12,17 @@ export const all = (args) => {
     .catch(proxy.print.failure_get_all_tabs);
 };
 
+export const move = (tabs, _window) => {
+  console.log("MOVE TAB", tabs, _window);
+  return browser.tabs
+    .move(tabs, {
+      index: -1, // arg reverse: 0 to reverse, -1 to stay same
+      windowId: _window.id,
+    })
+    .catch(proxy.print.failure_move_tab);
+};
+
+
 export const currentWindow = () => {
   return Promise.resolve({
     windowId: browser.windows.WINDOW_ID_CURRENT,
@@ -49,16 +60,6 @@ export const playing = (args) => {
   return browser.tabs
     .query({ audible: true })
     .catch(proxy.print.failure_get_playing_tabs);
-};
-
-export const move = (tabs, _window) => {
-  console.log("MOVE TAB", tabs, _window);
-  return browser.tabs
-    .move(tabs, {
-      index: -1, // arg reverse: 0 to reverse, -1 to stay same
-      windowId: _window.id,
-    })
-    .catch(proxy.print.failure_move_tab);
 };
 
 export const addActiveTabId = (data) => {
@@ -116,7 +117,7 @@ export const setActive = (data) => {
 };
 
 export const setPinned = async (args) => {
-  return tabs.getHighlightedTabs().then((tabs) => {
+  return tabs.highlighted().then((tabs) => {
     for (const tab of tabs) {
       browser.tabs
         .update(tab.id, { pinned: true })
@@ -150,7 +151,7 @@ export const getQueried = (args) => {
       .then(queries) // keyword
       // .then(proxy.print.status_tab_query)
       .then((tabQuery) => tabQuery())
-      .then(reduceTabs)
+      .then(reduce)
       .then((tabs) => {
         return tabs.map((tab) => ({
           ...tab,
@@ -161,6 +162,25 @@ export const getQueried = (args) => {
       })
       .catch(proxy.print.failure_stash_tabs)
   );
+};
+
+export const reduce = (tab) => {
+  return Promise.resolve(tab)
+    .then((_tab) => ({
+      uri: tab.url,
+      url: tab.url,
+      label: tab.title,
+      title: tab.title,
+      tabId: tab.id,
+      windowId: tab.windowId,
+      muted: tab.mutedInfo.muted,
+      playing: tab.audible,
+      article: tab.isArticle,
+      timestamp: Date.now(),
+      // icon: tab.favIconUrl, // spammy base64 rendering
+      // language: browser.tabs.detectLanguage(tab.id)
+    }))
+    .catch(proxy.print.failure_reduce_tab);
 };
 
 // ----

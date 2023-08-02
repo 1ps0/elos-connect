@@ -57,7 +57,7 @@ export const updatePlaying = (store) => {
 
 export const selectedCopy = (e) => {
   return Promise.resolve(e)
-    .then(tabs.getHighlighted)
+    .then(tabs.highlighted)
     .then(proxy.print.status_selected_copy)
     .then((tabs) => {
       return tabs.map((tab) => `${tab.title},${tab.url}`).join("\n");
