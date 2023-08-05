@@ -27,17 +27,15 @@
       <slot {item} index={i}/>
     </MoveResize>
   {/each}
-</div>
+</div> 
 
 <script>
-  import { getContainerHeight } from "./lib/layout_grid/container.js";
-  import { responsiveItems, moveItem, getItemById } from "./lib/layout_grid/item.js";
+  import * as layout from "./lib/apis/layout.js";
   import { onMount, createEventDispatcher } from "svelte";
-  import { debounce, getColumnFromBreakpoints } from "./lib/layout_grid/other.js";
 
   import MoveResize from "./LayoutGridMoveResize.svelte";
 
-  const dispatch = createEventDispatcher();
+  import * as proxy from "./lib/apis/proxy.js";
 
   export let items;
   export let rowHeight;
@@ -50,6 +48,9 @@
   export let debounceResize = 100;
   export let dynamic = false;
 
+  const dispatch = createEventDispatcher();
+  $: console.log("ITEMS", items);
+
   let getComputedCols;
 
   let container;
@@ -61,7 +62,7 @@
 
   let containerWidth;
 
-  $: containerHeight = getContainerHeight(items, yPerPx);
+  $: containerHeight = layout.getContainerHeight(items, yPerPx);
 
   let prevCols;
 
@@ -72,9 +73,9 @@
     prevCols = cols;
   }
 
-  const onResize = debounce(() => {
+  const onResize = layout.debounce(() => {
     if (breakpoints.length) {
-      items = responsiveItems(items, getComputedCols);
+      items(items, getComputedCols);
     }
 
     dispatch("resize", {
@@ -92,13 +93,13 @@
 
       if (width === containerWidth) return;
 
-      getComputedCols = getColumnFromBreakpoints(breakpoints, width, cols);
+      getComputedCols = layout.getColumnFromBreakpoints(breakpoints, width, cols);
 
       xPerPx = width / getComputedCols;
 
       if (!containerWidth) {
         if (breakpoints.length) {
-          items = responsiveItems(items, getComputedCols);
+          items(items, getComputedCols);
         }
 
         dispatch("mount", {
@@ -118,21 +119,31 @@
     return () => sizeObserver.disconnect();
   });
 
+
   const updateMatrix = ({ detail }) => {
-    let activeItem = getItemById(detail.id, items).item;
+    return Promise.resolve(detail)
+      .then(_detail => layout.getItemById(_detail.id, items)
+        .then(item => ({_detail, item})))
+      .then(({_detail, item}) => {
+        return Promise.resolve(item)
+          .then(_item => Object.assign(item, _detail.shadow))
+          .then(_item => layout.moveItem(_item, items, getComputedCols, _detail.clone))
+          .then(proxy.print.status_update_matrix_1)
+          .then(_items => {
+            items = _items;
+            if (_detail.onUpdate) {
+              _detail.onUpdate();
+            }
 
-    if (activeItem) {
-      activeItem = Object.assign(activeItem, detail.shadow);
-      items = moveItem(activeItem, items, getComputedCols, detail.clone);
-      console.log("updateMatrix", detail);
-      if (detail.onUpdate) detail.onUpdate();
-
-      dispatch("change", {
-        unsafeItem: activeItem,
-        id: activeItem.id,
-      });
-    }
+            dispatch("change", {
+              unsafeItem: item,
+              id: item.id,
+            });
+          })
+      })
+      .catch(proxy.print.failure_layout_grid_update_matrix)
+    
   };
 
-  export const handleRepaint = debounce(updateMatrix, debounceUpdate);
+  export const handleRepaint = layout.debounce(updateMatrix, debounceUpdate);
 </script>

@@ -173,7 +173,7 @@ export const reduce = (tab) => {
       title: tab.title,
       tabId: tab.id,
       windowId: tab.windowId,
-      muted: tab.mutedInfo.muted,
+      muted: tab?.mutedInfo?.muted,
       playing: tab.audible,
       article: tab.isArticle,
       timestamp: Date.now(),

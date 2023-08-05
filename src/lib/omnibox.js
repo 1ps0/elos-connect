@@ -3,15 +3,15 @@
 import { panelTypes } from "../config/panels.js";
 
 import * as bookmarks from "./apis/bookmarks.js";
-import * as files from "./apis/files.js";
+import * as util from "./apis/util.js";
 import * as proxy from "./apis/proxy.js";
 import * as reduce from "./apis/reduce.js";
+import * as network from "./apis/network.js";
 import * as storage from "./apis/storage.js";
 import * as tabs from "./apis/tabs.js";
 import * as windows from "./apis/windows.js";
 
 import * as actions from "./actions.js";
-import * as network from "./apis/network.js";
 import * as send from "./send.js";
 import { stores } from "./stores.js";
 
@@ -133,6 +133,20 @@ try {
       description: "window",
       action: (_args) => {
         /*IDEA: default action for window config value*/
+      },
+      dedupe: {
+        content: "dedupe",
+        description: "deduplicate applicable set of tabs",
+        action: (_args) => {
+          return Promise.resolve(_args)
+            .then(tabs.getQueried)
+            .then(Promise.all)
+            .then((_tabs) => _tabs.flat(1))
+            .then(util.duplicates)
+            .then((_tabs) => _tabs.map((_tab) => _tab.tabId))
+            .then(browser.tabs.remove, proxy.print.failure_tabs_remove)
+            .catch(proxy.print.failures_window_dedupe);
+        },
       },
       "%": {
         content: "%",

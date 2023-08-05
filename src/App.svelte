@@ -1,19 +1,21 @@
+
 <script>
   import { onMount } from 'svelte';
-  import { derived } from 'svelte/store';
+  // import { derived } from 'svelte/store';
   import LayoutGrid from "./LayoutGrid.svelte";
-  import layoutGridHelp from "./lib/layout_grid/helper.js";
+  import * as layout from "./lib/apis/layout.js";
 
   import { panelTypes, layoutConfig } from "./config/panels.js";
   import * as proxy from "./lib/apis/proxy.js";
   import { stores } from "./lib/stores.js"
   import { components } from "./components.js";
-  import ActionButton from './ActionButton.svelte';
+  // import ActionButton from './ActionButton.svelte';
 
   const genId = () => "_" + Math.random().toString(36).substr(2, 9);
 
-  let items = [];
   let objects = {};
+  let items = [];
+  $: items;
 
   function hydrateParams(item) {
     if (!components.hasOwnProperty(item.componentName)) {
@@ -42,49 +44,36 @@
     return item;
   }
 
-  function positionItem(item) {
+  const positionItem = (item) => {
     return Promise.resolve(item)
-      .then(_item => ({
-        ..._item,
-        ...layoutGridHelp.findSpace(_item, items, layoutConfig.columnCount)
-      }))
+      .then(_item => layout.findSpace(_item, items, layoutConfig.columnCount)
+        .then(_layout => ({..._item, ..._layout})))
       .catch(proxy.print.failure_panels_position_item)
   }
-  function _newItem(options={}) {
-    return Promise.resolve(options)
+
+  const add = (panelTarget, options={}) => {
+    // TODO render icons into menuItems
+    // TODO render source/dataStore props into actual stores
+    if (!panelTypes.hasOwnProperty(panelTarget)) {
+      console.log("MISSING PANEL", panelTarget);
+    }
+    return Promise.resolve(panelTarget)
+      .then(_target => panelTypes[_target])
+      .then(_type => ({..._type, ...options}))
+      .then(hydrateParams)
       .then(_opts => ({
-        ...hydrateParams(_opts),
         w: layoutConfig.columnCount,
         h: 5, // FIXME add default height
         id: genId(),
+        ..._opts,
       }))
-      .then(proxy.print.status_panels_new_item)
-      .then(layoutGridHelp.makeItem)
+      .then(layout.makeItem)
+      .then(proxy.print.status_panels_add_item_1)
+      .then(_item => [...items, _item])
+      .then(proxy.print.status_panels_add_item_2)
+      .then(_items => items = _items)
       .then(positionItem)
-      .catch(proxy.print.failure_panels_new_item)
-  }
-
-function add(panelTarget, options={}) {
-  // TODO render icons into menuItems
-  // TODO render source/dataStore props into actual stores
-  if (!panelTypes.hasOwnProperty(panelTarget)) {
-    // console.log("MISSING PANEL", panelTarget);
-  }
-  Promise.resolve(panelTarget)
-    .then(_target => panelTypes[_target])
-    .then(_type => ({..._type, ...options}))
-    .then(_newItem)
-    .then(_item => [...items, _item])
-    .then(_items => items = _items)
-    .catch(proxy.print.failure_panels_add_item)
-};
-
-  const onAdd = (val) => {
-    let item = val.detail;
-
-    if (item && item.event && item.target in objects) {
-      objects[item.target].$on(item.event.name, item.event.callback);
-    }
+      .catch(proxy.print.failure_panels_add_item)
   };
 
   const remove = (item) => {
@@ -94,16 +83,32 @@ function add(panelTarget, options={}) {
     }
   };
 
-  function togglePanel(e) {
-    _togglePanel(e.detail.name);
+  const togglePanel = (e) => {
+    return Promise.resolve(e)
+      .then(_e => _e?.detail?.name)
+      .then(_togglePanel)
+      .catch(proxy.print.failure_toggle_panel_1)
   }
 
-  function _togglePanel(itemName) {
-    let _layout = items.filter((value) => value.target === itemName);
-    if (_layout.length > 0)
-      remove(itemName);
-    else
-      add(itemName);
+  const _togglePanel = (itemName) => {
+    return Promise.resolve(itemName)
+      .then(_itemName => items.filter(value => value.target === _itemName))
+      .then(proxy.print.status_toggle_panel_2)
+      .then(_layout => {
+        if (_layout.length > 0)
+          remove(itemName);
+        else
+          add(itemName);
+      })
+      .catch(proxy.print.failure_toggle_panel_2)
+  };
+
+  const onAdd = (val) => {
+    let item = val.detail;
+
+    if (item && item.event && item.target in objects) {
+      objects[item.target].$on(item.event.name, item.event.callback);
+    }
   };
 
   onMount(async () => {
@@ -113,9 +118,9 @@ function add(panelTarget, options={}) {
     let panels = Promise.resolve([]);
     [
       "panel-mainmenu",
-      "panel-web-players",
+      // "panel-actionmenu",
+      // "panel-web-players",
       // "panel-playlists",
-      "panel-actionmenu",
       // "panel-config",
     ].forEach((name) => {
       panels = panels
@@ -128,56 +133,43 @@ function add(panelTarget, options={}) {
 
 </script>
 
-<main class="h-screen bg-gray-800 text-gray-300">
+<main >
   <header>
     <!-- <TopBar/> -->
   </header>
 
-  <section class="relative h-full">
+  <section>
     <LayoutGrid
       bind:items={items}
       cols={[[layoutConfig.columnCount * layoutConfig.columnMultiplier, layoutConfig.columnCount]]}
       rowHeight={layoutConfig.rowHeight}
       gap={[layoutConfig.panelGap]}
-      fillSpace=True
-      let:item let:dataItem
+      let:item 
+      let:dataItem
+      let:index
     >
-      <div
-        class="bg-gray-700 rounded shadow p-2"
-        data-x={item.x}
-        data-y={item.y}
-        data-w={item.w}
-        data-h={item.h}
-        data-id={item.id}
-      >
-        <div class="flex justify-between">
-          <span class="font-semibold">
-            {item.target.replace("panel-", '').replace('-', ' ')}
-          </span>
-          <!-- TODO: Add buttons for pin, shift up, shift down, close, max/shrink vertical -->
-        </div>
-        <hr class="my-2"/>
-        <div class="flex space-x-2">
-          <!-- Pin -->
-          <ActionButton icon="pin" action={() => console.log("Pin action")} />
-          <!-- Shift Up -->
-          <ActionButton icon="arrow-up" action={() => console.log("Shift up action")} />
-          <!-- Shift Down -->
-          <ActionButton icon="arrow-down" action={() => console.log("Shift down action")} />
-          <!-- Close -->
-          <ActionButton icon="close" action={() => remove(item)} />
-          <!-- Max/Shrink Vertical -->
-          <ActionButton icon="maximize" action={() => console.log("Maximize/Shrink vertical action")} />
-        </div>
-        <svelte:component
-          id={item.target}
-          this={components[item.componentName]}
-          bind:this={objects[item.target]}
-          on:didMount={onAdd}
-          data={item}
-          {...item.props}
-        />
-      </div>
+    <div>
+      <span>
+        {item.target.replace("panel-", '').replace('-', ' ')}
+        <!-- TODO: buttons
+          1. pin
+          2. shift up
+          3. shift down
+          4. close
+          5. max/shrink vertical
+        -->
+        <hr/>
+      </span>
+      <svelte:component
+        id={item.target}
+        this={components[item.componentName]}
+        bind:this={objects[item.target]}
+        on:didMount={onAdd}
+        data={item}
+        {...item.props}
+        {index}
+      />
+    </div>
     </LayoutGrid>
   </section>
 </main>

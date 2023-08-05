@@ -2,7 +2,35 @@ import { print, notify, register } from "./proxy.js";
 
 // -- util
 
-function zip(keys, vals) {
+export const deduplicate = (_tabs) => {
+  const seenUrls = new Set();
+  return _tabs.filter(tab => {
+    if (seenUrls.has(tab.url)) {
+      return false;
+    }
+    seenUrls.add(tab.url);
+    return true;
+  });
+}
+
+export const duplicates = (_tabs) => {
+  const urlCounts = new Map();
+  _tabs.forEach(tab => {
+    urlCounts.set(tab.url, (urlCounts.get(tab.url) || 0) + 1);
+  });
+
+  const duplicateUrls = new Set();
+  urlCounts.forEach((count, url) => {
+    if (count > 1) {
+      duplicateUrls.add(url);
+    }
+  });
+
+  return _tabs.filter(tab => duplicateUrls.has(tab.url));
+}
+
+
+export const zip = (keys, vals) => {
   return keys.reduce((m, key, index) => {
     m[key] = vals[index];
     return m;

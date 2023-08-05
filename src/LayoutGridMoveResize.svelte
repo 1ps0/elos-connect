@@ -107,12 +107,9 @@
 
   export let cols;
 
-  let shadow = { x: item.x, y: item.y, w: item.w, h: item.h };
 
   let active = false;
-
   let debounce = false;
-
   let initX, initY;
 
   let xyRef = { x: left, y: top };
@@ -120,6 +117,8 @@
 
   let clone = { ...item };
   let cloneBound = { width, height, top, left };
+  
+  let shadow = { x: item.x, y: item.y, w: item.w, h: item.h };
 
   const inActivate = () => (active = false);
   let repaint = (listen = true) => {

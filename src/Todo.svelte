@@ -1,15 +1,15 @@
 <script>
 
 import { onMount } from 'svelte';
+import { writable } from "svelte/store";
 
-import { stores } from "./lib/stores.js"
 import { updateLog } from "./lib/actions.js";
 
 import * as proxy from "./lib/apis/proxy.js";
 
 import ItemList from "./ItemList.svelte";
 
-export let dataStore = stores.todo;
+export const dataStore = writable([]);
 
 let template1 = [
   {
@@ -77,7 +77,7 @@ function clearLog(e) {}
 
 
 onMount(async () => {
-  print.success_Todo_mounted();
+  proxy.print.success_Todo_mounted();
 
   dataStore.update(n => [...(n.length > 0 ? n : todoItems)]);
 });

@@ -43,7 +43,8 @@ export const documentText = () => {
 // tabtab tab: tab tabity, tabbbbbbbb;
 export const tabs = (_tabs) => {
   return Promise.resolve(_tabs)
-    .then((_tabs) => _tabs.map(_tabs.reduce))
-    .then(Promise.all)
+    .then(__tabs => __tabs.map(_tabs.reduce))
+    // .then(proxy.print.status_reduce_tabs)
+    // .then(Promise.all)
     .catch(proxy.print.failure_reduce_tabs);
 };

@@ -1,3 +1,6 @@
+
+import { createEventDispatcher } from "svelte";
+
 const logKeywords = {
   success: (_args) => {
     _args;
@@ -40,7 +43,7 @@ export const print = new Proxy(() => {}, {
       return splitAndUpperCaseString(name)
         .then((_name) => `[${_name[0]}][${_name.slice(1).join("_")}]`)
         .then((_name) => console.log(_name, _args))
-        .catch(console.error)
+        .catch(console.assert)
         .then((_) => _args);
     };
   },
@@ -124,3 +127,22 @@ export const register = new Proxy(() => {}, {
 //     }
 //   }
 // });
+
+// dispatch 
+export const dispatch = new Proxy(() => {}, {
+  get(target, name) {
+    const _dispatch = createEventDispatcher();
+    return (args) => {
+      _dispatch(`${target}:${name}:${args}`, {
+        target, name, args,
+      });
+      if (name == 'tabs') {
+
+      }
+      return {
+        ...args,
+
+      };
+    }
+  }
+});

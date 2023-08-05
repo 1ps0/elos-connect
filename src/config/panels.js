@@ -101,7 +101,7 @@ export const panelTypes = {
     target: "panel-actionmenu",
     name: "actionmenu",
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 4),
-    h: 3,
+    h: 5,
     componentName: "actionmenu",
   },
   "panel-web-players": {
