@@ -1,5 +1,6 @@
 .storybook
 .DS_Store
+docs
 node_modules
 public/bundle.*
 public/build/css/bundle.css
