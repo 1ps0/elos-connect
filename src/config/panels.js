@@ -16,7 +16,7 @@ target: eg id, target value for types
 export const layoutConfig = {
   // LAYOUT GRID
   panelGap: 5,
-  columnMultiplier: 6,
+  columnMultiplier: 4,
   columnCount: 100,
   rowHeight: 65,
   mode: "full-width", // default, full-width, full-height, full-screen

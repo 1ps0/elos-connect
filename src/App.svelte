@@ -15,7 +15,7 @@
 
   let objects = {};
   let items = [];
-  $: items;
+  $: console.log('[ITEMS][App]', items);
 
   function hydrateParams(item) {
     if (!components.hasOwnProperty(item.componentName)) {
@@ -68,19 +68,21 @@
         ..._opts,
       }))
       .then(layout.makeItem)
+      .then(positionItem)
       .then(proxy.print.status_panels_add_item_1)
       .then(_item => [...items, _item])
       .then(proxy.print.status_panels_add_item_2)
       .then(_items => items = _items)
-      .then(positionItem)
       .catch(proxy.print.failure_panels_add_item)
   };
 
   const remove = (item) => {
-    items = items.filter((value) => value.target !== item);
-    if (items.length > 0) {
-      delete objects[item];
-    }
+    return Promise.resolve(item)
+      .then(_item => items.filter(value => value.target === _item.target))
+      .then(proxy.print.status_panels_remove_item_1)
+      .then(_items => items = _items)
+      .then(_ => items.length > 0 ? delete objects[item] : null)
+      .catch(proxy.print.failure_panels_remove_item)
   };
 
   const togglePanel = (e) => {
@@ -141,7 +143,7 @@
   <section>
     <LayoutGrid
       bind:items={items}
-      cols={[[layoutConfig.columnCount * layoutConfig.columnMultiplier, layoutConfig.columnCount]]}
+      cols={layoutConfig.columnCount}
       rowHeight={layoutConfig.rowHeight}
       gap={[layoutConfig.panelGap]}
       let:item 

@@ -74,16 +74,16 @@ export const findCloseBlocks = (matrix, curObject) => {
       const w = Math.min(matrix[0].length, curObject.w);
       const tempR = matrix.slice(y, y + h);
 
-      let result = [];
-      for (var i = 0; i < tempR.length; i++) {
-        let tempA = tempR[i].slice(x, x + w);
-        result = [
-          ...result,
+      const result = tempR.reduce((acc, _r) => {
+        console.log("[findCloseBlocks] _r:", _r, x, w, h, y, acc)
+        let tempA = _r.slice(x, x + w);
+        return [
+          ...acc,
           ...tempA
-            .map((val) => val.id && val.id !== curObject.id && val.id)
+            .map((val) => val && val.id && val.id !== curObject.id && val.id)
             .filter(Boolean),
         ];
-      }
+      }, []);
 
       return [...new Set(result)];
     })
@@ -102,18 +102,17 @@ export const makeMatrix = (rows, cols) => {
 
 export const makeMatrixFromItems = (items, _row, _col) => {
   return Promise.resolve({items, _row, _col})
-    .then(({items, _row, _col}) => getRowsCount(items)
-      .then(rows => makeMatrix(_row || rows, _col))
+    .then(({items, _col}) => getRowsCount(items)
+      .then(rows => makeMatrix(rows, _col))
       .then(matrix => ({items, _col, matrix})))
     .then(({items, _col, matrix}) => {
-      for (var i = 0; i < items.length; i++) {
-        const value = items[i];
+      for (let value in items) {
         const { x, y, h } = value;
         const w = Math.min(_col, value.w);
     
-        for (var j = y; j < y + h; j++) {
+        for (let j = y; j < y + h; j++) {
           const row = matrix[j];
-          for (var k = x; k < x + w; k++) {
+          for (let k = x; k < x + w; k++) {
             row[k] = value;
           }
         }
@@ -130,14 +129,14 @@ export const makeMatrixFromItemsIgnore = (
   _col
 ) => {
   return Promise.resolve({items, ignoreList, _row, _col})
-    .then(({items, ignoreList, _row, _col}) =>
-      makeMatrix(_row, _col)
-        .then(matrix => ({items, ignoreList, _col, matrix})))
+    .then(({items, ignoreList, _row, _col}) => getRowsCount(items)
+      .then(rows => makeMatrix(rows, _col))
+      .then(matrix => ({items, ignoreList, _col, matrix})))
+    .then(proxy.print.status_makeMatrix)
     .then(({items, _col, ignoreList, matrix}) => {
-      for (var i = 0; i < items.length; i++) {
-        const value = items[i];
+      for (let value in items) {
         const { x, y, h, id } = value;
-        const w = Math.min(_col, value.w);
+        const w = Math.min(_col, value.w || 100);
     
         if (ignoreList.indexOf(id) === -1) {
           for (var j = y; j < y + h; j++) {
@@ -146,6 +145,7 @@ export const makeMatrixFromItemsIgnore = (
               for (var k = x; k < x + w; k++) {
                 row[k] = value;
               }
+              console.log("[makeMatrixFromItems][row]:", row, i, j, '-', y, h, '-', x, w, '-', value, items);
             }
           }
         }
@@ -177,22 +177,27 @@ export const debounce = (fn, ms = 0) => {
 
 
 export const getColumnFromBreakpoints = (breakpoints, windowWidth, cols) => {
-  let found = false, tempCols = cols;
-  if (breakpoints) {
-    for (var i = breakpoints.length - 1; i >= 0; i--) {
-      const [resolution, cols] = breakpoints[i];
-
-      if (windowWidth <= resolution) {
-        found = true;
-        tempCols = cols;
-        break;
+  return Promise.resolve({breakpoints, windowWidth, cols})
+    .then(proxy.print.status_get_column_from_breakpoints)
+    .then(({breakpoints, windowWidth, cols}) => {
+      let found = false, tempCols = cols;
+      if (breakpoints) {
+        for (var i = breakpoints.length - 1; i >= 0; i--) {
+          const [resolution, cols] = breakpoints[i];
+    
+          if (windowWidth <= resolution) {
+            found = true;
+            tempCols = cols;
+            break;
+          }
+        }
       }
-    }
-  }
+      if (!found) return cols;
+    
+      return tempCols;
+    })
+    .catch(proxy.print.failure_layout_get_column_from_breakpoints)
 
-  if (!found) return cols;
-
-  return tempCols;
 };
 
 // -- item.js
@@ -289,7 +294,7 @@ export const moveItem = (item, items, cols, originalItem) => {
         .catch(proxy.print.failure_move_item_1);
 
       const closeBlocks = Promise.resolve(matrix)
-        .then(_matrix => findCloseBlocks(items, _matrix, item))
+        .then(_matrix => findCloseBlocks(_matrix, item))
         .then(proxy.print.status_close_blocks_1)
         .catch(proxy.print.failure_move_item_2);
       
@@ -331,22 +336,23 @@ export const moveItem = (item, items, cols, originalItem) => {
       //     );
       //   }
       // });
-    
-      closeObj.reduce((promiseChain, item) => {
+      _items = items;
+      return closeObj.reduce((promiseChain, item) => {
         return promiseChain
-          .then(() => findFreeSpaceForItem(matrix, item, tempItems))
+          .then(proxy.print.status_move_item_1)
+          .then(() => findFreeSpaceForItem(matrix, item, _items))
           .then(position => {
             exclude.push(item.id);
       
             if (position) {
-              tempItems = tempItems.map(assignPosition.bind(null, item, position));
+              _items = _items.map(assignPosition.bind(null, item, position));
               let getIgnoreItems = _closeBlocks.filter(
                 (value) => exclude.indexOf(value) === -1
               );
       
-              return getRowsCount(tempItems)
+              return getRowsCount(_items)
                 .then(rowCount => makeMatrixFromItemsIgnore(
-                  tempItems,
+                  _items,
                   getIgnoreItems,
                   rowCount,
                   cols
@@ -357,49 +363,47 @@ export const moveItem = (item, items, cols, originalItem) => {
             }
           });
       }, Promise.resolve());
-      
-      return items;
     })
     .catch(proxy.print.failure_make_matrix_2);
 }
 
-export function normalize(items, col) {
-  return Promise.resolve({items, col})
-    .then(({items, col}) => {
-      let result = items.slice();
+// export function normalize(items, col) {
+//   return Promise.resolve({items, col})
+//     .then(({items, col}) => {
+//       let result = items.slice();
 
-      result.forEach((value) => {
-        if (!value.static) {
-          result = moveItem(value, result, col, { ...value });
-        }
-      });
-      return result;
-    })
-    .catch(proxy.print.failure_normalize);
-}
+//       result.forEach((value) => {
+//         if (!value.static) {
+//           result = moveItem(value, result, col, { ...value });
+//         }
+//       });
+//       return result;
+//     })
+//     .catch(proxy.print.failure_normalize);
+// }
 
-export function adjust(items, col) {
-  return Promise.resolve({items, col})
-    .then(({items, col}) => ({
-      items, col,
-      rows: getRowsCount(items)
-    }))
-    .then(({items, col, rows}) => ({
-      items, col, rows,
-      matrix: makeMatrix(rows, col)
-    }))
-    .then(({items, col, rows, matrix}) => {
-      let res = [];
+// export function adjust(items, col) {
+//   return Promise.resolve({items, col})
+//     .then(({items, col}) => ({
+//       items, col,
+//       rows: getRowsCount(items)
+//     }))
+//     .then(({items, col, rows}) => ({
+//       items, col, rows,
+//       matrix: makeMatrix(rows, col)
+//     }))
+//     .then(({items, col, rows, matrix}) => {
+//       let res = [];
 
-      items.forEach((item) => {
-        let position = findFreeSpaceForItem(matrix, item, items);
+//       items.forEach((item) => {
+//         let position = findFreeSpaceForItem(matrix, item, items);
 
-        res.push({ ...item, ...position });
+//         res.push({ ...item, ...position });
 
-        matrix = makeMatrixFromItems(res, rows, col);
-      });
+//         matrix = makeMatrixFromItems(res, rows, col);
+//       });
 
-      return res;
-    })
-    .catch(proxy.print.failure_adjust);
-}
+//       return res;
+//     })
+//     .catch(proxy.print.failure_adjust);
+// }

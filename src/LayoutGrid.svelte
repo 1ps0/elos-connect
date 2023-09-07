@@ -31,11 +31,9 @@
 
 <script>
   import * as layout from "./lib/apis/layout.js";
-  import { onMount, createEventDispatcher } from "svelte";
-
-  import MoveResize from "./LayoutGridMoveResize.svelte";
-
   import * as proxy from "./lib/apis/proxy.js";
+  import { onMount, createEventDispatcher } from "svelte";
+  import MoveResize from "./LayoutGridMoveResize.svelte";
 
   export let items;
   export let rowHeight;
@@ -49,7 +47,7 @@
   export let dynamic = false;
 
   const dispatch = createEventDispatcher();
-  $: console.log("ITEMS", items);
+  $: console.log("[ITEMS][LayoutGrid]", items);
 
   let getComputedCols;
 
@@ -57,8 +55,6 @@
 
   let xPerPx = 0;
   let yPerPx = rowHeight;
-
-  let documentWidth;
 
   let containerWidth;
 
@@ -88,12 +84,12 @@
 
 
   onMount(() => {
-    const sizeObserver = new ResizeObserver(entries => {
+    const sizeObserver = new ResizeObserver(async (entries) => {
       let width = entries[0].contentRect.width;
 
       if (width === containerWidth) return;
 
-      getComputedCols = layout.getColumnFromBreakpoints(breakpoints, width, cols);
+      getComputedCols = await layout.getColumnFromBreakpoints(breakpoints, width, cols);
 
       xPerPx = width / getComputedCols;
 
@@ -142,7 +138,6 @@
           })
       })
       .catch(proxy.print.failure_layout_grid_update_matrix)
-    
   };
 
   export const handleRepaint = layout.debounce(updateMatrix, debounceUpdate);
