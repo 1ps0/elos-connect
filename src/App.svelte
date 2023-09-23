@@ -92,7 +92,8 @@
   const positionItem = (item) => {
     return Promise.resolve(item)
       .then(_item => layout.findSpace(_item, panelItems, layoutConfig.columnCount)
-        .then(_layout => ({..._item, ..._layout})))
+        .then(_layout => ({..._item, ..._layout}))
+      )
       .catch(proxy.print.failure_panels_position_item)
   }
 

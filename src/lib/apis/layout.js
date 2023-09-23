@@ -3,13 +3,13 @@ import * as proxy from "./proxy.js";
 // TODO convert items et al to be {items, rowCount, etc} in one blob
 // call this blob: LayoutInterface
 
-export const getRowsCount = (panel_items) => {
+export const getRowsCount = (panelItems) => {
   // console.log("[getRowsCount] items:", items)
   // console.log("[getRowsCount] row count: ", Math.max(...items.map(val => val.y + val.h), 1));
-  return Promise.resolve(panel_items)
-    .then((_panel_items) => _panel_items || [])
-    .then((_panel_items) => {
-      return Math.max(..._panel_items.map((val) => (val.y || 0) + val.h), 1);
+  return Promise.resolve(panelItems)
+    .then((_panelItems) => _panelItems || [])
+    .then((_panelItems) => {
+      return Math.max(..._panelItems.map((val) => (val.y || 0) + val.h), 1);
     })
     .catch(proxy.print.failure_get_rows_count);
 };
@@ -136,8 +136,8 @@ export const makeMatrixFromItemsIgnore = (
   return Promise.resolve({ items, ignoreList, _row, _col })
     .then(({ items, ignoreList, _row, _col }) =>
       getRowsCount(items)
-        .then((rows) => makeMatrix(rows, _col))
-        .then((matrix) => ({ items, ignoreList, _col, matrix }))
+        .then(rows => makeMatrix(rows, _col))
+        .then(matrix => ({ items, ignoreList, _col, matrix }))
     )
     .then(({ items, _col, ignoreList, matrix }) => {
       for (let value in items) {
@@ -151,21 +151,6 @@ export const makeMatrixFromItemsIgnore = (
               for (var k = x; k < x + w; k++) {
                 row[k] = value;
               }
-              console.log(
-                "[makeMatrixFromItems][row]:",
-                row,
-                i,
-                j,
-                "-",
-                y,
-                h,
-                "-",
-                x,
-                w,
-                "-",
-                value,
-                items
-              );
             }
           }
         }
@@ -306,12 +291,66 @@ const replaceItem = (item, cachedItem, value) => {
     .catch(proxy.print.failure_layout_replace_item);
 };
 
-export const moveItem = (item, panel_items, cols, originalItem) => {
-  return Promise.resolve({ item, panel_items, cols, originalItem })
-    .then(({ item, _panel_items, cols, originalItem }) => {
-      let matrix = getRowsCount(_panel_items)
+// export function moveItem($item, items, cols, originalItem) {
+//   let matrix = makeMatrixFromItemsIgnore(
+//     items,
+//     [$item.id],
+//     getRowsCount(items),
+//     cols
+//   );
+
+//   const closeBlocks = findCloseBlocks(items, matrix, $item);
+//   let closeObj = findItemsById(closeBlocks, items);
+
+//   const fixed = closeObj.find((value) => value.fixed);
+
+//   if (fixed) {
+//     if (originalItem) {
+//       return items.map(replaceItem.bind(null, $item, originalItem));
+//     }
+//   }
+
+//   matrix = makeMatrixFromItemsIgnore(
+//     items,
+//     closeBlocks,
+//     getRowsCount(items),
+//     cols
+//   );
+
+//   let tempItems = items;
+
+//   let tempCloseBlocks = closeBlocks;
+
+//   let exclude = [];
+
+//   closeObj.forEach((item) => {
+//     let position = findFreeSpaceForItem(matrix, item, tempItems);
+//     exclude.push(item.id);
+
+//     if (position) {
+//       tempItems = tempItems.map(assignPosition.bind(null, item, position));
+//       let getIgnoreItems = tempCloseBlocks.filter(
+//         (value) => exclude.indexOf(value) === -1
+//       );
+
+//       matrix = makeMatrixFromItemsIgnore(
+//         tempItems,
+//         getIgnoreItems,
+//         getRowsCount(tempItems),
+//         cols
+//       );
+//     }
+//   });
+
+//   return tempItems;
+// }
+
+export const moveItem = (item, panelItems, cols, originalItem) => {
+  return Promise.resolve({ item, panelItems, cols, originalItem })
+    .then(async ({ item, _panelItems, cols, originalItem }) => {
+      let matrix = getRowsCount(_panelItems)
         .then((rows) =>
-          makeMatrixFromItemsIgnore(_panel_items, [item.id], rows, cols)
+          makeMatrixFromItemsIgnore(_panelItems, [item.id], rows, cols)
         )
         .then(proxy.print.status_make_matrix_1)
         .catch(proxy.print.failure_move_item_1);
@@ -322,23 +361,23 @@ export const moveItem = (item, panel_items, cols, originalItem) => {
         .catch(proxy.print.failure_move_item_2);
 
       const closeObj = Promise.resolve(closeBlocks)
-        .then((_closeBlocks) => findItemsById(_closeBlocks, _panel_items))
+        .then((_closeBlocks) => findItemsById(_closeBlocks, _panelItems))
         .catch(proxy.print.failure_move_item_3);
 
       const fixed = Promise.resolve(closeObj)
         .then((_closeObj) => _closeObj.find((value) => value.fixed))
         .then((fixed) => {
           return fixed && originalItem
-            ? _panel_items.map(replaceItem.bind(null, item, originalItem))
+            ? _panelItems.map(replaceItem.bind(null, item, originalItem))
             : [];
         })
         .catch(proxy.print.failure_move_item_4);
 
-      if (fixed) return fixed;
+      if (await fixed) return fixed;
 
-      matrix = getRowsCount(_panel_items)
+      matrix = getRowsCount(_panelItems)
         .then((rows) =>
-          makeMatrixFromItemsIgnore(_panel_items, closeBlocks, rows, cols)
+          makeMatrixFromItemsIgnore(_panelItems, closeBlocks, rows, cols)
         )
         .then(proxy.print.status_make_matrix_2)
         .catch(proxy.print.failure_move_item_1);
@@ -346,22 +385,22 @@ export const moveItem = (item, panel_items, cols, originalItem) => {
       return closeObj.reduce((promiseChain, item) => {
         return promiseChain
           .then(proxy.print.status_move_item_1)
-          .then(() => findFreeSpaceForItem(matrix, item, _panel_items))
+          .then(() => findFreeSpaceForItem(matrix, item, _panelItems))
           .then((position) => {
             exclude.push(item.id);
 
             if (position) {
-              _panel_items = _panel_items.map(
+              _panelItems.map(
                 assignPosition.bind(null, item, position)
               );
               let getIgnoreItems = _closeBlocks.filter(
                 (value) => exclude.indexOf(value) === -1
               );
 
-              return getRowsCount(_panel_items)
+              return getRowsCount(_panelItems)
                 .then((rowCount) =>
                   makeMatrixFromItemsIgnore(
-                    _panel_items,
+                    _panelItems,
                     getIgnoreItems,
                     rowCount,
                     cols
@@ -377,42 +416,42 @@ export const moveItem = (item, panel_items, cols, originalItem) => {
     .catch(proxy.print.failure_make_matrix_2);
 };
 
-// export const moveItem = (item, panel_items, cols, originalItem) => {
-//   return Promise.resolve({item, panel_items, cols, originalItem})
-//     .then(({item, panel_items, cols, originalItem}) => {
-//       return getRowsCount(panel_items)
-//         .then(rows => makeMatrixFromItemsIgnore(panel_items, [item.id], rows, cols))
+// export const moveItem = (item, panelItems, cols, originalItem) => {
+//   return Promise.resolve({item, panelItems, cols, originalItem})
+//     .then(({item, panelItems, cols, originalItem}) => {
+//       return getRowsCount(panelItems)
+//         .then(rows => makeMatrixFromItemsIgnore(panelItems, [item.id], rows, cols))
 //         .then(proxy.print.status_make_matrix_1)
 //         .then(_matrix => findCloseBlocks(_matrix, item))
 
 //         .then(proxy.print.status_close_blocks_1)
-//         .then(_closeBlocks => findItemsById(_closeBlocks, panel_items))
+//         .then(_closeBlocks => findItemsById(_closeBlocks, panelItems))
 //         .then(_closeObj => _closeObj.find((value) => value.fixed))
 
 //         .then(fixed => {
 //           return fixed && originalItem
-//           ? panel_items.map(replaceItem.bind(null, item, originalItem))
+//           ? panelItems.map(replaceItem.bind(null, item, originalItem))
 //           : []
 //         })
 //         .then(getRowsCount)
-//         .then(rows => makeMatrixFromItemsIgnore(panel_items, closeBlocks, rows, cols))
+//         .then(rows => makeMatrixFromItemsIgnore(panelItems, closeBlocks, rows, cols))
 //         .then(proxy.print.status_make_matrix_2)
 //         .then(closeObj.reduce((promiseChain, item) => {
 //           return promiseChain
 //             .then(proxy.print.status_move_item_1)
-//             .then(() => findFreeSpaceForItem(matrix, item, _panel_items))
+//             .then(() => findFreeSpaceForItem(matrix, item, _panelItems))
 //             .then(position => {
 //               exclude.push(item.id);
 
 //               if (position) {
-//                 _panel_items = _panel_items.map(assignPosition.bind(null, item, position));
+//                 _panelItems = _panelItems.map(assignPosition.bind(null, item, position));
 //                 let getIgnoreItems = _closeBlocks.filter(
 //                   (value) => exclude.indexOf(value) === -1
 //                 );
 
-//                 return getRowsCount(_panel_items)
+//                 return getRowsCount(_panelItems)
 //                   .then(rowCount => makeMatrixFromItemsIgnore(
-//                     _panel_items,
+//                     _panelItems,
 //                     getIgnoreItems,
 //                     rowCount,
 //                     cols

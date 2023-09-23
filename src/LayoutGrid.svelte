@@ -126,7 +126,7 @@
           .then(_item => layout.moveItem(_item, panelItems, getComputedCols, _detail.clone))
           .then(proxy.print.status_update_matrix_1)
           .then(_panelItems => {
-            panelItems = _panelItems;
+            // panelItems = _panelItems;
             if (_detail.onUpdate) {
               _detail.onUpdate();
             }
