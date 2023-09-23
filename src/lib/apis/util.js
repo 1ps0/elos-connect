@@ -4,18 +4,18 @@ import { print, notify, register } from "./proxy.js";
 
 export const deduplicate = (_tabs) => {
   const seenUrls = new Set();
-  return _tabs.filter(tab => {
+  return _tabs.filter((tab) => {
     if (seenUrls.has(tab.url)) {
       return false;
     }
     seenUrls.add(tab.url);
     return true;
   });
-}
+};
 
 export const duplicates = (_tabs) => {
   const urlCounts = new Map();
-  _tabs.forEach(tab => {
+  _tabs.forEach((tab) => {
     urlCounts.set(tab.url, (urlCounts.get(tab.url) || 0) + 1);
   });
 
@@ -26,16 +26,15 @@ export const duplicates = (_tabs) => {
     }
   });
 
-  return _tabs.filter(tab => duplicateUrls.has(tab.url));
-}
-
+  return _tabs.filter((tab) => duplicateUrls.has(tab.url));
+};
 
 export const zip = (keys, vals) => {
   return keys.reduce((m, key, index) => {
     m[key] = vals[index];
     return m;
   }, {});
-}
+};
 
 export const resolvePath = (path, obj, separator = ".") => {
   var properties = Array.isArray(path) ? path : path.split(separator);

@@ -168,7 +168,8 @@ export const sendTag = (params) => {
 };
 
 export const sendLink = async (tagName) => {
-  return tabs.currentActive()
+  return tabs
+    .currentActive()
     .then((tabs) => tabs[0])
     .then((tab) => {
       return {

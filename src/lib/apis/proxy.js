@@ -1,4 +1,3 @@
-
 import { createEventDispatcher } from "svelte";
 
 const logKeywords = {
@@ -41,6 +40,12 @@ export const print = new Proxy(() => {}, {
   get(target, name) {
     return (_args) => {
       return splitAndUpperCaseString(name)
+        .then(
+          new Promise(
+            (run, skip) => (_name) =>
+              _name[0] === "status" ? skip(_name) : run(_name)
+          )
+        )
         .then((_name) => `[${_name[0]}][${_name.slice(1).join("_")}]`)
         .then((_name) => console.log(_name, _args))
         .catch(console.assert)
@@ -72,6 +77,39 @@ export const notify = new Proxy(() => {}, {
         .then(browser.notifications.create)
         .catch(print.failure_notify)
         .then((_) => _args);
+    };
+  },
+});
+
+export const ground = new Proxy(() => {}, {
+  // acts as a grounding point for any failing cases
+  // ends the chain, while also printing the error or fail state
+  get(target, name) {
+    return (_args) => {
+      return (
+        splitAndUpperCaseString(name)
+          .catch(print.failure_expect)
+          // maybe not just print, but also report failure shape and have fallback options
+          // forking river not a stopping dam
+          .then((_) => _args)
+      );
+    };
+  },
+});
+
+export const expect = new Proxy(() => {}, {
+  // expect the data to have a certain shape and return true
+  // passthrough layer
+  get(target, name) {
+    return (_args) => {
+      return (
+        splitAndUpperCaseString(name)
+          .catch(print.failure_expect)
+          .then((err) => ("abort" in err ? ground : notify))
+          // maybe not just print, but also report failure shape and have fallback options
+          // forking river not a stopping dam
+          .then((_) => _args)
+      );
     };
   },
 });
@@ -128,21 +166,21 @@ export const register = new Proxy(() => {}, {
 //   }
 // });
 
-// dispatch 
+// dispatch
 export const dispatch = new Proxy(() => {}, {
   get(target, name) {
     const _dispatch = createEventDispatcher();
     return (args) => {
       _dispatch(`${target}:${name}:${args}`, {
-        target, name, args,
+        target,
+        name,
+        args,
       });
-      if (name == 'tabs') {
-
+      if (name == "tabs") {
       }
       return {
         ...args,
-
       };
-    }
-  }
+    };
+  },
 });

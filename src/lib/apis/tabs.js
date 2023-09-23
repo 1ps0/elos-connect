@@ -22,7 +22,6 @@ export const move = (tabs, _window) => {
     .catch(proxy.print.failure_move_tab);
 };
 
-
 export const currentWindow = () => {
   return Promise.resolve({
     windowId: browser.windows.WINDOW_ID_CURRENT,

@@ -5,7 +5,7 @@
 </style>
 
 <div class="svlt-grid-container" style="height: {containerHeight}px" bind:this={container}>
-  {#each items as item, i (item.id)}
+  {#each (panelItems || []) as item, i (item.id)}
     <MoveResize
       on:load={handleRepaint}
       on:repaint={handleRepaint}
@@ -35,7 +35,7 @@
   import { onMount, createEventDispatcher } from "svelte";
   import MoveResize from "./LayoutGridMoveResize.svelte";
 
-  export let items;
+  export let panelItems;
   export let rowHeight;
   export let cols;
   export let gap = 10;
@@ -47,7 +47,7 @@
   export let dynamic = false;
 
   const dispatch = createEventDispatcher();
-  $: console.log("[ITEMS][LayoutGrid]", items);
+  $: console.log("[panelItems][LayoutGrid]", panelItems);
 
   let getComputedCols;
 
@@ -58,7 +58,7 @@
 
   let containerWidth;
 
-  $: containerHeight = layout.getContainerHeight(items, yPerPx);
+  $: containerHeight = layout.getContainerHeight(panelItems, yPerPx);
 
   let prevCols;
 
@@ -71,7 +71,7 @@
 
   const onResize = layout.debounce(() => {
     if (breakpoints.length) {
-      items(items, getComputedCols);
+      panelItems(panelItems, getComputedCols);
     }
 
     dispatch("resize", {
@@ -95,7 +95,7 @@
 
       if (!containerWidth) {
         if (breakpoints.length) {
-          items(items, getComputedCols);
+          panelItems(panelItems, getComputedCols);
         }
 
         dispatch("mount", {
@@ -118,15 +118,15 @@
 
   const updateMatrix = ({ detail }) => {
     return Promise.resolve(detail)
-      .then(_detail => layout.getItemById(_detail.id, items)
+      .then(_detail => layout.getItemById(_detail.id, panelItems)
         .then(item => ({_detail, item})))
       .then(({_detail, item}) => {
         return Promise.resolve(item)
           .then(_item => Object.assign(item, _detail.shadow))
-          .then(_item => layout.moveItem(_item, items, getComputedCols, _detail.clone))
+          .then(_item => layout.moveItem(_item, panelItems, getComputedCols, _detail.clone))
           .then(proxy.print.status_update_matrix_1)
-          .then(_items => {
-            items = _items;
+          .then(_panelItems => {
+            panelItems = _panelItems;
             if (_detail.onUpdate) {
               _detail.onUpdate();
             }
