@@ -26,13 +26,6 @@
       .catch(proxy.print.failure_add_writable)
   }
 
-  const _removeFromWritable = (item) => {
-    return Promise.resolve(item)
-      .then(_item => panelItems.findIndex(value => value.target === _item.target))
-      .then(_itemIndex => _itemIndex > -1 ? panelItems.splice(_itemIndex, 1) : null)
-      .catch(proxy.print.failure_add_writable)
-  }
-
   const addPanel = (panelTarget, options={}) => {
     // TODO render icons into menupanelItems
     // TODO render source/dataStore props into actual stores
@@ -54,6 +47,13 @@
       .then(_addToWritable)
       .catch(proxy.print.failure_panels_add_item)
   };
+
+  const _removeFromWritable = (item) => {
+    return Promise.resolve(item)
+      .then(_item => panelItems.findIndex(value => value.target === _item.target))
+      .then(_itemIndex => _itemIndex > -1 ? panelItems.splice(_itemIndex, 1) : panelItems)
+      .catch(proxy.print.failure_add_writable)
+  }
 
   const removePanel = (item) => {
     return Promise.resolve(item)
@@ -133,7 +133,7 @@
     let panels = Promise.resolve([]);
     [
       "panel-mainmenu",
-      "panel-actionmenu",
+      // "panel-actionmenu",
       // "panel-web-players",
       // "panel-playlists",
       // "panel-config",
