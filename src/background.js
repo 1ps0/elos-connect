@@ -202,7 +202,7 @@ const omniboxOnInputEntered = (input, disposition) => {
   // console.log("INPUT SUBMITTED", lastInput, '--', input, '--', cmds[input]);
   return Promise.resolve(lastInput)
     .then(proxy.print.status_on_input_entered)
-    .then(registerHistory)
+    // .then(registerHistory)
     .then(renderAction)
     .then(proxy.print.success_on_input_entered)
     .catch(proxy.print.failure_omnibox_entered);

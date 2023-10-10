@@ -94,6 +94,7 @@
       .then(_item => layout.findSpace(_item, panelItems, layoutConfig.columnCount)
         .then(_layout => ({..._item, ..._layout}))
       )
+      .then(proxy.print.status_position_item)
       .catch(proxy.print.failure_panels_position_item)
   }
 

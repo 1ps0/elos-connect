@@ -313,7 +313,8 @@ try {
         // TODO browser.tabs.unload this/selection/tabs/window
         return (
           Promise.resolve(args)
-            .then(tabs.highlighted)
+            // .then(tabs.highlighted)
+            .then(tabs.getQueried)
             .then(actions.unloadTabs)
             // use tabs.warmup() to undo this/prime a tab
             .catch(proxy.print.failure_unload)
