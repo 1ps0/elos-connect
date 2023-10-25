@@ -54,6 +54,13 @@
         return obj.loop ? 'LOOPING' : 'SINGLE';
       },
       action: send.toggleLoop
+    },
+    {
+      name: 'next',
+      description: '',
+      check: (obj) => null,
+      icon: () => "NEXT",
+      action: send.clickNext
     }
   ];
 

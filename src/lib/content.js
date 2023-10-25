@@ -129,6 +129,10 @@ export const startElementTracking = () => {
 };
 export const stopElementTracking = () => {};
 
+export const applyToControlElements = () => {
+  "element.clickNext"
+};
+
 // ---- Extractive
 
 export const captureScrollPosition = (options = {}) =>

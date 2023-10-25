@@ -81,10 +81,10 @@
       "css": ["build/css/site/hackernews.css"]
     },
     {
-      "matches": ["https://fansly.com/*"],
-      "js": ["content_accessibility.js"],
-      "css": ["style.css"],
-      "all_frames": true
+      "matches": ["https://old.reddit.com/*"],
+      "match_about_blank": false,
+      "all_frames": true,
+      "css": ["build/css/site/reddit.css"]
     }
   ],
   "options_ui": {
@@ -98,7 +98,7 @@
   // },
   "os_env": {
     "archive": {
-      "path": "/media/admin/ARCHIVE/unsorted/",
+      "path": "~/.elos/archive/unsorted",
       "subset": []
     },
     "auto_dark": true

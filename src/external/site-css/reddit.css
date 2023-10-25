@@ -1,0 +1,188 @@
+@-moz-document domain(reddit.com){
+:root{
+    --background: #11202c;
+    --color: #ccc;
+    --dark-color: #aa8;
+    --border: #446;
+    --lighter: rgba(100,120,100,0.1);
+    --link: #389fc7;
+    --dark-link: #637cd7;
+    --separator: #5f99cf;
+    --visited: #a8d;
+    --solid-lighter: #234;
+    --sidebar-width: 320px;
+    color: var(--color);
+}
+.content[role="main"]{
+    margin-inline-end: var(--sidebar-width) !important;
+}
+.side{
+    padding-inline-start: 1em !important;
+}
+.link .usertext-body .md,
+.tabmenu li a,
+.side .titlebox > *,
+.sidebox .spacer,
+.icon-menu a{
+    background-color: transparent !important;
+}
+.morelink{
+    background:transparent !important;
+}
+.morelink > .nub{
+    display: none !important;
+}
+body,
+#chat-container > div,
+.hover-bubble{
+    background: var(--background) !important;
+    color: var(--color) !important;
+}
+
+.md{
+    color: inherit !important;
+}
+.md code,
+.md pre,
+.linkinfo,
+.nextprev a,
+.infobar,
+.trophy-area .content,
+.new-comment .usertext-body,
+.new-comment .md.md code,
+#header-bottom-right,
+#sr-header-area,
+body > .side,
+#newlink-with-image-upload .image-upload-drop-target,
+.content.submit .info-notice,
+#header{
+    background: var(--lighter) !important;
+}
+.author-tooltip__head{
+  background-color: var(--lighter) !important;
+  color: var(--color) !important;
+}
+a,
+.titlebox h1 a,
+.sr-bar a,
+.dropdown.srdrop .selected,
+.search-result-meta a,
+.thing .title{
+    color: var(--link) !important;
+}
+.search-result :visited,
+a:visited,
+.thing .title:visited{
+    color: var(--visited) !important;
+}
+.flat-list.buttons a{
+    color: #559999 !important;
+}
+a.message-count{
+    color: black !important;
+}
+.search-result .search-title > mark{
+    color: salmon !important;
+}
+.drop-choices,
+#searchexpando,
+.flair,
+textarea,
+#shortlink-text,
+.roundfield,
+.roundfield input,
+#search > input,
+.titlebox form.toggle,
+.tabmenu li.selected a,
+.message > .entry,
+#sr-more-link{
+    background: var(--solid-lighter) !important;
+    color: var(--color) !important;
+}
+textarea{
+  appearance: none;
+}
+.message.new > .entry,
+.message.recipient > .entry{
+    color: var(--color) !important;
+    background: transparent !important;
+}
+.message.message-reply.recipient > .entry .head,
+.message.message-parent.recipient > .entry .head{
+    color: inherit !important;
+}
+span.domain > a{
+  color: var(--dark-link) !important;
+}
+.author-tooltip__credentials-list strong,
+.author-tooltip__head h3,
+a.author,
+.md strong{
+    color: var(--dark-color) !important;
+}
+.md del{
+  color: #977 !important;
+}
+.md blockquote{
+    background: var(--solid-lighter) !important;
+    color: var(--dark-color) !important;
+    padding-block: 0.5em !important;
+}
+
+.md code,
+.md pre{
+    border: 1px solid var(--border) !important;
+}
+.md pre code{
+  border: none !important;
+  background: none !important;
+}
+.tagline,
+.search-result-meta{
+    padding-block: 0.3em !important;
+}
+.tabmenu li.selected a{
+    outline: 2px solid var(--separator) !important;
+    border: none !important;
+    outline-offset: -1px !important;
+    color: salmon !important;
+}
+.titlebox form.toggle{
+    padding: 1em !important;
+    border: 1px solid var(--border) !important;
+}
+.thing{
+    margin: 1em !important;
+    padding: 1em !important;
+    border: 1px solid var(--border) !important;
+}
+.link.last-clicked{
+    border: 1px solid var(--link)
+}
+.thing:hover{
+    background-color: var(--lighter)
+}
+.thing.comment{
+    background-color: transparent !important;
+    border: none !important;
+    margin: 0 0.2em !important;
+}
+.thing .child{
+    border-left: 2px solid var(--border) !important;
+}
+.md code{
+    white-space: pre-wrap !important;
+}
+#chat-container{
+  --layout-body: var(--solid-lighter,#fff);
+  --activity-text-regular: var(--color);
+  --sidebar-item-selected: var(--background);
+  --overlay-headerColor: var(--color);
+  --message-list-item-ownerBg: var(--lighter);
+  --bubble-color: var(--dark-color);
+  --activity-input-background: var(--background);
+}
+#chat-container textarea{
+  background: var(--background) !important
+}
+}

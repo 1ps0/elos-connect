@@ -1,4 +1,4 @@
-import { print, notify, register } from "./apis/proxy.js";
+import * as proxy from "./apis/proxy.js";
 import { _send, _fetch } from "./apis/network.js";
 import * as tabs from "./apis/tabs.js";
 
@@ -6,7 +6,7 @@ import * as tabs from "./apis/tabs.js";
 
 export const toContent = (args) => {
   return Promise.resolve(args)
-    .then(print.status_send_to_content)
+    .then(proxy.print.status_send_to_content)
     .then((data) => {
       browser.tabs.sendMessage(data.tabId, data);
       return {
@@ -15,47 +15,54 @@ export const toContent = (args) => {
       };
     })
     .then(notify.success)
-    .catch(print.failure_send_to_content);
+    .catch(proxy.print.failure_send_to_content);
 };
 
 export const setDarkMode = (e) => {
   return Promise.resolve(e)
     .then((data) => ({ tabId: data.id, message: "set.darkMode" }))
     .then(toContent)
-    .catch(print.failure_send_toggle_loop);
+    .catch(proxy.print.failure_send_toggle_loop);
 };
 
 export const toggleLoop = (e) => {
   return Promise.resolve(e)
     .then((data) => ({ tabId: data.tabId, message: "media.toggleLoop" }))
     .then(toContent)
-    .catch(print.failure_send_toggle_loop);
+    .catch(proxy.print.failure_send_toggle_loop);
 };
 
 export const playPause = (e) => {
   return Promise.resolve(e)
     .then((data) => ({ tabId: data.tabId, message: "media.playPause" }))
     .then(toContent)
-    .catch(print.failure_send_play_pause);
+    .catch(proxy.print.failure_send_play_pause);
 };
+
+export const clickNext = (e) => {
+  return Promise.resolve(e)
+    .then((data) => ({ tabId: data.tabId, message: "element.clickNext" }))
+    .then(toContent)
+    .catch(proxy.print.failure_action_click_next)
+}
 
 export const restart = (e) => {
   return Promise.resolve(e)
     .then((data) => ({ tabId: data.tabId, message: "media.restart" }))
     .then(toContent)
-    .catch(print.failure_send_restart);
+    .catch(proxy.print.failure_send_restart);
 };
 
 // export const sendRuntimeMessage = async (params) => {
 //   return browser.runtime.sendMessage(params)
-//     .catch(print.failure);
+//     .catch(proxy.print.failure);
 // };
 
 export const sendTabMessage = (args) => {
   return Promise.resolve(args)
     .then((_args) => _args.tabId)
     .then(browser.tabs.sendMessage)
-    .catch(print.failure_send_tab_message);
+    .catch(proxy.print.failure_send_tab_message);
 };
 
 export const sendMessageToTabs = (tabs) => {
@@ -63,8 +70,8 @@ export const sendMessageToTabs = (tabs) => {
     tabs.map((tab) => {
       return browser.tabs
         .sendMessage(tab.id, { greeting: "Hi from background script" })
-        .then(print.status_send_message_to_tabs_response)
-        .catch(print.failure_send_message_to_tabs_response);
+        .then(proxy.print.status_send_message_to_tabs_response)
+        .catch(proxy.print.failure_send_message_to_tabs_response);
     })
   );
 };
@@ -87,7 +94,7 @@ export const sendRuntimeMessage = async (params) => {
   return Promise.resolve(params)
     .then(pruneMethods)
     .then(browser.runtime.postMessage)
-    .catch(print.failure_send_runtime_message);
+    .catch(proxy.print.failure_send_runtime_message);
 };
 
 export const toContentScript = async (params) => {
@@ -97,7 +104,7 @@ export const toContentScript = async (params) => {
       message: _params.message,
     }))
     .then((args) => window.postMessage(args, "*"))
-    .catch(print.failure_send_to_content_script);
+    .catch(proxy.print.failure_send_to_content_script);
 };
 
 // ------- Send composites
@@ -163,7 +170,7 @@ export const sendTag = (params) => {
         };
       })
       .then(_send)
-      .catch(print.failure_send_tag)
+      .catch(proxy.print.failure_send_tag)
   );
 };
 
@@ -183,7 +190,7 @@ export const sendLink = async (tagName) => {
     })
     .then(_send)
     .then(notify.success)
-    .catch(print.failure_send_link);
+    .catch(proxy.print.failure_send_link);
 };
 
 export const sendSidebar = (params) => {
@@ -191,7 +198,7 @@ export const sendSidebar = (params) => {
   // neither gives global table, both gives rejection
   return Promise.resolve(params)
     .then(browser.sidbarAction.open)
-    .catch(print.failure_open_sidebar);
+    .catch(proxy.print.failure_open_sidebar);
 };
 
 export const getContexts = (results) => {
@@ -202,9 +209,9 @@ export const getContexts = (results) => {
         return Promise.resolve(result)
           .then((_result) => [result.tabId, { ...result, message: "find" }])
           .then((_result) => browser.tabs.sendMessage(..._result))
-          .catch(print.failure_send_message_context);
+          .catch(proxy.print.failure_send_message_context);
       });
     })
     .then(Promise.all)
-    .catch(print.failure_get_contexts);
+    .catch(proxy.print.failure_get_contexts);
 };

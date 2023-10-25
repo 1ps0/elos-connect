@@ -16,6 +16,12 @@ const isElementVisible = (element) => {
   return visible;
 };
 
+const handleElementMessage = (obj, sendResponse) => {
+  return Promise.resolve(obj)
+    .then(content.applyToControlElements)
+    .catch(proxy.print.failure_handle_element_message);
+}
+
 const handleMediaMessage = (obj, sendResponse) => {
   return Promise.resolve(obj)
     .then((obj) => ({
@@ -43,6 +49,8 @@ const handleMessage = (request, sender, sendResponse) => {
 
   if (request.message.indexOf("media") != -1) {
     return handleMediaMessage(obj, sendResponse);
+  } else if () {
+    return handleElementMessage(obj, sendResponse);
   } else if (request.message === "set.darkMode") {
     return Promise.resolve(content.elementHexMap) // chesterish
       .then(content.applyDarkMode)
