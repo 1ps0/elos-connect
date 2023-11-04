@@ -1,4 +1,4 @@
-import * as proxy from "./proxy.js";
+import * as proxy from './proxy.js';
 
 // --- tab ops
 // NOTE: all 'get' types dont have a catch failure by design
@@ -13,7 +13,7 @@ export const all = (args) => {
 };
 
 export const move = (tabs, _window) => {
-  console.log("MOVE TAB", tabs, _window);
+  console.log('MOVE TAB', tabs, _window);
   return browser.tabs
     .move(tabs, {
       index: -1, // arg reverse: 0 to reverse, -1 to stay same
@@ -73,10 +73,10 @@ export const addActiveTabId = (data) => {
 
 export const tabIdQueries = (arg) => {
   return {
-    single: tabQueries("this")
+    single: tabQueries('this')
       .then((tab) => tab.id)
       .catch(proxy.print.failure_tab_id_single),
-    plural: tabQueries("window")
+    plural: tabQueries('window')
       .then((tabs) => tabs.map((tab) => tab.id))
       .catch(proxy.print.failure_tab_id_plural),
   }[arg];
@@ -106,7 +106,7 @@ export const filter = (args) => {
 };
 
 export const setActive = (data) => {
-  console.log("Setting active tab with data", data);
+  console.log('Setting active tab with data', data);
   return Promise.resolve(data)
     .then(enrichItem)
     .then((_data) => {
@@ -146,7 +146,7 @@ export const queries = (arg) => {
 export const getQueried = (args) => {
   return (
     Promise.resolve(args)
-      .then((_args) => (_args.length ? _args[0] : "this"))
+      .then((_args) => (_args.length ? _args[0] : 'this'))
       .then(queries) // keyword
       // .then(proxy.print.status_tab_query)
       .then((tabQuery) => tabQuery())

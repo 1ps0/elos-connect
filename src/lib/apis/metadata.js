@@ -1,4 +1,4 @@
-import * as proxy from "./apis/proxy.js";
+import * as proxy from './apis/proxy.js';
 
 export const getBrowserInfo = async () => {
   return browser.runtime

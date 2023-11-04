@@ -1,9 +1,9 @@
-import * as proxy from "./apis/proxy.js";
-import * as network from "./apis/network.js";
-import * as reduce from "./apis/reduce.js";
-import * as tabs from "./apis/tabs.js";
+import * as proxy from './apis/proxy.js';
+import * as network from './apis/network.js';
+import * as reduce from './apis/reduce.js';
+import * as tabs from './apis/tabs.js';
 
-import * as send from "./send.js";
+import * as send from './send.js';
 
 // ---------- Actions
 
@@ -60,7 +60,7 @@ export const selectedCopy = (e) => {
     .then(tabs.highlighted)
     .then(proxy.print.status_selected_copy)
     .then((tabs) => {
-      return tabs.map((tab) => `${tab.title},${tab.url}`).join("\n");
+      return tabs.map((tab) => `${tab.title},${tab.url}`).join('\n');
     })
     .then(updateClipboard)
     .then(proxy.notify.success)
@@ -71,7 +71,7 @@ export const downloadVideo = (e) => {
   return Promise.resolve(e)
     .then(tabs.currentActive)
     .then((tab) => ({
-      uri: "api/action/download/video",
+      uri: 'api/action/download/video',
       body: {
         uri: tab[0].url,
       },
@@ -144,12 +144,12 @@ export const extractReaderText = (e) => {
     })
     .then((tabId) => ({
       tabId: tabId,
-      message: "extractReaderText",
+      message: 'extractReaderText',
     }))
     .then(send.toContent)
     .then(proxy.print.status_content_response_reader_text)
     .then((pageData) => ({
-      uri: "api/analysis/data",
+      uri: 'api/analysis/data',
       body: pageData,
     }))
     .then(network._send)
@@ -172,7 +172,7 @@ export const startPlaylist = (name) => {
   10. operations for the current playlist item, the current cursor location
   11. location is by object, as location is over time and object resulting from action
   */
-  return Promise.resolve("stash")
+  return Promise.resolve('stash')
     .then(browser.storage.local.get)
     .then((_stash) => _stash.stash)
     .then((data) => data[name])

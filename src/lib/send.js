@@ -1,6 +1,6 @@
-import * as proxy from "./apis/proxy.js";
-import { _send, _fetch } from "./apis/network.js";
-import * as tabs from "./apis/tabs.js";
+import * as proxy from './apis/proxy.js';
+import { _send, _fetch } from './apis/network.js';
+import * as tabs from './apis/tabs.js';
 
 // ------- Send to webpage content_inject.js
 
@@ -20,35 +20,35 @@ export const toContent = (args) => {
 
 export const setDarkMode = (e) => {
   return Promise.resolve(e)
-    .then((data) => ({ tabId: data.id, message: "set.darkMode" }))
+    .then((data) => ({ tabId: data.id, message: 'set.darkMode' }))
     .then(toContent)
     .catch(proxy.print.failure_send_toggle_loop);
 };
 
 export const toggleLoop = (e) => {
   return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message: "media.toggleLoop" }))
+    .then((data) => ({ tabId: data.tabId, message: 'media.toggleLoop' }))
     .then(toContent)
     .catch(proxy.print.failure_send_toggle_loop);
 };
 
 export const playPause = (e) => {
   return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message: "media.playPause" }))
+    .then((data) => ({ tabId: data.tabId, message: 'media.playPause' }))
     .then(toContent)
     .catch(proxy.print.failure_send_play_pause);
 };
 
 export const clickNext = (e) => {
   return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message: "element.clickNext" }))
+    .then((data) => ({ tabId: data.tabId, message: 'element.clickNext' }))
     .then(toContent)
-    .catch(proxy.print.failure_action_click_next)
-}
+    .catch(proxy.print.failure_action_click_next);
+};
 
 export const restart = (e) => {
   return Promise.resolve(e)
-    .then((data) => ({ tabId: data.tabId, message: "media.restart" }))
+    .then((data) => ({ tabId: data.tabId, message: 'media.restart' }))
     .then(toContent)
     .catch(proxy.print.failure_send_restart);
 };
@@ -69,7 +69,7 @@ export const sendMessageToTabs = (tabs) => {
   return Promise.all(
     tabs.map((tab) => {
       return browser.tabs
-        .sendMessage(tab.id, { greeting: "Hi from background script" })
+        .sendMessage(tab.id, { greeting: 'Hi from background script' })
         .then(proxy.print.status_send_message_to_tabs_response)
         .catch(proxy.print.failure_send_message_to_tabs_response);
     })
@@ -103,30 +103,30 @@ export const toContentScript = async (params) => {
       direction: _params.direction,
       message: _params.message,
     }))
-    .then((args) => window.postMessage(args, "*"))
+    .then((args) => window.postMessage(args, '*'))
     .catch(proxy.print.failure_send_to_content_script);
 };
 
 // ------- Send composites
 
 export const openAIApi = (prompt) => {
-  const apiKey = "your_openai_api_key_here";
-  const apiUrl = "https://api.openai.com/v1/chat/completions";
-  const model = "gpt-4";
+  const apiKey = 'your_openai_api_key_here';
+  const apiUrl = 'https://api.openai.com/v1/chat/completions';
+  const model = 'gpt-4';
 
   const headers = new Headers({
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${apiKey}`,
   });
 
   const body = JSON.stringify({
     model,
-    messages: [{ role: "user", content: prompt }],
+    messages: [{ role: 'user', content: prompt }],
     temperature: 0.7,
   });
 
   const response = fetch(apiUrl, {
-    method: "POST",
+    method: 'POST',
     headers,
     body,
   });
@@ -142,12 +142,12 @@ export const extractSemanticObjectsAndGroupingsFromDOM = () => {
     const gpt4Response = callOpenAIAPI(prompt);
 
     // Create a new function from the GPT-4 response
-    const extractedFunction = new Function("document", gpt4Response);
+    const extractedFunction = new Function('document', gpt4Response);
 
     // Execute the function and return the extracted data
     return extractedFunction(document);
   } catch (error) {
-    console.error("Error in extractSemanticObjectsAndGroupingsFromDOM:", error);
+    console.error('Error in extractSemanticObjectsAndGroupingsFromDOM:', error);
   }
 };
 
@@ -156,14 +156,14 @@ export const sendTag = (params) => {
   return (
     Promise.resolve(params)
       .then((_params) =>
-        params && params.tagName ? params.tagName : "#tag_name"
+        params && params.tagName ? params.tagName : '#tag_name'
       )
       .then((name) => document.querySelector(name))
       // FIXME extract css styling into module that can be integrated
       .then((button) => button.value)
       .then((tagName) => {
         return {
-          uri: "api/analysis/tag",
+          uri: 'api/analysis/tag',
           args: {
             name: tagName,
           },
@@ -180,7 +180,7 @@ export const sendLink = async (tagName) => {
     .then((tabs) => tabs[0])
     .then((tab) => {
       return {
-        uri: "api/location/add",
+        uri: 'api/location/add',
         body: {
           label: tab.title,
           uri: tab.url,
@@ -202,12 +202,12 @@ export const sendSidebar = (params) => {
 };
 
 export const getContexts = (results) => {
-  console.log("sending results", results);
+  console.log('sending results', results);
   return Promise.resolve(results)
     .then((_results) => {
       return _results.map((result) => {
         return Promise.resolve(result)
-          .then((_result) => [result.tabId, { ...result, message: "find" }])
+          .then((_result) => [result.tabId, { ...result, message: 'find' }])
           .then((_result) => browser.tabs.sendMessage(..._result))
           .catch(proxy.print.failure_send_message_context);
       });

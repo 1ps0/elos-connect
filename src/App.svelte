@@ -11,16 +11,16 @@
   import { components } from "./components.js";
   // import ActionButton from './ActionButton.svelte';
 
-  const genId = () => "_" + Math.random().toString(36).substr(2, 9);
+  const genId = () => "_" + Math.random().toString(36).substr(2, 9)
 
   let objects = {};
-  // const panelItems = writable([]);
+  // const panelItems = writable([])
   const panelItems = [];
 
   const _addToWritable = (item) => {
     return Promise.resolve(item)
       .then(_item => {
-          panelItems.push(_item);
+          panelItems.push(_item)
           return panelItems;
       })
       .catch(proxy.print.failure_add_writable)
@@ -30,7 +30,7 @@
     // TODO render icons into menupanelItems
     // TODO render source/dataStore props into actual stores
     if (!panelTypes.hasOwnProperty(panelTarget)) {
-      console.log("MISSING PANEL", panelTarget);
+      console.log("MISSING PANEL", panelTarget)
     }
     return Promise.resolve(panelTarget)
       .then(_target => panelTypes[_target])
@@ -64,7 +64,7 @@
 
   function hydrateParams(item) {
     if (!components.hasOwnProperty(item.componentName)) {
-      console.log("MISSING COMPONENT", item.componentName);
+      console.log("MISSING COMPONENT", item.componentName)
     }
 
     if (item.props !== undefined
@@ -74,7 +74,7 @@
       item.props.dataStore = stores[item.props.dataStore];
 
       if (item.target in objects && objects[item.target]) {
-        objects[item.target].$set("dataStore", item.props.dataStore);
+        objects[item.target].$set("dataStore", item.props.dataStore)
       }
     }
 
@@ -83,7 +83,7 @@
         case "togglePanel": item.event.callback = togglePanel; break;
       }
       if (item && item.target && item.target in objects && objects[item.target] !== null) {
-        objects[item.target].$on(item.event.name, item.event.callback);
+        objects[item.target].$on(item.event.name, item.event.callback)
       }
     }
     return item;
@@ -110,41 +110,43 @@
       .then(_itemName => panelItems.filter(value => value.target === _itemName))
       .then(_layout => {
         if (_layout.length > 0)
-          return removePanel(itemName);
+          return removePanel(itemName)
         else
-          return addPanel(itemName);
+          return addPanel(itemName)
       })
       .catch(proxy.print.failure_toggle_panel_2)
-  };
+  }
 
   const onAdd = (val) => {
     return Promise.resolve(val)
       .then(_val => _val.detail)
       .then(item => {
         if (item && item.event && item.target in objects) {
-          objects[item.target].$on(item.event.name, item.event.callback);
+          objects[item.target].$on(item.event.name, item.event.callback)
         }
       })
   };
 
   onMount(() => {
-    proxy.print.success_App_mounted();
+    proxy.print.success_App_mounted()
 
-    // let defaults = browser.runtime.getManifest().panels.default;
-    let panels = Promise.resolve([]);
-    [
+    // let defaults = (browser.runtime.getManifest() || {}).panels.default;
+    // let panels = Promise.resolve([])
+    // defaults ||
+    ([
       "panel-mainmenu",
       // "panel-actionmenu",
       // "panel-web-players",
       // "panel-playlists",
       // "panel-config",
-    ].forEach((name) => {
-      panels = panels
-        .then((prev) => addPanel(name))
-        .catch(proxy.print.failure_panel);
-    });
-    return panels.catch(proxy.print.failure_panels);
-  });
+    ]).forEach(addPanel)
+    // (name) => {
+    //   panels = panels
+    //     .then((prev) => addPanel(name))
+    //     .catch(proxy.print.failure_panel)
+    // }
+    return panels.catch(proxy.print.failure_panels)
+  })
 
 </script>
 

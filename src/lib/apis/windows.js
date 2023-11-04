@@ -1,4 +1,4 @@
-import { print, notify, register } from "./proxy.js";
+import { print, notify, register } from './proxy.js';
 
 // ------- WINDOW FUNCTIONS
 
@@ -8,7 +8,7 @@ export const createWindow = (args) => {
       ? args
       : {
           // type: "popup",
-          type: "detached_panel",
+          type: 'detached_panel',
           incognito: true,
         }
   )
@@ -18,7 +18,7 @@ export const createWindow = (args) => {
 
 export const setTitle = (data) => {
   return Promise.resolve({
-    titlePreface: data && data.length ? `${data[0]} | ` : "Preface | ",
+    titlePreface: data && data.length ? `${data[0]} | ` : 'Preface | ',
   })
     .then((preface) => {
       return browser.windows.update(browser.windows.WINDOW_ID_CURRENT, preface);

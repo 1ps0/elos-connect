@@ -6,27 +6,27 @@
 // info.menuItemId == data.id
 // doWork
 
-import { print, notify, register } from "./proxy.js";
+import { print, notify, register } from './proxy.js';
 
 export const setupMenuSaveText = () => {
   browser.contextMenus
     .create({
-      title: "Add selected to Focus",
-      id: "add-selected-to-focus",
-      contexts: ["selection"],
+      title: 'Add selected to Focus',
+      id: 'add-selected-to-focus',
+      contexts: ['selection'],
     })
     .catch(print.failure_create_context_menu);
 
   browser.contextMenus.onClicked.addListener((info) => {
-    if (info.menuItemId === "add-selected-to-focus") {
+    if (info.menuItemId === 'add-selected-to-focus') {
       // clipboard.writeText();
       browser.storage.local
-        .get("notes")
+        .get('notes')
         .then((result) => result.notes)
         .then((_notes) => ({
           notes: [
             ..._notes,
-            `${info.pageUrl.split("#")[0]}#:~:text=${encodeURIComponent(
+            `${info.pageUrl.split('#')[0]}#:~:text=${encodeURIComponent(
               info.selectionText
             )}`,
           ],
@@ -75,7 +75,7 @@ function copySelectedText(info, tab) {
 function shareSelectedText(info, tab) {
   // Share the selected text
   navigator.share({
-    title: "Shared text",
+    title: 'Shared text',
     text: info.selectionText,
     url: tab.url,
   });
@@ -84,10 +84,10 @@ function shareSelectedText(info, tab) {
 function saveSelectedText(info, tab) {
   // Save the selected text to a file
   const selectedText = info.selectionText;
-  const blob = new Blob([selectedText], { type: "text/plain" });
+  const blob = new Blob([selectedText], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.download = "selectedText.txt";
+  const a = document.createElement('a');
+  a.download = 'selectedText.txt';
   a.href = url;
   a.click();
   URL.revokeObjectURL(url);
@@ -101,21 +101,21 @@ function speakSelectedText(info, tab) {
 
 export const config = [
   {
-    id: "search_selected_text",
+    id: 'search_selected_text',
     title: "Search '%s'",
-    contexts: ["selection"],
+    contexts: ['selection'],
     onClick: searchSelectedText,
   },
   {
-    id: "translate_selected_text",
+    id: 'translate_selected_text',
     title: "Translate '%s'",
-    contexts: ["selection"],
+    contexts: ['selection'],
     onClick: translateSelectedText,
   },
   {
-    id: "define_selected_text",
+    id: 'define_selected_text',
     title: "Define '%s'",
-    contexts: ["selection"],
+    contexts: ['selection'],
     onClick: defineSelectedText,
   },
 ];
@@ -129,7 +129,7 @@ function copySelectedTextAsJSON(info, tab) {
   const date = new Date();
 
   //expand the selection to include the parent element of the selected text
-  TextUtils.expand(range, "word");
+  TextUtils.expand(range, 'word');
   //get the context text
   const contextText = TextUtils.getTextInRange(range);
   //get the encapsulating element
@@ -178,10 +178,10 @@ function textToImageHash(text, size) {
   const lowFrequencyDCT = dct.slice(0, 8);
 
   // Convert the low-frequency DCT coefficients to a bitstring
-  let bitstring = "";
+  let bitstring = '';
   for (let i = 0; i < lowFrequencyDCT.length; i++) {
     const value = lowFrequencyDCT[i];
-    bitstring += value > 0 ? "1" : "0";
+    bitstring += value > 0 ? '1' : '0';
   }
 
   // Convert the bitstring to a hexadecimal string as the final hash value

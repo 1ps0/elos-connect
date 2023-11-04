@@ -1,4 +1,4 @@
-import * as proxy from "./proxy.js";
+import * as proxy from './proxy.js';
 
 // TODO convert items et al to be {items, rowCount, etc} in one blob
 // call this blob: LayoutInterface
@@ -77,7 +77,7 @@ export const findCloseBlocks = (matrix, curObject) => {
       const tempR = matrix.slice(y, y + h);
 
       const result = tempR.reduce((acc, _r) => {
-        console.log("[findCloseBlocks][_r]", _r, x, w, h, y, acc);
+        console.log('[findCloseBlocks][_r]', _r, x, w, h, y, acc);
         let tempA = _r.slice(x, x + w);
         const ret = [
           ...acc,
@@ -85,7 +85,7 @@ export const findCloseBlocks = (matrix, curObject) => {
             .map((val) => val && val.id && val.id !== curObject.id && val.id)
             .filter(Boolean),
         ];
-        console.log("[findCloseBlock][tempA][ret]", tempA, ret);
+        console.log('[findCloseBlock][tempA][ret]', tempA, ret);
         return ret;
       }, []);
 
@@ -136,8 +136,8 @@ export const makeMatrixFromItemsIgnore = (
   return Promise.resolve({ items, ignoreList, _row, _col })
     .then(({ items, ignoreList, _row, _col }) =>
       getRowsCount(items)
-        .then(rows => makeMatrix(rows, _col))
-        .then(matrix => ({ items, ignoreList, _col, matrix }))
+        .then((rows) => makeMatrix(rows, _col))
+        .then((matrix) => ({ items, ignoreList, _col, matrix }))
     )
     .then(({ items, _col, ignoreList, matrix }) => {
       for (let value in items) {
@@ -238,7 +238,7 @@ export const getItemById = (id, items) => {
 };
 
 export const findFreeSpaceForItem = (matrix, item, items) => {
-  console.log("[findFreeSpaceForItem] matrix:", matrix);
+  console.log('[findFreeSpaceForItem] matrix:', matrix);
 
   return Promise.resolve({ matrix, item, items })
     .then(({ matrix, item, items }) =>
@@ -260,7 +260,7 @@ export const findFreeSpaceForItem = (matrix, item, items) => {
               .every((a) => a.slice(j, j + w).every((n) => n === undefined));
 
             if (isEmpty) {
-              console.log("[findFreeSpaceForItem] IS EMPTY:", matrix);
+              console.log('[findFreeSpaceForItem] IS EMPTY:', matrix);
               return { y: i, x: j }; // return found space
             }
           }
@@ -390,9 +390,7 @@ export const moveItem = (item, panelItems, cols, originalItem) => {
             exclude.push(item.id);
 
             if (position) {
-              _panelItems.map(
-                assignPosition.bind(null, item, position)
-              );
+              _panelItems.map(assignPosition.bind(null, item, position));
               let getIgnoreItems = _closeBlocks.filter(
                 (value) => exclude.indexOf(value) === -1
               );

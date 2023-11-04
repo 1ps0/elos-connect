@@ -13,11 +13,11 @@ action = (node: HTMLEelement, parameters: any) => {
 }
 */
 
-import { createEventDispatcher } from "svelte";
-import { onMount, setContext, getContext, hasContext } from "svelte";
-import { writable, readable, derived, get } from "svelte/store";
+import { createEventDispatcher } from 'svelte';
+import { onMount, setContext, getContext, hasContext } from 'svelte';
+import { writable, readable, derived, get } from 'svelte/store';
 
-import { bringToFront, updatePlaying, print } from "./lib/actions.js";
+import { bringToFront, updatePlaying, print } from './lib/actions.js';
 
 export function messenger(node, params) {
   const dispatch = createEventDispatcher();
@@ -28,20 +28,20 @@ export function messenger(node, params) {
 
   const handleMsg = (e) => {
     e.preventDefault();
-    console.log("got command submit", e);
+    console.log('got command submit', e);
     // dispatch('openFile', {
     //   source: "fileset",
     //   data: file
     // });
   };
-  node.addEventListener("click", handleMsg);
+  node.addEventListener('click', handleMsg);
 
   const handlePlayerUpdate = (request, sender, sendResponse) => {
-    console.log("Message: ", request, sender);
+    console.log('Message: ', request, sender);
     return updatePlaying(tabStore)
       .then((params) => ({
         params: params,
-        response: "Response from WebPlayers",
+        response: 'Response from WebPlayers',
       }))
       .then(sendResponse)
       .catch(print.failure);
@@ -50,11 +50,11 @@ export function messenger(node, params) {
 
   return {
     update(newFile) {
-      console.log("messenger got update", newFile);
+      console.log('messenger got update', newFile);
     },
     destroy() {
-      console.log("messenger is destroyed");
-      node.removeListener("click", handleMsg);
+      console.log('messenger is destroyed');
+      node.removeListener('click', handleMsg);
     },
   };
 }

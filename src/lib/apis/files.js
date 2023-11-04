@@ -1,7 +1,7 @@
 // import { stores } from "./stores.js";
 
 export const selectedFile = (item) =>
-  item ? item["locations"][0].split("/Volumes/ARCHIVE/")[1] : "";
+  item ? item['locations'][0].split('/Volumes/ARCHIVE/')[1] : '';
 export const selectedFilePath = (item) =>
   `/api/load?filepath=${selectedFile(item)}`;
 
@@ -15,7 +15,7 @@ export const fileList = async (params) => {
 };
 
 export const openFile = (e) => {
-  console.log("open file", e);
+  console.log('open file', e);
   let data = e.detail;
   return _openFile(data);
 };
@@ -23,12 +23,12 @@ export const openFile = (e) => {
 export const _openFile = (data) => {
   let target;
 
-  if (["md", "txt", "json", "py", "js"].indexOf(data["file.ext"]) != -1) {
-    target = "panel-editor";
-  } else if (data["file.ext"] === "pdf") {
-    target = "panel-pdf";
-  } else if (["jpg", "gif", "png"].indexOf(data["file.ext"]) != -1) {
-    target = "panel-gallery";
+  if (['md', 'txt', 'json', 'py', 'js'].indexOf(data['file.ext']) != -1) {
+    target = 'panel-editor';
+  } else if (data['file.ext'] === 'pdf') {
+    target = 'panel-pdf';
+  } else if (['jpg', 'gif', 'png'].indexOf(data['file.ext']) != -1) {
+    target = 'panel-gallery';
   }
 
   if (target !== undefined) {
@@ -36,12 +36,12 @@ export const _openFile = (data) => {
       target_name: target,
       props: {
         data: selectedFilePath(data),
-        language: data["file.ext"] || "markdown",
-        theme: "vs-light",
-        features: ["wordWrap"],
+        language: data['file.ext'] || 'markdown',
+        theme: 'vs-light',
+        features: ['wordWrap'],
       },
     };
-    console.log("data for open file", options);
+    console.log('data for open file', options);
 
     // stores.actionHistory.update(n => [...(n || []), data]);
 

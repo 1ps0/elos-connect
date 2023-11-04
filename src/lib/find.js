@@ -1,6 +1,6 @@
-import * as proxy from "./apis/proxy.js";
-import * as tabs from "./tabs.js";
-import { getContexts } from "./send.js";
+import * as proxy from './apis/proxy.js';
+import * as tabs from './tabs.js';
+import { getContexts } from './send.js';
 
 // -------- Find composites
 
@@ -8,7 +8,7 @@ export const inTab = (query, tabId) => {
   return (
     Promise.resolve([query, tabId])
       .then((args) => [
-        args[0].join(" "),
+        args[0].join(' '),
         {
           tabId: args[1],
           includeRangeData: true,

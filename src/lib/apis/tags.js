@@ -1,4 +1,4 @@
-import * as windows from "./windows.js";
+import * as windows from './windows.js';
 
 export const queries = (arg) => {
   return {

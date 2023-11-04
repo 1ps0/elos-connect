@@ -1,19 +1,19 @@
 // main cli command structure
 
-import { panelTypes } from "../config/panels.js";
+import { panelTypes } from '../config/panels.js';
 
-import * as bookmarks from "./apis/bookmarks.js";
-import * as util from "./apis/util.js";
-import * as proxy from "./apis/proxy.js";
-import * as reduce from "./apis/reduce.js";
-import * as network from "./apis/network.js";
-import * as storage from "./apis/storage.js";
-import * as tabs from "./apis/tabs.js";
-import * as windows from "./apis/windows.js";
+import * as bookmarks from './apis/bookmarks.js';
+import * as util from './apis/util.js';
+import * as proxy from './apis/proxy.js';
+import * as reduce from './apis/reduce.js';
+import * as network from './apis/network.js';
+import * as storage from './apis/storage.js';
+import * as tabs from './apis/tabs.js';
+import * as windows from './apis/windows.js';
 
-import * as actions from "./actions.js";
-import * as send from "./send.js";
-import { stores } from "./stores.js";
+import * as actions from './actions.js';
+import * as send from './send.js';
+import { stores } from './stores.js';
 
 proxy.print.load_omnibox();
 
@@ -21,8 +21,8 @@ let _cmds = {};
 try {
   _cmds = {
     reload: {
-      content: "reload",
-      description: "reload plugin",
+      content: 'reload',
+      description: 'reload plugin',
       action: (args) =>
         actions
           .reloadSystem()
@@ -30,8 +30,8 @@ try {
           .catch(proxy.notify.failure_reload),
     },
     sync: {
-      content: "sync",
-      description: "sync current state with remote.",
+      content: 'sync',
+      description: 'sync current state with remote.',
       // suggestions: (args) => {
       //   mine: {
       //     content: "mine",
@@ -48,8 +48,8 @@ try {
       },
     },
     move: {
-      content: "move",
-      description: "Move selection to tagged entity",
+      content: 'move',
+      description: 'Move selection to tagged entity',
       // suggestion: (args) => {
       // // TODO suggest: "elos move <this> main", window 2 title: "main | ..."
       // // TODO suggest: "elos move <window> ... (yield window names)"
@@ -58,7 +58,7 @@ try {
       action: (params) => {
         let _tabs = getQueriedTabs([...params, ..._tag]);
         Promise.resolve(args)
-          .then((_args) => (args.length > 1 ? args.slice(1) : ["popout"]))
+          .then((_args) => (args.length > 1 ? args.slice(1) : ['popout']))
           .then(getWindowByPrefix)
           .then((_window) => tabs.all({ window: _window.id }))
           .then((_tabs) => tabs.move(_tabs))
@@ -67,11 +67,11 @@ try {
       },
     },
     watch: {
-      content: "watch",
-      description: "Watch selected field for changes",
+      content: 'watch',
+      description: 'Watch selected field for changes',
       action: (args) => {
-        console.log("MOVE");
-        let _tag = args.length > 1 ? args.slice(1) : ["selection"];
+        console.log('MOVE');
+        let _tag = args.length > 1 ? args.slice(1) : ['selection'];
         return (
           Promise.resolve([...args, ..._tag])
             // .then(tabs.getQueried)
@@ -82,12 +82,12 @@ try {
       },
     },
     stash: {
-      content: "stash",
+      content: 'stash',
       description:
-        "args: this, window, all | [tag_name]; Capture essential content in each of the selected tabs, and store with stash.",
+        'args: this, window, all | [tag_name]; Capture essential content in each of the selected tabs, and store with stash.',
       suggestions: (args) => {
         return browser.bookmarks
-          .search({ title: "stash" })
+          .search({ title: 'stash' })
           .then((bookmarks) => {
             return bookmarks.map((bookmark) => {
               return {
@@ -99,8 +99,8 @@ try {
           .catch(proxy.print.failure_stash_suggestions)
           .then(() => [
             {
-              content: "No stash found.",
-              description: "No stash found.",
+              content: 'No stash found.',
+              description: 'No stash found.',
             },
           ]);
       },
@@ -112,13 +112,13 @@ try {
           .then((__tabs) => __tabs.flat(1))
           .then((tabs) => {
             tabs.forEach((tab) => {
-              if (!tab.tag || tab.tag === "unsorted") {
+              if (!tab.tag || tab.tag === 'unsorted') {
                 tab.tag = _tag;
               }
               bookmarks.create({
                 title: tab.title,
                 url: tab.url,
-                parentId: "stash",
+                parentId: 'stash',
               });
             });
             return tabs;
@@ -129,14 +129,14 @@ try {
       },
     },
     window: {
-      content: "window",
-      description: "window",
+      content: 'window',
+      description: 'window',
       action: (_args) => {
         /*IDEA: default action for window config value*/
       },
       dedupe: {
-        content: "dedupe",
-        description: "deduplicate applicable set of tabs",
+        content: 'dedupe',
+        description: 'deduplicate applicable set of tabs',
         action: (_args) => {
           return Promise.resolve(_args)
             .then(tabs.getQueried)
@@ -148,9 +148,9 @@ try {
             .catch(proxy.print.failures_window_dedupe);
         },
       },
-      "%": {
-        content: "%",
-        description: "expand to % of screen",
+      '%': {
+        content: '%',
+        description: 'expand to % of screen',
         action: (_args) => {
           return Promise.resolve(_args)
             .then((args) => ({
@@ -167,8 +167,8 @@ try {
         },
       },
       normalize: {
-        content: "normalize",
-        description: "normalize all windows to this size",
+        content: 'normalize',
+        description: 'normalize all windows to this size',
         action: (args) => {
           let currentWindow = windows
             .getCurrent()
@@ -195,8 +195,8 @@ try {
         },
       },
       left: {
-        content: "window_left",
-        description: "Fit to left side of screen",
+        content: 'window_left',
+        description: 'Fit to left side of screen',
         action: (args) => {
           return windows
             .updateCurrent({
@@ -210,8 +210,8 @@ try {
         },
       },
       right: {
-        content: "window_right",
-        description: "Fit to right side of screen",
+        content: 'window_right',
+        description: 'Fit to right side of screen',
         action: (args) => {
           return windows
             .updateCurrent({
@@ -225,8 +225,8 @@ try {
         },
       },
       full: {
-        content: "window_full",
-        description: "Fit to screen",
+        content: 'window_full',
+        description: 'Fit to screen',
         action: (args) => {
           return windows
             .updateCurrent({
@@ -240,8 +240,8 @@ try {
         },
       },
       title: {
-        content: "title",
-        description: "set the title of the window/tab",
+        content: 'title',
+        description: 'set the title of the window/tab',
         action: (args) => {
           return Promise.resolve(args)
             .then(windows.setTitle)
@@ -251,8 +251,8 @@ try {
       },
     },
     gather: {
-      content: "gather",
-      description: "move input|all tabs to current|new window",
+      content: 'gather',
+      description: 'move input|all tabs to current|new window',
       action: (args) => {
         // args in ('all', '<domain>', <tag>, ilike <title>, type: video, audio, article)
         let tabs = Promise.resolve(args)
@@ -274,10 +274,10 @@ try {
       },
     },
     split: {
-      content: "split",
-      description: "split",
+      content: 'split',
+      description: 'split',
       action: (args) => {
-        console.log("HIT ", "split", args);
+        console.log('HIT ', 'split', args);
         // elos split selected tile column,
         return Promise.resolve(args)
           .then(tabs.highlighted)
@@ -307,8 +307,8 @@ try {
       },
     },
     unload: {
-      content: "unload",
-      description: "unload current tabs",
+      content: 'unload',
+      description: 'unload current tabs',
       action: (args) => {
         // TODO browser.tabs.unload this/selection/tabs/window
         return (
@@ -322,21 +322,21 @@ try {
       },
     },
     select: {
-      content: "select",
-      description: "select specified tabs",
+      content: 'select',
+      description: 'select specified tabs',
       action: (args) => {
-        console.log("SELECT HIT", args);
+        console.log('SELECT HIT', args);
       },
       element: {
-        content: "element",
-        description: "select element picker",
+        content: 'element',
+        description: 'select element picker',
         action: (args) => {
           // TODO ublock origin element picker
         },
       },
       all: {
-        content: "all",
-        description: "select all tabs in this window",
+        content: 'all',
+        description: 'select all tabs in this window',
         action: (args) => {
           browser.tabs
             .query({ currentWindow: true }) // or windowId: windows.WINDOW_ID_CURRENT
@@ -348,8 +348,8 @@ try {
       },
     },
     pin: {
-      content: "pin",
-      description: "manage pins in this window",
+      content: 'pin',
+      description: 'manage pins in this window',
       action: (args) => {
         // const
         return Promise.resolve(args)
@@ -366,8 +366,8 @@ try {
           .catch(proxy.print.failure_pin);
       },
       remove: {
-        content: "remove",
-        description: "remove pins from",
+        content: 'remove',
+        description: 'remove pins from',
         action: (args) => {
           return Promise.resolve(args)
             .then(tabs.filter)
@@ -387,8 +387,8 @@ try {
       },
     },
     popout: {
-      content: "popout",
-      description: "popout current tab (default to left half",
+      content: 'popout',
+      description: 'popout current tab (default to left half',
       action: (args) => {
         return Promise.resolve(args)
           .then(tabs.filter)
@@ -412,8 +412,8 @@ try {
       },
     },
     goto: {
-      content: "goto",
-      description: "goto a given tab (TBD), playing, last, tagged",
+      content: 'goto',
+      description: 'goto a given tab (TBD), playing, last, tagged',
       suggestions: (args) => {
         // how to replace, augment, or otherwise stand by firefox suggestions
         // push/pop last tab
@@ -440,13 +440,13 @@ try {
       },
     },
     clear: {
-      content: "clear",
-      description: "clear ... stash",
+      content: 'clear',
+      description: 'clear ... stash',
       stash: {
-        content: "stash",
-        description: "stash",
+        content: 'stash',
+        description: 'stash',
         action: (args) => {
-          console.log("HIT clear history");
+          console.log('HIT clear history');
           const argsFilter = {
             all: () => {
               return (
@@ -465,11 +465,11 @@ try {
         },
       },
       history: {
-        content: "history",
+        content: 'history',
         description:
-          "clear history given args: tab, window, session, by domain, by timestamp",
+          'clear history given args: tab, window, session, by domain, by timestamp',
         action: (args) => {
-          console.log("HIT clear history");
+          console.log('HIT clear history');
           return stores.actionHistory
             .update((n) => [])
             .then(proxy.notify.success_clear_history)
@@ -477,10 +477,10 @@ try {
         },
       },
       log: {
-        content: "log",
-        description: "clear eventLog",
+        content: 'log',
+        description: 'clear eventLog',
         action: (args) => {
-          console.log("HIT clear log");
+          console.log('HIT clear log');
           return stores.eventLog
             .update((n) => [])
             .then(proxy.notify.success_clear_log)
@@ -488,10 +488,10 @@ try {
         },
       },
       store: {
-        content: "store",
-        description: "clear storage type by name",
+        content: 'store',
+        description: 'clear storage type by name',
         action: (args) => {
-          console.log("HIT clear store");
+          console.log('HIT clear store');
           return Promise.resolve(args)
             .then((_args) => _args[0])
             .then((_param) => stores[_param].update((n) => []))
@@ -501,32 +501,32 @@ try {
       },
     },
     save: {
-      content: "save",
-      description: "save",
+      content: 'save',
+      description: 'save',
       page: {
-        content: "save page",
+        content: 'save page',
         description:
-          "Renders the page with readability and sends content to remote.",
+          'Renders the page with readability and sends content to remote.',
         action: (args) => {
-          console.log("HIT ", "save page", args);
+          console.log('HIT ', 'save page', args);
           // TODO render with readability?
           // TODO save full HTML
         },
       },
       video: {
-        content: "save video",
+        content: 'save video',
         description:
-          "Tells the remote server to download the video in this tab.",
+          'Tells the remote server to download the video in this tab.',
         action: (args) => {
-          console.log("HIT save_video, running doDownloadVideo", args);
+          console.log('HIT save_video, running doDownloadVideo', args);
           return tabs
             .currentActive()
             .then((tab) => ({
-              uri: "api/action/download/video",
+              uri: 'api/action/download/video',
               body: {
                 uri: tab[0].url,
                 save: true,
-                tag: args.length ? args[0] : "video",
+                tag: args.length ? args[0] : 'video',
               },
             }))
             .then(network._send)
@@ -535,19 +535,19 @@ try {
         },
       },
       song: {
-        content: "save song",
+        content: 'save song',
         description:
-          "Tells the remote server to download the music in this tab.",
+          'Tells the remote server to download the music in this tab.',
         action: (args) => {
-          console.log("HIT save_audio, running doDownloadAudio", args);
+          console.log('HIT save_audio, running doDownloadAudio', args);
           return tabs
             .currentActive()
             .then((tab) => ({
-              uri: "api/action/download/audio",
+              uri: 'api/action/download/audio',
               body: {
                 uri: tab[0].url,
                 save: true,
-                tag: args.length ? args[0] : "audio",
+                tag: args.length ? args[0] : 'audio',
               },
             }))
             .then(network._send)
@@ -556,21 +556,21 @@ try {
         },
       },
       link: {
-        content: "save link",
+        content: 'save link',
         description: "save link this tab's location with a given tag (or not)",
         action: (args) => {
-          return sendLink(args ? args : "unsorted");
+          return sendLink(args ? args : 'unsorted');
         },
       },
     },
     copy: {
-      content: "copy",
-      description: "copy",
+      content: 'copy',
+      description: 'copy',
       tabs: {
-        content: "copy tabs",
-        description: "copy tabs",
+        content: 'copy tabs',
+        description: 'copy tabs',
         action: (args) => {
-          console.log("HIT ", "copy_tabs", args);
+          console.log('HIT ', 'copy_tabs', args);
           return Promise.resolve({})
             .then(doSelectedCopy)
             .then(reduce.CSVToJSON)
@@ -579,8 +579,8 @@ try {
         },
       },
       storage: {
-        content: "copy storage",
-        description: "copy to clipboard the contents of storage",
+        content: 'copy storage',
+        description: 'copy to clipboard the contents of storage',
         action: (args) => {
           return browser.storage.local
             .get()
@@ -590,20 +590,20 @@ try {
         },
       },
       target: {
-        content: "copy target",
-        description: "copy target",
+        content: 'copy target',
+        description: 'copy target',
         action: (args) => {
-          console.log("HIT ", "copy_target", args);
+          console.log('HIT ', 'copy_target', args);
           // selected target ON PAGE
         },
       },
     },
     control: {
-      content: "control current context",
-      description: "",
+      content: 'control current context',
+      description: '',
       play: {
-        content: "play",
-        description: "Play current content",
+        content: 'play',
+        description: 'Play current content',
         suggestions: (args) => {},
         action: (args) => {
           return send
@@ -613,8 +613,8 @@ try {
         },
       },
       pause: {
-        content: "pause",
-        description: "Pause current content",
+        content: 'pause',
+        description: 'Pause current content',
         suggestions: (args) => {},
         action: (args) => {
           return send
@@ -624,8 +624,8 @@ try {
         },
       },
       restart: {
-        content: "restart",
-        description: "Restart current content",
+        content: 'restart',
+        description: 'Restart current content',
         suggestions: (args) => {},
         action: (args) => {
           return send
@@ -635,8 +635,8 @@ try {
         },
       },
       loop: {
-        content: "loop",
-        description: "Toggles the current playing media to loop.",
+        content: 'loop',
+        description: 'Toggles the current playing media to loop.',
         action: (args) => {
           return send
             .toggleLoop()
@@ -645,8 +645,8 @@ try {
         },
       },
       mute: {
-        content: "mute",
-        description: "mute notifications or current/other tab",
+        content: 'mute',
+        description: 'mute notifications or current/other tab',
         suggestions: (args) => {
           return args;
         },
@@ -655,8 +655,8 @@ try {
         },
       },
       cache: {
-        content: "cache",
-        description: "cache current playing and play offline",
+        content: 'cache',
+        description: 'cache current playing and play offline',
         action: (_args) => {
           //
           return args;
@@ -664,26 +664,26 @@ try {
       },
     },
     search: {
-      content: "search",
-      description: "search",
+      content: 'search',
+      description: 'search',
       suggestions: (_args) => {
-        console.log("Searching", _args);
+        console.log('Searching', _args);
         const suggestionsOnEmptyResults = [
           {
-            content: "about:blank",
-            description: "no results found",
+            content: 'about:blank',
+            description: 'no results found',
           },
         ];
         return Promise.resolve(_args)
           .then((args) => {
             return {
               ...args,
-              uri: "/api/location/search",
+              uri: '/api/location/search',
             };
           })
           .then(network._fetch)
           .then((response) => {
-            console.log("Got search response", response);
+            console.log('Got search response', response);
             return response.results.map((obj) => {
               return {
                 content: obj.uri,
@@ -695,7 +695,7 @@ try {
         // .then(err => suggestionsOnEmptyResults);
       },
       action: (args) => {
-        console.log("HIT ", "search", args);
+        console.log('HIT ', 'search', args);
         return browser.tabs
           .create({
             active: true,
@@ -705,8 +705,8 @@ try {
       },
     },
     find: {
-      content: "find",
-      description: "find in tabs",
+      content: 'find',
+      description: 'find in tabs',
       // option: open find results in new "tab" or panel
       // option: show suggestions with tabs containing criteria
       //  - suggestions have tab name and matched criteria/surrounding
@@ -716,10 +716,10 @@ try {
       action: (args) => {},
     },
     config: {
-      content: "config",
-      description: "config",
+      content: 'config',
+      description: 'config',
       action: (args) => {
-        console.log("HIT ", "config", args);
+        console.log('HIT ', 'config', args);
         /*
         TODO config items passable to args
         - remote url
@@ -733,12 +733,12 @@ try {
         - default panels shown
         */
         return Promise.resolve(args)
-          .then((_args) => _args.split(" ").slice(1))
+          .then((_args) => _args.split(' ').slice(1))
           .then((args) => {
             // command shortcut, remote uri, color pallete
-            if (!args || args.length === 0 || args[0] === "open") {
-            } else if (args[0] === "remote") {
-              console.log("UPDATING REMOTE TARGET:", args, args);
+            if (!args || args.length === 0 || args[0] === 'open') {
+            } else if (args[0] === 'remote') {
+              console.log('UPDATING REMOTE TARGET:', args, args);
               //
             }
             return [args, args];
@@ -754,7 +754,7 @@ try {
       },
     },
     tag: {
-      content: "tag",
+      content: 'tag',
       description: "add this tab's location with a given tag (or none)",
       action: (args) => {
         // return sendLink(args ? args : 'unsorted');
@@ -769,11 +769,11 @@ try {
       },
     },
     set: {
-      content: "set",
-      description: "Set tag for this window or tab.",
+      content: 'set',
+      description: 'Set tag for this window or tab.',
       tag: {
         action: (args) => {
-          console.log("HIT ", "set tag", args);
+          console.log('HIT ', 'set tag', args);
           return tabs
             .currentActive()
             .then((tab) => {
@@ -785,7 +785,7 @@ try {
       },
       group: {
         action: (args) => {
-          console.log("HIT ", "set group", args);
+          console.log('HIT ', 'set group', args);
           return tabs
             .currentActive()
             .then((tab) => {
@@ -797,61 +797,61 @@ try {
       },
     },
     panel: {
-      content: "panel",
-      description: "panel actions by name",
+      content: 'panel',
+      description: 'panel actions by name',
       suggestions: (args) => {
         return Promise.resolve(args)
           .then(() => {
             return Object.keys(panelTypes).map((panelName) =>
-              "-".join(panelName.split("-").slice(1))
+              '-'.join(panelName.split('-').slice(1))
             );
           })
           .then(proxy.print.success_panel_suggestions)
           .catch(proxy.print.failure_panel_suggestions);
       },
       pin: {
-        content: "pin",
-        description: "pin",
+        content: 'pin',
+        description: 'pin',
         action: (args) => {},
       },
       shift: {
-        content: "shift",
-        description: "shift",
+        content: 'shift',
+        description: 'shift',
         up: {
-          content: "shift up",
-          description: "shift up",
+          content: 'shift up',
+          description: 'shift up',
           action: (args) => {},
         },
         down: {
-          content: "shift down",
-          description: "shift down",
+          content: 'shift down',
+          description: 'shift down',
           action: (args) => {},
         },
       },
       close: {
-        content: "close",
-        description: "panel.close alias to close.panel",
+        content: 'close',
+        description: 'panel.close alias to close.panel',
         action: (args) => {},
       },
       horizontal: {
-        content: "horizontal",
-        description: "max/shrink horizontal",
+        content: 'horizontal',
+        description: 'max/shrink horizontal',
         action: (args) => {},
       },
     },
     open: {
-      content: "open",
-      description: "Opens something [root] (TODO show default action)",
+      content: 'open',
+      description: 'Opens something [root] (TODO show default action)',
       action: (args) => {
-        console.log("HIT ", "open", args);
+        console.log('HIT ', 'open', args);
         // TODO console, options, sidebar, set default in config
         /*
         package: index, current, mark_as_completed, next, reset
         */
       },
       options: {
-        content: "options",
-        description: "open the plugin options as a tab",
+        content: 'options',
+        description: 'open the plugin options as a tab',
         action: (args) => {
           return browser.runtime
             .openOptionsPage()
@@ -859,17 +859,17 @@ try {
         },
       },
       tab: {
-        content: "tab",
-        description: "open the plugin tab as a tab",
+        content: 'tab',
+        description: 'open the plugin tab as a tab',
         action: (args) => {
           return browser.tabs
-            .create({ url: "/index.html" })
+            .create({ url: '/index.html' })
             .catch(proxy.print.failure_open_options);
         },
       },
       sidebar: {
-        content: "sidebar",
-        description: "open the plugin sidebar as a tab",
+        content: 'sidebar',
+        description: 'open the plugin sidebar as a tab',
         action: (args) => {
           // TODO sidebar: all, timer, actionmenu
           return browser.sidebarAction
@@ -879,35 +879,35 @@ try {
       },
       group: {
         // TODO tie in data stores for autocomplete suggestions
-        content: "panel",
-        description: "open a group of tabs, tagged with param(s)",
+        content: 'panel',
+        description: 'open a group of tabs, tagged with param(s)',
         action: (args) => {
           // return browser.runtime.
         },
       },
       panel: {
         // TODO tie in data stores for autocomplete suggestions
-        content: "panel",
+        content: 'panel',
         description:
-          "open a panel (and TODO move to top?) in the sidebar for this window",
+          'open a panel (and TODO move to top?) in the sidebar for this window',
         action: (args) => {
           // return browser.runtime.
         },
       },
       console: {
-        content: "console",
-        description: "open the plugin console as a tab",
+        content: 'console',
+        description: 'open the plugin console as a tab',
         action: (args) => {
           return browser.tabs.create({
             url: `about:devtools-toolbox?id=${browser.runtime.id}%40temporary-addon&type=extension`,
             active: true,
-            title: "console |",
+            title: 'console |',
           });
         },
       },
     },
     close: {
-      content: "close",
+      content: 'close',
       description: `Close all sidebars, tagged group, tabs with url / domain / partial match`,
       action: (args) => {
         // Close all sidebars, tagged group, tabs with url / domain / partial match
@@ -915,8 +915,8 @@ try {
         return args;
       },
       sidebar: {
-        content: "sidebar",
-        description: "Close the sidebar.",
+        content: 'sidebar',
+        description: 'Close the sidebar.',
         action: (args) => {
           // TODO sidebar: all, timer, actionmenu
           // FIXME "sidebarAction.close may only be called from a user input handler"
@@ -927,28 +927,28 @@ try {
       },
     },
     track: {
-      content: "track",
-      description: "track",
+      content: 'track',
+      description: 'track',
       add: {
-        content: "track_add",
-        description: "track_add",
+        content: 'track_add',
+        description: 'track_add',
         action: (args) => {
-          console.log("HIT ", "track_add", args);
+          console.log('HIT ', 'track_add', args);
         },
       },
       show_as: {
-        content: "track_show_as",
-        description: "track_show_as",
+        content: 'track_show_as',
+        description: 'track_show_as',
         action: (args) => {
-          console.log("HIT ", "track_show_as", args);
+          console.log('HIT ', 'track_show_as', args);
         },
       },
     },
     timer: {
-      content: "timer",
-      description: "timer",
+      content: 'timer',
+      description: 'timer',
       suggestions: (args) => {
-        console.log("HIT ", "timer", args);
+        console.log('HIT ', 'timer', args);
         return (
           Promise.resolve(args)
             // .then((_args) => {
@@ -964,7 +964,7 @@ try {
         );
       },
       action: (args) => {
-        console.log("HIT ", "timer", args);
+        console.log('HIT ', 'timer', args);
         return Promise.resolve(args)
           .then((_args) => {
             // stores.timers.map((timer) => {})
@@ -972,74 +972,74 @@ try {
           .catch(proxy.print.failure_timer);
       },
       start: {
-        content: "timer_start",
-        description: "timer_start",
+        content: 'timer_start',
+        description: 'timer_start',
         action: (args) => {
-          console.log("HIT ", "timer_start", args);
+          console.log('HIT ', 'timer_start', args);
         },
       },
       pause: {
-        content: "timer_pause",
-        description: "timer_pause",
+        content: 'timer_pause',
+        description: 'timer_pause',
         action: (args) => {
-          console.log("HIT ", "timer_pause", args);
+          console.log('HIT ', 'timer_pause', args);
         },
       },
       reset: {
-        content: "timer_reset",
-        description: "timer_reset",
+        content: 'timer_reset',
+        description: 'timer_reset',
         action: (args) => {
-          console.log("HIT ", "timer_reset", args);
+          console.log('HIT ', 'timer_reset', args);
         },
       },
       lap: {
-        content: "timer_lap",
-        description: "timer_lap",
+        content: 'timer_lap',
+        description: 'timer_lap',
         action: (args) => {
-          console.log("HIT ", "timer_lap", args);
+          console.log('HIT ', 'timer_lap', args);
         },
       },
     },
     help: {
-      content: "help",
-      description: "help",
+      content: 'help',
+      description: 'help',
       changelog: {
-        content: "help_changelog",
-        description: "help_changelog",
+        content: 'help_changelog',
+        description: 'help_changelog',
         action: (args) => {
-          console.log("HIT ", "help_changelog", args);
+          console.log('HIT ', 'help_changelog', args);
         },
       },
       documentation: {
-        content: "help_documentation",
-        description: "help_documentation",
+        content: 'help_documentation',
+        description: 'help_documentation',
         action: (args) => {
-          console.log("HIT ", "help_documentation", args);
+          console.log('HIT ', 'help_documentation', args);
         },
       },
       check_for_updates: {
-        content: "help_check_for_updates",
-        description: "help_check_for_updates",
+        content: 'help_check_for_updates',
+        description: 'help_check_for_updates',
         action: (args) => {
-          console.log("HIT ", "help_check_for_updates", args);
+          console.log('HIT ', 'help_check_for_updates', args);
         },
       },
       worker_status: {
-        content: "help_worker_status",
-        description: "help_worker_status",
+        content: 'help_worker_status',
+        description: 'help_worker_status',
         action: (args) => {
-          console.log("HIT ", "help_worker_status", args);
+          console.log('HIT ', 'help_worker_status', args);
         },
       },
     },
     bookmarks: {
-      content: "bookmarks",
-      description: "bookmarks",
+      content: 'bookmarks',
+      description: 'bookmarks',
       import: {
-        content: "import",
-        description: "import",
+        content: 'import',
+        description: 'import',
         action: (args) => {
-          console.log("HIT ", "storage", args);
+          console.log('HIT ', 'storage', args);
           // elos storage selected tile column,
           return Promise.resolve(args)
             .then((_args) => {})
@@ -1047,8 +1047,8 @@ try {
         },
       },
       export: {
-        content: "export",
-        description: "export",
+        content: 'export',
+        description: 'export',
         action: (args) => {
           // save off bookmarks as a flat json array
           return (
@@ -1062,13 +1062,13 @@ try {
       },
     },
     bookmarks: {
-      content: "bookmarks",
-      description: "bookmarks",
+      content: 'bookmarks',
+      description: 'bookmarks',
       import: {
-        content: "import",
-        description: "import",
+        content: 'import',
+        description: 'import',
         action: (params) => {
-          console.log("HIT ", "storage", params);
+          console.log('HIT ', 'storage', params);
           // elos storage selected tile column,
           return Promise.resolve(params)
             .then((_params) => {})
@@ -1076,8 +1076,8 @@ try {
         },
       },
       export: {
-        content: "export",
-        description: "export",
+        content: 'export',
+        description: 'export',
         action: (params) => {
           // save off bookmarks as a flat json array
           return (
@@ -1091,46 +1091,46 @@ try {
       },
     },
     history: {
-      content: "history",
-      description: "history",
+      content: 'history',
+      description: 'history',
       last: {
-        content: "history_last",
-        description: "history_last",
+        content: 'history_last',
+        description: 'history_last',
         action: (args) => {
-          console.log("HIT ", "history_last_actions", args);
+          console.log('HIT ', 'history_last_actions', args);
         },
       },
       undo: {
-        content: "history_undo",
-        description: "history_undo",
+        content: 'history_undo',
+        description: 'history_undo',
         action: (args) => {
-          console.log("HIT ", "history_undo_close", args);
+          console.log('HIT ', 'history_undo_close', args);
         },
       },
     },
     convert: {
-      content: "convert",
-      description: "convert",
+      content: 'convert',
+      description: 'convert',
       csv_to_json: {
-        content: "convert_csv_to_json",
-        description: "convert_csv_to_json",
+        content: 'convert_csv_to_json',
+        description: 'convert_csv_to_json',
         action: (args) => {
-          console.log("HIT ", "convert_csv_to_json", args);
+          console.log('HIT ', 'convert_csv_to_json', args);
         },
       },
       json_to_csv: {
-        content: "convert_json_to_csv",
-        description: "convert_json_to_csv",
+        content: 'convert_json_to_csv',
+        description: 'convert_json_to_csv',
         action: (args) => {
-          console.log("HIT ", "convert_json_to_csv", args);
+          console.log('HIT ', 'convert_json_to_csv', args);
         },
       },
     },
     package: {
-      content: "package",
-      description: "package",
+      content: 'package',
+      description: 'package',
       action: (args) => {
-        console.log("HIT ", "package", args);
+        console.log('HIT ', 'package', args);
         /*
           add:
             channel
@@ -1165,4 +1165,4 @@ try {
 }
 
 export const cmds = _cmds;
-console.log("cmds", cmds);
+console.log('cmds', cmds);

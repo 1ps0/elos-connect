@@ -1,4 +1,4 @@
-import { createEventDispatcher } from "svelte";
+import { createEventDispatcher } from 'svelte';
 
 const logKeywords = {
   success: (_args) => {
@@ -43,10 +43,10 @@ export const print = new Proxy(() => {}, {
         .then(
           new Promise(
             (run, skip) => (_name) =>
-              _name[0] === "status" ? skip(_name) : run(_name)
+              _name[0] === 'status' ? skip(_name) : run(_name)
           )
         )
-        .then((_name) => `[${_name[0]}][${_name.slice(1).join("_")}]`)
+        .then((_name) => `[${_name[0]}][${_name.slice(1).join('_')}]`)
         .then((_name) => console.log(_name, _args))
         .catch(console.assert)
         .then((_) => _args);
@@ -57,7 +57,7 @@ export const print = new Proxy(() => {}, {
 const splitAndUpperCaseString = (_name) => {
   return Promise.resolve(_name)
     .then((name) => name.toUpperCase())
-    .then((_n) => _n.split("_"))
+    .then((_n) => _n.split('_'))
     .catch(console.error); // possible cyclical error if we use print
 };
 
@@ -69,9 +69,9 @@ export const notify = new Proxy(() => {}, {
         .then((_name) => ({
           ..._args,
           state: _name[0],
-          type: "basic",
+          type: 'basic',
           title: _name[0],
-          message: _name.slice(1).join("_"),
+          message: _name.slice(1).join('_'),
           // buttons: params.buttons || []
         }))
         .then(browser.notifications.create)
@@ -105,7 +105,7 @@ export const expect = new Proxy(() => {}, {
       return (
         splitAndUpperCaseString(name)
           .catch(print.failure_expect)
-          .then((err) => ("abort" in err ? ground : notify))
+          .then((err) => ('abort' in err ? ground : notify))
           // maybe not just print, but also report failure shape and have fallback options
           // forking river not a stopping dam
           .then((_) => _args)
@@ -118,8 +118,8 @@ const _default_env = {
   baseURL: (args) => `http://localhost:${args.port || 3000}`,
   url: (args) => new URL(args.uri, args.baseUrl),
   headers: (args) => ({
-    Accept: "application/json",
-    "Content-Type": "application/json",
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
   }),
 };
 
@@ -142,9 +142,9 @@ export const default_value = new Proxy(() => {}, {
 //.then(register.success_last_message)
 export const register = new Proxy(() => {}, {
   get(target, name) {
-    let _name = name.toUpperCase().split("_");
+    let _name = name.toUpperCase().split('_');
     return (args) => {
-      console.log(`[REGISTER][${_name[0]}][${_name.slice(1).join("_")}]`, args);
+      console.log(`[REGISTER][${_name[0]}][${_name.slice(1).join('_')}]`, args);
       return args;
     };
   },
@@ -176,7 +176,7 @@ export const dispatch = new Proxy(() => {}, {
         name,
         args,
       });
-      if (name == "tabs") {
+      if (name == 'tabs') {
       }
       return {
         ...args,

@@ -1,14 +1,14 @@
 // import browser from "webextension-polyfill";
-import { writable, get } from "svelte/store";
-import { setContext, getContext } from "svelte";
-import * as network from "./lib/apis/network.js";
+import { writable, get } from 'svelte/store';
+import { setContext, getContext } from 'svelte';
+import * as network from './lib/apis/network.js';
 
-import * as proxy from "./lib/apis/proxy.js";
-import * as theme from "./lib/apis/theme.js";
-import { cmds } from "./lib/omnibox.js";
-import { stores } from "./lib/stores.js";
+import * as proxy from './lib/apis/proxy.js';
+import * as theme from './lib/apis/theme.js';
+import { cmds } from './lib/omnibox.js';
+import { stores } from './lib/stores.js';
 
-console.log("LOADING ELOS CONNECT - background.js");
+console.log('LOADING ELOS CONNECT - background.js');
 
 // ------ GLOBAL ERRORS
 
@@ -31,7 +31,7 @@ $: {
 const handleMessage = (message) => {
   proxy.print.status_background_got_message(message);
   // TODO setup message handling and routing here
-  if (message.action === "set.readerMode") {
+  if (message.action === 'set.readerMode') {
     // Toggle Reader Mode
     return Promise.resolve(message)
       .then(browser.readerMode.toggleReaderMode)
@@ -39,10 +39,10 @@ const handleMessage = (message) => {
       .then(browser.tabs.query)
       .then((_tabs) => _tabs[0].id)
       .then((tabId) =>
-        browser.tabs.sendMessage(tabId, { action: "set.readerMode" })
+        browser.tabs.sendMessage(tabId, { action: 'set.readerMode' })
       )
       .catch(proxy.print.failure_set_readermode);
-  } else if (message.action === "processMarkdown") {
+  } else if (message.action === 'processMarkdown') {
     return Promise.resolve(message)
       .then((msg) => msg.markdown)
       .then((mkdown) => ({
@@ -74,7 +74,7 @@ export const updateTab = (tabId, changeInfo, tab) => {
 
 // ------ COMMAND SEARCH
 
-let lastInput = ""; // hack cache to move the whole input to the actuation
+let lastInput = ''; // hack cache to move the whole input to the actuation
 let prevSuggestions = [];
 
 export const renderSuggestions = (_cmds) => {
@@ -107,7 +107,7 @@ export const renderSuggestions = (_cmds) => {
               description: item.description,
             });
           }
-          const entryKeys = ["content", "description", "action", "suggestions"];
+          const entryKeys = ['content', 'description', 'action', 'suggestions'];
           Object.entries(item).forEach((_entry) => {
             if (entryKeys.indexOf(_entry[0]) != -1) {
               return;
@@ -129,7 +129,7 @@ const materialzeCommandPaths = (_cmds) => {
 };
 
 const findCommands = (_input) => {
-  let parts = _input.toLowerCase().split(" ");
+  let parts = _input.toLowerCase().split(' ');
   let cursor = cmds;
   let args = null;
   parts.forEach((part, idx) => {
@@ -165,8 +165,8 @@ const omniboxOnInputChanged = (text, addSuggestions) => {
 };
 
 const omniboxOnInputStarted = (params) => {
-  console.log("User has started interacting with me.", params);
-  lastInput = "";
+  console.log('User has started interacting with me.', params);
+  lastInput = '';
 };
 
 export const registerHistory = (event) => {
@@ -200,12 +200,14 @@ export const renderAction = (_input) => {
 
 const omniboxOnInputEntered = (input, disposition) => {
   // console.log("INPUT SUBMITTED", lastInput, '--', input, '--', cmds[input]);
-  return Promise.resolve(lastInput)
-    .then(proxy.print.status_on_input_entered)
-    // .then(registerHistory)
-    .then(renderAction)
-    .then(proxy.print.success_on_input_entered)
-    .catch(proxy.print.failure_omnibox_entered);
+  return (
+    Promise.resolve(lastInput)
+      .then(proxy.print.status_on_input_entered)
+      // .then(registerHistory)
+      .then(renderAction)
+      .then(proxy.print.success_on_input_entered)
+      .catch(proxy.print.failure_omnibox_entered)
+  );
 };
 
 const omniboxOnInputCancelled = () => {
@@ -259,7 +261,7 @@ class CommandContextMenu {
     return {
       id: this.command.content,
       title: this.command.content,
-      contexts: ["browser_action"],
+      contexts: ['browser_action'],
       onclick: this.onClick,
     };
   }
@@ -294,13 +296,13 @@ try {
 
   // WATCH FOR PROPERTY CHANGES
   browser.tabs.onUpdated.addListener(updateTab, {
-    properties: ["audible"], // , "hidden", "mutedInfo", "url"
+    properties: ['audible'], // , "hidden", "mutedInfo", "url"
     // tabId: tabId
   });
 
   // OMNIBOX START
   browser.omnibox.setDefaultSuggestion({
-    description: "this is a limited eLOS preview; v0.0.11-prealpha",
+    description: 'this is a limited eLOS preview; v0.0.11-prealpha',
   });
 
   browser.omnibox.onInputStarted.addListener(omniboxOnInputStarted);
@@ -326,5 +328,5 @@ try {
   //   browser.contextMenus.create(menu);
   // });
 } catch (e) {
-  console.log("Caught background.js init error", e);
+  console.log('Caught background.js init error', e);
 }

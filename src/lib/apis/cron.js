@@ -17,14 +17,14 @@ const isAlarmActive = (alarmName) => {
 };
 
 const alarms = {
-  "flashcard-review-alarm": () => createAlarm("flashcard-review-alarm", 1),
-  "content-curation-alarm": () => createAlarm("content-curation-alarm", 7),
-  "knowledge-map-generation": () => createAlarm("knowledge-map-generation", 30),
-  "adaptive-learning-alarm": () => createAlarm("adaptive-learning-alarm", 7),
-  "feedback-loop-alarm": () => createAlarm("feedback-loop-alarm", 1),
+  'flashcard-review-alarm': () => createAlarm('flashcard-review-alarm', 1),
+  'content-curation-alarm': () => createAlarm('content-curation-alarm', 7),
+  'knowledge-map-generation': () => createAlarm('knowledge-map-generation', 30),
+  'adaptive-learning-alarm': () => createAlarm('adaptive-learning-alarm', 7),
+  'feedback-loop-alarm': () => createAlarm('feedback-loop-alarm', 1),
 };
 
-const cronJob = require("cron-job");
+const cronJob = require('cron-job');
 
 let cronJobs = [];
 
@@ -145,16 +145,16 @@ const scheduleCronJob = (bookmarkId, callback) => {
  */
 function initCron() {
   return browser.bookmarks
-    .search({ title: "cron-config" })
+    .search({ title: 'cron-config' })
     .then((bookmarkNodes) => {
       if (bookmarkNodes.length === 0) {
-        throw new Error("Cron config not found");
+        throw new Error('Cron config not found');
       }
 
       const annotations = bookmarkNodes[0].annotations;
 
       if (!annotations || !annotations[0]) {
-        throw new Error("Cron config not found");
+        throw new Error('Cron config not found');
       }
 
       return annotations[0];
@@ -171,17 +171,17 @@ function initCron() {
  */
 function clearCronConfig() {
   return browser.bookmarks
-    .search({ title: "cron-config" })
+    .search({ title: 'cron-config' })
     .then((bookmarkNodes) => {
       if (bookmarkNodes.length === 0) {
-        throw new Error("Cron config not found");
+        throw new Error('Cron config not found');
       }
 
       return browser.bookmarks.remove(bookmarkNodes[0].id);
     })
     .catch((error) => {
       console.error(error);
-      throw new Error("Failed to clear cron configuration");
+      throw new Error('Failed to clear cron configuration');
     });
 }
 
@@ -191,7 +191,7 @@ function clearCronConfig() {
  * @param {Alarm} alarm The alarm object that triggered the event
  */
 function onAlarm(alarm) {
-  if (alarm.name === "cron") {
+  if (alarm.name === 'cron') {
     return Promise.resolve(alarm)
       .then(proxy.print.status_on_alarm)
       .then((_alarm) => _alarm.name)
@@ -218,17 +218,17 @@ function executeCronJob(job) {
 }
 
 function validateCronJob(job) {
-  if (!job || typeof job !== "object") {
-    throw new Error("Invalid cron job object");
+  if (!job || typeof job !== 'object') {
+    throw new Error('Invalid cron job object');
   }
-  if (!job.id || typeof job.id !== "string") {
-    throw new Error("Cron job must have a valid bookmark ID");
+  if (!job.id || typeof job.id !== 'string') {
+    throw new Error('Cron job must have a valid bookmark ID');
   }
-  if (!job.action || typeof job.action !== "string") {
-    throw new Error("Cron job must have a valid action");
+  if (!job.action || typeof job.action !== 'string') {
+    throw new Error('Cron job must have a valid action');
   }
-  if (!job.config || typeof job.config !== "string") {
-    throw new Error("Cron job must have a valid cron configuration");
+  if (!job.config || typeof job.config !== 'string') {
+    throw new Error('Cron job must have a valid cron configuration');
   }
   return job;
 }
@@ -236,7 +236,7 @@ function validateCronJob(job) {
 function parseCronConfig(config) {
   const cron = new CronJob(config);
   if (!cron) {
-    throw new Error("Invalid cron configuration");
+    throw new Error('Invalid cron configuration');
   }
   return cron;
 }
@@ -245,7 +245,7 @@ function runCronAction(cron) {
   return Promise.resolve()
     .then(() => {
       if (cron.running) {
-        throw new Error("Cron job already running");
+        throw new Error('Cron job already running');
       }
       cron.start();
     })
@@ -254,8 +254,8 @@ function runCronAction(cron) {
         cron.addCallback(() => {
           try {
             const actionFn = eval(cron.action);
-            if (typeof actionFn !== "function") {
-              throw new Error("Invalid action function");
+            if (typeof actionFn !== 'function') {
+              throw new Error('Invalid action function');
             }
             actionFn();
           } catch (err) {
@@ -282,17 +282,17 @@ function handleCronError(err) {
  * @returns {Promise} A promise that resolves with the cron configuration.
  */
 function retrieveCronConfig() {
-  return getBookmarkAnnotation("cron_config")
+  return getBookmarkAnnotation('cron_config')
     .then((annotation) => {
       if (!annotation) {
-        return Promise.reject("No cron config found.");
+        return Promise.reject('No cron config found.');
       }
 
       let cronConfig = null;
       try {
         cronConfig = JSON.parse(annotation);
       } catch (error) {
-        return Promise.reject("Invalid cron config.");
+        return Promise.reject('Invalid cron config.');
       }
 
       return Promise.resolve(cronConfig);

@@ -1,6 +1,6 @@
 // 2nd order
 
-import { menuItems, actionItems } from "./layout.js";
+import { menuItems, actionItems } from './layout.js';
 
 /*
 Item Interface:
@@ -19,13 +19,13 @@ export const layoutConfig = {
   columnMultiplier: 4,
   columnCount: 100,
   rowHeight: 65,
-  mode: "full-width", // default, full-width, full-height, full-screen
+  mode: 'full-width', // default, full-width, full-height, full-screen
 };
 
 export const optionTypes = {
   close: {
-    title: "close",
-    icon: "status-closemark",
+    title: 'close',
+    icon: 'status-closemark',
   },
   // pin: {
   //   title: 'pin',
@@ -34,121 +34,121 @@ export const optionTypes = {
 };
 
 const columnForConfig = (config, columns) => {
-  return config.mode === "full-width" ? config.columnCount : columns;
+  return config.mode === 'full-width' ? config.columnCount : columns;
 };
 
 export const panelTypes = {
-  "panel-mainmenu": {
-    target: "panel-mainmenu",
-    name: "mainmenu",
+  'panel-mainmenu': {
+    target: 'panel-mainmenu',
+    name: 'mainmenu',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 11),
     h: 2,
-    componentName: "selectlist",
-    event: { name: "menuToggle", callback: "togglePanel" },
+    componentName: 'selectlist',
+    event: { name: 'menuToggle', callback: 'togglePanel' },
     props: {
-      showIn: "sidebar",
-      eventName: "menuToggle",
+      showIn: 'sidebar',
+      eventName: 'menuToggle',
       items: menuItems,
       transform: (e) => {
         return e.value.icon;
       },
     },
   },
-  "panel-layout": {
-    target: "panel-layout",
-    name: "layout",
+  'panel-layout': {
+    target: 'panel-layout',
+    name: 'layout',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 11),
     h: 2,
-    componentName: "selectlist",
-    event: { name: "layoutAction", callback: "alignPanel" },
+    componentName: 'selectlist',
+    event: { name: 'layoutAction', callback: 'alignPanel' },
     props: {
-      showIn: "sidebar",
-      eventName: "layoutAction",
+      showIn: 'sidebar',
+      eventName: 'layoutAction',
       items: actionItems,
       transform: (e) => {
         return e.value.icon;
       },
     },
   },
-  "panel-dashboard": {
-    target: "panel-dashboard",
-    name: "dashboard",
+  'panel-dashboard': {
+    target: 'panel-dashboard',
+    name: 'dashboard',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 4),
     h: 5,
-    componentName: "dashboard",
+    componentName: 'dashboard',
     props: {
-      showIn: "tab",
+      showIn: 'tab',
     },
   },
-  "panel-config": {
-    target: "panel-config",
-    name: "config",
+  'panel-config': {
+    target: 'panel-config',
+    name: 'config',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 4),
     h: 5,
-    componentName: "config",
+    componentName: 'config',
     props: {
-      showIn: "tab",
+      showIn: 'tab',
     },
   },
-  "panel-focus": {
-    target: "panel-focus",
-    name: "focus",
+  'panel-focus': {
+    target: 'panel-focus',
+    name: 'focus',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 4),
     h: 5,
-    componentName: "focus",
+    componentName: 'focus',
   },
-  "panel-actionmenu": {
-    target: "panel-actionmenu",
-    name: "actionmenu",
+  'panel-actionmenu': {
+    target: 'panel-actionmenu',
+    name: 'actionmenu',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 4),
     h: 5,
-    componentName: "actionmenu",
+    componentName: 'actionmenu',
   },
-  "panel-web-players": {
-    target: "panel-web-players",
-    name: "web_players",
+  'panel-web-players': {
+    target: 'panel-web-players',
+    name: 'web_players',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 6),
     h: 3,
-    componentName: "web_players",
+    componentName: 'web_players',
     event: {
-      name: "filterType",
-      callback: "updateLocations",
+      name: 'filterType',
+      callback: 'updateLocations',
     },
     props: {
-      eventName: "media.playPause",
+      eventName: 'media.playPause',
       transform: (e) => e,
     },
   },
-  "panel-playlists": {
-    target: "panel-playlists",
-    name: "playlists",
+  'panel-playlists': {
+    target: 'panel-playlists',
+    name: 'playlists',
     w: columnForConfig(layoutConfig),
     h: 4,
-    componentName: "playlists",
+    componentName: 'playlists',
   },
-  "panel-timer": {
-    target: "panel-timer",
-    name: "timer",
+  'panel-timer': {
+    target: 'panel-timer',
+    name: 'timer',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 2),
     h: 4,
-    componentName: "timer",
+    componentName: 'timer',
   },
-  "panel-todo": {
-    target: "panel-todo",
-    name: "todo",
+  'panel-todo': {
+    target: 'panel-todo',
+    name: 'todo',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 3),
     h: 5,
-    componentName: "todo",
+    componentName: 'todo',
   },
-  "panel-eventlog": {
-    target: "panel-eventlog",
-    name: "eventlog",
+  'panel-eventlog': {
+    target: 'panel-eventlog',
+    name: 'eventlog',
     w: columnForConfig(layoutConfig, layoutConfig.columnMultiplier * 2),
     h: 3,
-    componentName: "itemlist",
+    componentName: 'itemlist',
     props: {
       readonly: true,
-      dataStore: "eventLog",
+      dataStore: 'eventLog',
       transform: (x) => `${x.name} @ ${x.at[1]} `,
       transforms: {
         title: (x) => `${x.name} @ ${x.at[1]} `,

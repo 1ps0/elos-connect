@@ -11,15 +11,15 @@ so readable(value) internally updates
 then writable calls readable's values for those datasets
 */
 
-import { writable } from "svelte/store";
+import { writable } from 'svelte/store';
 
-import * as network from "./apis/network.js";
+import * as network from './apis/network.js';
 
-import * as bookmarks from "./apis/bookmarks.js";
-import * as proxy from "./apis/proxy.js";
-import * as tabs from "./apis/tabs.js";
+import * as bookmarks from './apis/bookmarks.js';
+import * as proxy from './apis/proxy.js';
+import * as tabs from './apis/tabs.js';
 
-import { workspaceConfig } from "../workspace.js";
+import { workspaceConfig } from '../workspace.js';
 
 // -----
 // Experiment: source abstraction
@@ -58,15 +58,15 @@ export const watchPath = (path) => monitorBookmarksAt(path);
 export const setupBookmarkListeners = (bookmarkTreeNodes) => {
   // Register change listeners
   browser.bookmarks.onCreated.addListener((id, bookmark) => {
-    console.log("Bookmark created:", bookmark);
+    console.log('Bookmark created:', bookmark);
   });
 
   browser.bookmarks.onRemoved.addListener((id, removeInfo) => {
-    console.log("Bookmark removed:", removeInfo);
+    console.log('Bookmark removed:', removeInfo);
   });
 
   browser.bookmarks.onChanged.addListener((id, changeInfo) => {
-    console.log("Bookmark changed:", changeInfo);
+    console.log('Bookmark changed:', changeInfo);
   });
 
   return bookmarkTreeNodes;
@@ -96,7 +96,7 @@ export const bookmarksFor = (name, otherwise = {}) => {
 
 const configWritable = writable(workspaceConfig);
 const layoutItemsWritable = writable(
-  bookmarksFor("layoutItems", { items: [], add: [] })
+  bookmarksFor('layoutItems', { items: [], add: [] })
 );
 
 export const stores = {
@@ -108,7 +108,7 @@ Object.entries(stores).forEach((entry) => {
   let name = entry[0];
   let store = entry[1];
   store.subscribe((val) => {
-    if (val !== undefined && val !== "undefined") {
+    if (val !== undefined && val !== 'undefined') {
       return Promise.resolve({ name: val })
         .then(bookmarks.search)
         .then(proxy.print.success_storage_bookmarks)

@@ -1,4 +1,4 @@
-import { print, notify, register } from "./proxy.js";
+import { print, notify, register } from './proxy.js';
 
 // -- util
 
@@ -36,7 +36,7 @@ export const zip = (keys, vals) => {
   }, {});
 };
 
-export const resolvePath = (path, obj, separator = ".") => {
+export const resolvePath = (path, obj, separator = '.') => {
   var properties = Array.isArray(path) ? path : path.split(separator);
   return properties.reduce((prev, curr) => prev && prev[curr], obj);
 };
@@ -49,11 +49,11 @@ export const intersection = (sA, sB) => {
       const result = new Set();
       for (let elem of sB) {
         if (_sA.has(elem)) {
-          console.log("[INTERSECTION]", elem);
+          console.log('[INTERSECTION]', elem);
           result.add(elem);
         }
       }
-      console.log("[DONE]", result);
+      console.log('[DONE]', result);
       return [...result];
     })
     .catch(print.failure_intersection);

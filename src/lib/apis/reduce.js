@@ -1,5 +1,5 @@
-import * as proxy from "./proxy.js";
-import * as _tabs from "./tabs.js"; // _tabs for function name collision
+import * as proxy from './proxy.js';
+import * as _tabs from './tabs.js'; // _tabs for function name collision
 
 // -- render functions
 

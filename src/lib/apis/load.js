@@ -1,9 +1,9 @@
-import * as network from "./network.js";
+import * as network from './network.js';
 
 // ---------- Load composites
 
 export const tags = async () => {
-  return Promise.resolve({ uri: "api/analysis/tag" })
+  return Promise.resolve({ uri: 'api/analysis/tag' })
     .then(network._fetch)
     .then((results) => results.names.map((tag) => tag[1]))
     .catch(proxy.print.failure_load_tabs);
@@ -23,7 +23,7 @@ export const sites = async () => {
     })
     .then((sites) => {
       return {
-        elementId: "item-list",
+        elementId: 'item-list',
         sites: sites,
       };
     })
@@ -50,7 +50,7 @@ export const history = async (params) => {
   // params can only be { url: string }
   return browser.history
     .search({
-      text: params && params.query ? params.query : "",
+      text: params && params.query ? params.query : '',
       startTime: params && params.startTime ? params.startTime : 0, // default 24h window
       // maxResults: params && params.resultCount ? params.resultCount :
     })

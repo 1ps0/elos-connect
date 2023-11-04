@@ -8,7 +8,7 @@ function found(results) {
 
 async function findInAllTabs(allTabs) {
   for (let tab of allTabs) {
-    let results = await browser.find.find("banana", { tabId: tab.id });
+    let results = await browser.find.find('banana', { tabId: tab.id });
     console.log(`In page "${tab.url}": ${results.count} matches.`);
   }
 }
@@ -25,7 +25,7 @@ async function redact(matches) {
   let tabId = activeTabArray[0].id;
 
   // execute the content script in the active tab
-  await browser.tabs.executeScript(tabId, { file: "redact.js" });
+  await browser.tabs.executeScript(tabId, { file: 'redact.js' });
   // ask the content script to redact matches for us
   await browser.tabs.sendMessage(tabId, { rects: matches.rectData });
 }
@@ -43,7 +43,7 @@ async function getContexts(matches) {
   let tabId = activeTabArray[0].id;
 
   // execute the content script in the active tab
-  await browser.tabs.executeScript(tabId, { file: "get-context.js" });
+  await browser.tabs.executeScript(tabId, { file: 'get-context.js' });
   // ask the content script to get the contexts for us
   let contexts = await browser.tabs.sendMessage(tabId, {
     ranges: matches.rangeData,

@@ -1,12 +1,12 @@
-import * as proxy from "./proxy.js";
-import * as windows from "./windows.js";
+import * as proxy from './proxy.js';
+import * as windows from './windows.js';
 
 export const create = (tabs) => {
   return Promise.all(
     tabs.map((tab) => {
       return Promise.resolve(tab)
         .then((_tab) => ({
-          parentId: "monitoring",
+          parentId: 'monitoring',
           title: tab.title,
           url: tab.url,
         }))
@@ -17,10 +17,10 @@ export const create = (tabs) => {
 };
 
 export const update = (tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete") {
+  if (changeInfo.status === 'complete') {
     return Promise.resolve(tab)
       .then((_tab) => ({ url: tab.url, title: tab.title }))
-      .then((_meta) => browser.bookmarks.update("", _meta))
+      .then((_meta) => browser.bookmarks.update('', _meta))
       .catch(proxy.print.failure_update_monitoring_bookmark);
   }
 };
@@ -28,7 +28,7 @@ export const update = (tabId, changeInfo, tab) => {
 export const createMonitoringBookmarks = (tab) => {
   return Promise.resolve(tab)
     .then((_tab) => ({
-      parentId: "monitoring", // FIXME make arg?
+      parentId: 'monitoring', // FIXME make arg?
       title: tab.title,
       url: tab.url,
       windowId: tab.windowId,
@@ -75,12 +75,12 @@ export const add = (args) => {
 };
 
 export const renderBranch = (nodes) => {
-  return nodes.map((node) => _renderBranch(node, "."));
+  return nodes.map((node) => _renderBranch(node, '.'));
 };
 
 export const _renderBranch = (node, _path) => {
-  console.log("rendering node -> ", _path, node);
-  if (node.type === "folder") {
+  console.log('rendering node -> ', _path, node);
+  if (node.type === 'folder') {
     _path = `${_path}/${node.title}`;
   }
   if (node.children) {
@@ -137,7 +137,7 @@ const recurseNodes = (node, path) => {
 export const extract = (args) => {
   return browser.bookmarks
     .getTree()
-    .then((node) => recurseNodes(node[0], "."))
+    .then((node) => recurseNodes(node[0], '.'))
     .catch(proxy.print.failure_extract_bookmarks);
 };
 
@@ -151,12 +151,12 @@ export const getAll = (args) => {
 export const search = (args) => {};
 
 export const bookmarkApi = (() => {
-  if (typeof browser !== "undefined" && browser.bookmarks) {
+  if (typeof browser !== 'undefined' && browser.bookmarks) {
     return browser.bookmarks;
-  } else if (typeof chrome !== "undefined" && chrome.bookmarks) {
+  } else if (typeof chrome !== 'undefined' && chrome.bookmarks) {
     return chrome.bookmarks;
   } else {
-    throw new Error("Bookmark API not supported");
+    throw new Error('Bookmark API not supported');
   }
 })();
 
@@ -215,7 +215,7 @@ export const fetchAnnotations = (bookmark) => {
 
 export const importFromStash = (args) => {
   return browser.storage.local
-    .get("stash")
+    .get('stash')
     .then((result) => result.stash)
     .then((stash) => {
       return Object.entries(stash).map((entry) => {
@@ -235,12 +235,12 @@ export const importFromStash = (args) => {
 export const createBookmarkForTag = (_tag) => {
   return Promise.resolve()
     .then(() => {
-      return browser.bookmarks.search({ title: "example" });
+      return browser.bookmarks.search({ title: 'example' });
     })
     .then((bookmarks) => {
       return browser.bookmarks.update(bookmarks[0].id, {
-        title: "example",
-        tags: ["example-tag"],
+        title: 'example',
+        tags: ['example-tag'],
       });
     })
     .catch(proxy.print.failure_import_from_stash);
@@ -248,13 +248,13 @@ export const createBookmarkForTag = (_tag) => {
 
 export const createBookmarkForResearchNote = (_type) => {
   return Promise.resolve({
-    title: "example research",
-    url: "https://example.com",
-    parentId: "research_folder",
+    title: 'example research',
+    url: 'https://example.com',
+    parentId: 'research_folder',
     index: 0,
     // Add a custom property to store research notes
     research_notes:
-      "# Research Notes\n1. **Source**: [Example Article](https://example.com)\n2. **Key Takeaways**:\n- Point 1\n- Point 2\n3. **Comments**:\n- Example comment 1\n- Example comment 2",
+      '# Research Notes\n1. **Source**: [Example Article](https://example.com)\n2. **Key Takeaways**:\n- Point 1\n- Point 2\n3. **Comments**:\n- Example comment 1\n- Example comment 2',
   })
     .then(browser.bookmarks.create)
     .catch(proxy.print.failure_import_from_stash);

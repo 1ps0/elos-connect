@@ -1,13 +1,13 @@
-import * as proxy from "./apis/proxy.js";
-import * as contextMenu from "./apis/context_menu.js";
+import * as proxy from './apis/proxy.js';
+import * as contextMenu from './apis/context_menu.js';
 
 // ------- Register content script
 
 export const registerScript = (hosts) => {
   return Promise.resolve({
-    matches: ["<all_urls>"],
-    js: [{ file: "build/content_actions.js" }],
-    runAt: "document_idle",
+    matches: ['<all_urls>'],
+    js: [{ file: 'build/content_actions.js' }],
+    runAt: 'document_idle',
   })
     .then(browser.contentScripts.register)
     .catch(proxy.print.failure_content_scripts_register);
@@ -24,44 +24,44 @@ export const _registerScript = (message) => {
   return browser.contentScripts.register({
     matches: hosts,
     js: [{ code }],
-    runAt: "document_idle",
+    runAt: 'document_idle',
   });
 };
 
 // ------ Content scripts
 
 export const elementHexMap = {
-  body: ["#1a2028", "#242b34"],
-  div: ["#1a2028", "#242b34"],
-  header: ["#b5c2d9", "#1e2a34"],
-  nav: ["#b5c2d9", "#242b34"],
-  main: ["#1a2028", "#242b34"],
-  section: ["#1a2028", "#242b34"],
-  article: ["#1a2028", "#242b34"],
-  aside: ["#b5c2d9", "#242b34"],
-  footer: ["#4cb2ff", "#1e2a34"],
-  h1: ["#b5c2d9", "#242b34"],
-  h2: ["#b5c2d9", "#242b34"],
-  h3: ["#b5c2d9", "#242b34"],
-  h4: ["#b4bcde", "#242b34"],
-  h5: ["#4cb2ff", "#242b34"],
-  h6: ["#95b6f5", "#242b34"],
-  p: ["#b5c2d9", "#242b34"],
-  a: ["#4cb2ff", "#242b34"],
-  span: ["#b5c2d9", "#242b34"],
-  button: ["#b5c2d9", "#242b34"],
-  input: ["#b5c2d9", "#242b34"],
-  textarea: ["#b5c2d9", "#242b34"],
-  select: ["#b5c2d9", "#242b34"],
-  table: ["#1a2028", "#242b34"],
-  tr: ["#1a2028", "#242b34"],
-  td: ["#b5c2d9", "#242b34"],
-  th: ["#b5c2d9", "#242b34"],
-  ul: ["#1a2028", "#242b34"],
-  ol: ["#1a2028", "#242b34"],
-  li: ["#b5c2d9", "#1a2028"],
-  code: ["#b5c2d9", "#1a2028"],
-  pre: ["#363f4e", "#1a2028"],
+  body: ['#1a2028', '#242b34'],
+  div: ['#1a2028', '#242b34'],
+  header: ['#b5c2d9', '#1e2a34'],
+  nav: ['#b5c2d9', '#242b34'],
+  main: ['#1a2028', '#242b34'],
+  section: ['#1a2028', '#242b34'],
+  article: ['#1a2028', '#242b34'],
+  aside: ['#b5c2d9', '#242b34'],
+  footer: ['#4cb2ff', '#1e2a34'],
+  h1: ['#b5c2d9', '#242b34'],
+  h2: ['#b5c2d9', '#242b34'],
+  h3: ['#b5c2d9', '#242b34'],
+  h4: ['#b4bcde', '#242b34'],
+  h5: ['#4cb2ff', '#242b34'],
+  h6: ['#95b6f5', '#242b34'],
+  p: ['#b5c2d9', '#242b34'],
+  a: ['#4cb2ff', '#242b34'],
+  span: ['#b5c2d9', '#242b34'],
+  button: ['#b5c2d9', '#242b34'],
+  input: ['#b5c2d9', '#242b34'],
+  textarea: ['#b5c2d9', '#242b34'],
+  select: ['#b5c2d9', '#242b34'],
+  table: ['#1a2028', '#242b34'],
+  tr: ['#1a2028', '#242b34'],
+  td: ['#b5c2d9', '#242b34'],
+  th: ['#b5c2d9', '#242b34'],
+  ul: ['#1a2028', '#242b34'],
+  ol: ['#1a2028', '#242b34'],
+  li: ['#b5c2d9', '#1a2028'],
+  code: ['#b5c2d9', '#1a2028'],
+  pre: ['#363f4e', '#1a2028'],
 };
 // export const elementHexMap = {
 //   "body": ["#1a2028", "#242b34"],
@@ -99,7 +99,7 @@ export const elementHexMap = {
 export const applyDarkMode = (schema) => {
   return Promise.resolve(schema)
     .then((colorSchema) => {
-      const elements = document.querySelectorAll("*");
+      const elements = document.querySelectorAll('*');
 
       // Loop through all elements and apply the color specified in elementHexMap
       elements.forEach((element) => {
@@ -115,10 +115,10 @@ export const applyDarkMode = (schema) => {
 
 export const extractReaderText = () => {
   return {
-    title: document.querySelector(".reader-title h1").value,
-    link: document.querySelector(".reader-domain a").href,
-    readerTime: document.querySelector(".reader-estimated-time").value,
-    contentBody: document.querySelectorAll(".page"),
+    title: document.querySelector('.reader-title h1').value,
+    link: document.querySelector('.reader-domain a').href,
+    readerTime: document.querySelector('.reader-estimated-time').value,
+    contentBody: document.querySelectorAll('.page'),
   };
 };
 
@@ -130,7 +130,7 @@ export const startElementTracking = () => {
 export const stopElementTracking = () => {};
 
 export const applyToControlElements = () => {
-  "element.clickNext"
+  'element.clickNext';
 };
 
 // ---- Extractive
@@ -154,14 +154,14 @@ export const captureScrollPosition = (options = {}) =>
       };
     })
     .catch((error) => {
-      console.error("Error capturing scroll position:", error);
+      console.error('Error capturing scroll position:', error);
       throw error;
     });
 
 // ----- Media Control
 
 export const getPlayable = () => {
-  return Promise.resolve(["video", "audio"])
+  return Promise.resolve(['video', 'audio'])
     .then((types) => {
       return types.reduce((_out, _type) => {
         return [
@@ -189,7 +189,7 @@ export const toggleLoop = () => {
 export const playPause = () => {
   return getPlayable()
     .then((playing) => {
-      console.log("Playing and Pausing", playing);
+      console.log('Playing and Pausing', playing);
       playing.forEach((item) => {
         if (item.paused) {
           item.play();
@@ -205,7 +205,7 @@ export const playPause = () => {
 export const restart = () => {
   return getPlayable()
     .then((playing) => {
-      console.log("Restarting", playing);
+      console.log('Restarting', playing);
       playing.forEach((item) => {
         item.currentTime = 0;
       });
@@ -293,7 +293,7 @@ export const getTextForRanges = (ranges) => {
 // npm install zip-buffer
 
 export const zipImagesAndText = () => {
-  const imageElements = document.querySelectorAll("img");
+  const imageElements = document.querySelectorAll('img');
   const imageBuffers = [];
 
   // Iterate over the image elements
@@ -309,9 +309,9 @@ export const zipImagesAndText = () => {
       });
   });
 
-  const zip = require("zip-buffer");
+  const zip = require('zip-buffer');
 
-  const articleElement = document.querySelector("article");
+  const articleElement = document.querySelector('article');
   const markdown = turndownService.turndown(articleElement);
 
   // When all of the image data Buffers have been collected, you can create a ZIP file in memory
@@ -320,7 +320,7 @@ export const zipImagesAndText = () => {
       // Create a ZIP file in memory using the zip-buffer library
       return zip.create([
         {
-          name: "article.md",
+          name: 'article.md',
           data: markdown,
         },
         ...imageBuffers.map((buffer, index) => ({
@@ -340,18 +340,18 @@ export const detectPrimaryColorSelectors = () => {
   const selectors = [];
 
   // Iterate over all the elements in the document
-  for (const element of document.querySelectorAll("*")) {
+  for (const element of document.querySelectorAll('*')) {
     // Get the computed style of the element
     const style = getComputedStyle(element);
 
     // Check if the element has a background-color or color property that is not "transparent" or "inherit"
-    if (style.backgroundColor !== "transparent" && style.color !== "inherit") {
+    if (style.backgroundColor !== 'transparent' && style.color !== 'inherit') {
       // If so, add the element's tag name and class list to the array of selectors
       selectors.push(
         element.tagName +
           (element.classList.length > 0
-            ? "." + [...element.classList].join(".")
-            : "")
+            ? '.' + [...element.classList].join('.')
+            : '')
       );
     }
   }

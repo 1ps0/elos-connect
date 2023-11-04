@@ -1,5 +1,5 @@
-import { get } from "svelte/store";
-import * as proxy from "./proxy.js";
+import { get } from 'svelte/store';
+import * as proxy from './proxy.js';
 
 // -- primitive functions
 
@@ -33,8 +33,8 @@ export const _send = (args) => {
     .then((_args) => {
       return {
         ..._args,
-        method: "POST",
-        credentials: "omit",
+        method: 'POST',
+        credentials: 'omit',
         body: JSON.stringify(_args.body),
       };
     })

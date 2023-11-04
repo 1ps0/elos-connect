@@ -48,9 +48,9 @@ function getContexts(ranges) {
  * Add a black DIV where the rect is.
  */
 function redactRect(rect) {
-  var redaction = document.createElement("div");
-  redaction.style.backgroundColor = "black";
-  redaction.style.position = "absolute";
+  var redaction = document.createElement('div');
+  redaction.style.backgroundColor = 'black';
+  redaction.style.position = 'absolute';
   redaction.style.top = `${rect.top}px`;
   redaction.style.left = `${rect.left}px`;
   redaction.style.width = `${rect.right - rect.left}px`;

@@ -1,6 +1,6 @@
 // promise CRUD for alarms webextension api
 
-import * as proxy from "./proxy.js";
+import * as proxy from './proxy.js';
 
 const create = (item) => {
   // item == {name, when, interval}

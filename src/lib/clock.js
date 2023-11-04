@@ -1,8 +1,8 @@
-import { readable } from "svelte/store";
+import { readable } from 'svelte/store';
 
 export const minutesToSeconds = (minutes) => minutes * 60;
 export const secondsToMinutes = (seconds) => Math.floor(seconds / 60);
-export const padWithZeroes = (number) => number.toString().padStart(2, "0");
+export const padWithZeroes = (number) => number.toString().padStart(2, '0');
 export const capitalize = (phrase) => {
   return phrase.replace(/^\w/, (c) => {
     return c.toUpperCase();
@@ -16,11 +16,11 @@ export const formatTime = (timeInSeconds) => {
   return `${padWithZeroes(minutes)}:${padWithZeroes(remainingSeconds)}`;
 };
 
-export const clockFormatter = new Intl.DateTimeFormat("en", {
+export const clockFormatter = new Intl.DateTimeFormat('en', {
   hour12: true,
-  hour: "numeric",
-  minute: "2-digit",
-  second: "2-digit",
+  hour: 'numeric',
+  minute: '2-digit',
+  second: '2-digit',
 });
 
 export const dateStringFromDate = (date) => date.toLocaleDateString();
@@ -55,14 +55,14 @@ export const timerAction = (node, args) => {
   let _args = args;
   let started = false;
   let interval = _args.interval;
-  let timerP = node.querySelector("p.timer");
-  console.log("Loading TIMERACTION", node, "|", _args, "|", timerP);
+  let timerP = node.querySelector('p.timer');
+  console.log('Loading TIMERACTION', node, '|', _args, '|', timerP);
 
   let unsubscribe = clockStore.subscribe((val) => {
-    let doc = document.querySelector("p.timer");
+    let doc = document.querySelector('p.timer');
     if (doc && started) {
       console.log(
-        "p.timer",
+        'p.timer',
         doc,
         interval,
         formatTime(interval),
@@ -74,30 +74,30 @@ export const timerAction = (node, args) => {
     }
   });
 
-  node.querySelectorAll("button").forEach((button) => {
+  node.querySelectorAll('button').forEach((button) => {
     switch (button.name) {
-      case "start":
-        button.addEventListener("click", (e) => {
+      case 'start':
+        button.addEventListener('click', (e) => {
           started = true;
           e.preventDefault();
         });
         break; // args.start
-      case "reset":
-        button.addEventListener("click", (e) => {
+      case 'reset':
+        button.addEventListener('click', (e) => {
           started = false;
           interval = _args.interval;
           doc.innerHTML = formatTime(interval);
           e.preventDefault();
         });
         break;
-      case "pause":
-        button.addEventListener("click", (e) => {
+      case 'pause':
+        button.addEventListener('click', (e) => {
           started = false;
           e.preventDefault();
         });
         break;
-      case "lap":
-        button.addEventListener("click", (e) => {
+      case 'lap':
+        button.addEventListener('click', (e) => {
           interval = args.interval;
           doc.innerHTML = formatTime(interval);
           // TODO register data somewhere

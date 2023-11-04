@@ -99,7 +99,7 @@ a > u {
 }
 
 .votearrow::before {
-  content: "";
+  content: '';
   width: 0;
   height: 0;
   left: 1px;
@@ -111,14 +111,14 @@ a > u {
   border-bottom: 7px solid #bebfd1;
 }
 
-input[type="text"],
+input[type='text'],
 textarea {
   background-color: #333a4a;
   color: #fafafa;
   border: 1px solid #1f2430;
 }
 
-input[type="submit"] {
+input[type='submit'] {
   background-color: #333a4a;
   color: #fafafa;
   border: 1px solid #1f2430;
