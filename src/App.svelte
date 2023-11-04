@@ -127,25 +127,24 @@
       })
   };
 
-  onMount(() => {
-    proxy.print.success_App_mounted()
+  onMount(async () => {
+    // proxy.print.success_App_mounted()
 
     // let defaults = (browser.runtime.getManifest() || {}).panels.default;
-    // let panels = Promise.resolve([])
+    let panels = Promise.resolve([]);
     // defaults ||
     ([
       "panel-mainmenu",
-      // "panel-actionmenu",
+      "panel-actionmenu",
       // "panel-web-players",
       // "panel-playlists",
       // "panel-config",
-    ]).forEach(addPanel)
-    // (name) => {
-    //   panels = panels
-    //     .then((prev) => addPanel(name))
-    //     .catch(proxy.print.failure_panel)
-    // }
-    return panels.catch(proxy.print.failure_panels)
+    ]).forEach((name) => {
+      panels = panels
+        .then((prev) => addPanel(name))
+        .catch(proxy.print.failure_panel)
+    })
+    return await panels.catch(proxy.print.failure_panels)
   })
 
 </script>
