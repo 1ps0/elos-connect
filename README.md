@@ -7,7 +7,7 @@ eLOS Connect is a browser plugin extension of the eLOS web project.
 1. Installing
 2. What is it?
 3. Current Features
-4. How to use it
+4. Design
 
 ## Installation
 
