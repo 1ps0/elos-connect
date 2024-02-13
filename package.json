@@ -13,7 +13,6 @@
     "carbon-icons-svelte": "^11.4.0",
     "chart.js": "^4.2.1",
     "npm-check-updates": "^16.9.0",
-    "prettier": "^3.0.3",
     "serve": "^14.2.0",
     "svelte": "^3.42.1",
     "svelte-grid": "^5.1.1",
@@ -22,6 +21,7 @@
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {
+    "rollup": "^3.29.4",
     "@babel/core": "^7.18.2",
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
@@ -31,7 +31,8 @@
     "jest-transform-stub": "^2.0.0",
     "jest-webextension-mock": "^3.8.6",
     "mini-css-extract-plugin": "^2.7.5",
-    "rollup": "^3.20.2",
+    "prettier": "^3.0.3",
+    "rollup": "^3.29.4",
     "rollup-plugin-css-only": "^4.3.0",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-svelte": "^7.1.4",

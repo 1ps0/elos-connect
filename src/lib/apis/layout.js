@@ -112,13 +112,18 @@ export const makeMatrixFromItems = (items, _row, _col) => {
     )
     .then(({ items, _col, matrix }) => {
       for (let value in items) {
-        const { x, y, h } = value;
-        const w = Math.min(_col, value.w);
+        const { x, y, h, id } = value;
+        const w = Math.min(_col, value.w || 100);
 
         for (let j = y; j < y + h; j++) {
           const row = matrix[j];
+          if (!row) continue;
           for (let k = x; k < x + w; k++) {
-            row[k] = value;
+            if (row[k] === undefined) {
+              row[k] = value;
+            } else {
+              throw new Error(`Cell (${j}, ${k}) is already occupied by panel ${row[k].id}`);
+            }
           }
         }
       }

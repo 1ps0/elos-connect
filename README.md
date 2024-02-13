@@ -6,7 +6,7 @@ eLOS Connect is a browser plugin extension of the eLOS web project.
 
 1. Installing
 2. What is it?
-3. Philosophy
+3. Current Features
 4. How to use it
 
 ## Installation
@@ -14,14 +14,12 @@ eLOS Connect is a browser plugin extension of the eLOS web project.
 > NOTE: Currently only Firefox is supported.
 > However, manifest v2 standards make Chrome support an approachable feature.
 
-- PREREQ: be authorized to `elos-web` repo.
-
-1. `git submodule update --init --recursive` to download `elos-web` submodule (if not already)
-2. `npm install && rollup -c`
-3. In browser bar, navigate to: `about:debugging#/runtime/this-firefox`
-4. Find and click the button labeled `Load Temporary Add-on...`
-5. Navigate to `public/manifest.json` and submit the selected file.
-6. Use 'Ctrl+e' on mac to open the sidebar, or open history,et al. and change the tab to `eLOS Connect`
+### Dev Install
+1. `npm install rollup && npm install && npm run dev`
+2. In browser bar, navigate to: [about:debugging](about:debugging#/runtime/this-firefox)
+3. Find and click the button labeled `Load Temporary Add-on...`
+4. Navigate to `public/manifest.json` and submit the selected file.
+5. Use 'Ctrl+e' on mac to open the sidebar, or open history,et al. and change the tab to `eLOS Connect`
 
 ## What is it?
 
@@ -31,52 +29,32 @@ Content is ambiguous on purpose, with a primary goal of organizing and bringing 
 
 eLOS Connect is the most directly usable aspect of the eLOS platform. It is designed to integrate with the daily use scenarios; such as saving a video, stashing an article, saving links to your personal library.
 
-eLOS Connect is a toolkit itself. It uses the eLOS web command center (currently in stealth mode). The goal is to bring all of your needs as close and easy as possible.
+eLOS Connect is a toolkit itself. The goal is to bring all of your needs as close and easy as possible.
 
 Adding new features is a little bit of development work, and well documented and templated. The main display panels live in
-
-## Philosophy
-
-```
-practical over pretty
-local over remote
-private over public
-opt-in over opt-out
-personal over general
-people over profit
-stable over trendy
-fair over friendly
-logical balanced with emotional
-exploration over dictation
-projects over memorization
-```
-
-## How to use it
-
-- `npm run dev`
 
 ### Current Features
 
 > Plugin Only
 
 - Copy Selected Tabs to Clipboard (format: `title,url`)
-- Save to PDF (under construction)
-- Timer (under maintenance)
-- TODO (demo mode, under construction)
+- Darkmode current site (applies to all sites)
+- HackerNews default darkmode
+- Track, Control, Access actively playing tabs
+- CLI for a motley of combined operations
 
 > eLOS Server/API integrated
 
 - Download Video (ytdl to cache a video/song/ locally)
 - tag location/url and save to server
--
 
 ## Design
 
-Currently, `elos-web` is figuring out the path to its core purpose.
+Currently, `elos-connect` is figuring out the path to its core purpose.
 In the mean-time, the structure is as below:
 
 1. eLOS connect browser plugin
-2. eLOS panel UI (referred to as `web`)
+2. eLOS panel UI (referred to as `connect`)
 3. eLOS unified api/processing server
 
 The eLOS server can:
@@ -85,21 +63,15 @@ The eLOS server can:
 - facilitate filesystem-level operations
 - run processing jobs
 - integrate with sqlite via json schema/interface
--
 
-The eLOS UI can:
+The eLOS connect UI can:
 
-- provide a faux desktop environment
+- provide a faux control environment
 - uses a panel system to contain function widgets
-- provide deep and rich data display, interaction, and collection
--
-
-The eLOS connect plugin can:
-
 - provide a sidebar space for the eLOS UI
 - provide deeper access to the data and capabilities available to the browser
-- directly interact with a website
-- enable the eLOS UI to monitor the status of active elements in a website.
+- directly interact with a website in a controlled manner
+- enable the eLOS UI to monitor the status of active elements in a website
 
 ---
 
