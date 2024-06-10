@@ -2,7 +2,7 @@ import * as proxy from './apis/proxy.js';
 import * as network from './apis/network.js';
 import * as reduce from './apis/reduce.js';
 import * as tabs from './apis/tabs.js';
-
+import * as windows from './apis/windows.js';
 import * as send from './send.js';
 
 // ---------- Actions
@@ -38,8 +38,8 @@ export const reloadSystem = (args) => {
 
 export const updatePlaying = (store) => {
   return Promise.resolve({
-    audible: true,
-  })
+      audible: true,
+    })
     .then(browser.tabs.query)
     .then(reduce.tabs)
     .then((tabs) => {
@@ -83,10 +83,10 @@ export const downloadVideo = (e) => {
 
 export const bringToFront = (e) => {
   return Promise.resolve(e)
-    .then((_e) => (e.detail ? e.detail : e))
     .then(proxy.print.start_bring_to_front)
+    .then(_e => _e.detail ? _e.detail : _e)
     .then(tabs.setActive)
-    .then(windows.setWindowActive)
+    .then(windows.setActive)
     .then(proxy.print.success)
     .catch(proxy.print.failure_bring_to_front);
 };

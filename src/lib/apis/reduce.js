@@ -1,5 +1,5 @@
 import * as proxy from './proxy.js';
-import * as _tabs from './tabs.js'; // _tabs for function name collision
+import * as tabs_lib from './tabs.js'; // _tabs for function name collision
 
 // -- render functions
 
@@ -18,10 +18,7 @@ export const CSVToJSON = (data) => {
   return data;
 };
 
-export const playing = (tabs, obj) => {
-  if (!tabs) {
-    return {};
-  }
+export const playing = (_tabs, obj) => {
   return _tabs.reduce((_out, curr) => {
     if (!_out[curr.name]) {
       _out[curr.name] = curr;
@@ -43,7 +40,7 @@ export const documentText = () => {
 export const tabs = (_tabs) => {
   return (
     Promise.resolve(_tabs)
-      .then((__tabs) => __tabs.map(_tabs.reduce))
+      .then((__tabs) => __tabs.map(tabs_lib.reduce))
       // .then(proxy.print.status_reduce_tabs)
       // .then(Promise.all)
       .catch(proxy.print.failure_reduce_tabs)

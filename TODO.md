@@ -19,6 +19,13 @@
 
 ---
 
+- `/` as cli activation
+- access files on the fs via file://
+- search files and build playlists
+- 
+
+---
+
 > Profile: WHOAMI
 
 1. identifying information

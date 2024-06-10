@@ -84,35 +84,30 @@ export const tabIdQueries = (arg) => {
 
 export const filterBy = (args) => {
   return {
-    url: (tabs) => tabs.filter((tab) => new RegExp(args[1]).test(tab.url)),
-    playing: (tabs) => {
-      tabs.filter((tab) => tab.audible);
-    },
-    last: (tabs) => {
-      tabs;
-    },
-    tag: (tabs) => {
-      tabs;
-    },
+    url: tabs => tabs.filter((tab) => new RegExp(args[1]).test(tab.url)),
+    playing: tabs => tabs.filter((tab) => tab.audible),
+    last: tabs => tabs,
+    tag: tabs => tabs,
   }[args[0]];
 };
 
 export const filter = (args) => {
-  let filter = Promise.resolve(args)
-    .then(filterTabsBy)
-    .catch(proxy.print.failure_filterTabsBy);
+  let _filter = Promise.resolve(args)
+    .then(filterBy)
+    .catch(proxy.print.failure_tabs_filterBy);
 
-  return getAllTabs().then(filter).catch(proxy.print.failure_filter_tabs);
+  return all().then(_filter).catch(proxy.print.failure_filter_tabs);
 };
 
 export const setActive = (data) => {
   console.log('Setting active tab with data', data);
   return Promise.resolve(data)
-    .then(enrichItem)
+    // .then(enrichItem)
     .then((_data) => {
-      return browser.tabs.update(data.tabId, { active: true });
+      browser.tabs.update(_data.tabId, { active: true });
+      return _data
     })
-    .catch(proxy.print.failure_set_tab_active);
+    .catch(proxy.print.failure_tab_set_active);
 };
 
 export const setPinned = async (args) => {
@@ -120,7 +115,7 @@ export const setPinned = async (args) => {
     for (const tab of tabs) {
       browser.tabs
         .update(tab.id, { pinned: true })
-        .catch(proxy.print.failure_update_tab_pinned);
+        .catch(proxy.print.failure_tab_update_pinned);
     }
   });
 };

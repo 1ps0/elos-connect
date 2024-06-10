@@ -40,9 +40,10 @@ export const addActiveWindowId = (data) => {
 export const setActive = (data) => {
   return Promise.resolve(data)
     .then(print.start_set_window_active)
-    .then(enrichItem)
+    // .then(enrichItem)
     .then((_data) => {
-      return browser.windows.update(_data.windowId, { focused: true });
+      browser.windows.update(_data.windowId, { focused: true });
+      return _data;
     })
     .catch(print.failure_set_window_active);
 };
