@@ -246,11 +246,30 @@ const omniboxOnInputCancelled = () => {
 
 // -------------------
 
-const commandAction = (name) => {
-  return Promise.resolve(name)
-    .then(renderAction)
-    .then(proxy.print.success_command_action)
-    .catch(proxy.print.failure_command_action);
+const createContextMenu = () => {
+  return new Promise((resolve, reject) => {
+    browser.contextMenus.create({
+      id: 'unloadTab',
+      title: 'Unload Tab',
+      contexts: ['tab']
+    }, () => {
+      if (browser.runtime.lastError) {
+        reject(browser.runtime.lastError);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+const handleContextMenuClick = (info, tab) => {
+  return Promise.resolve({ info: info, tabId: tab.id })
+    .then(_info => {
+      if (info.menuItemId === 'unloadTab') {
+        browser.tabs.discard(tab.id);
+      }
+    })
+    .catch(proxy.print.failure_handle_context_menu_click);
 };
 
 
@@ -259,14 +278,10 @@ const commandAction = (name) => {
 try {
   proxy.print.success_background_js_mounted();
 
-  const _filter = {
-    // urls: [pattern1, pattern2],
-    properties: ["audible"],
-  };
+  browser.tabs.onUpdated.addListener(updatePlayingTabs, { properties: ["audible"] });
+  browser.tabs.onRemoved.addListener(removeTabFromPlaying);  
+  scanAllTabs();
 
-  browser.tabs.onUpdated.addListener(updatePlayingTabs, _filter);
-  browser.tabs.onRemoved.addListener(removeTabFromPlaying);
-  
   
   // GENERAL MESSAGE HANDLER
   browser.runtime.onMessage.addListener(handleMessage);
@@ -285,7 +300,8 @@ try {
   // browser.commands.onCommand.addListener(commandAction);
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
 
-  scanAllTabs();
+  browser.contextMenus.onClicked.addListener(handleContextMenuClick);
+  createContextMenu();
 
 } catch (e) {
   console.log('Caught background.js init error', e);
