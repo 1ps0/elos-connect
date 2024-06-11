@@ -1,12 +1,11 @@
 // import browser from "webextension-polyfill";
-import { writable, get } from 'svelte/store';
-import { setContext, getContext } from 'svelte';
+import { writable } from 'svelte/store';
 import * as network from './lib/apis/network.js';
 
 import * as proxy from './lib/apis/proxy.js';
 import * as theme from './lib/apis/theme.js';
 import { cmds } from './lib/omnibox.js';
-import { stores } from './lib/stores.js';
+// import { stores } from './lib/stores.js';
 
 console.log('LOADING ELOS CONNECT - background.js');
 
@@ -52,28 +51,78 @@ const handleMessage = (message) => {
   }
 };
 
-export const updateTab = (tabId, changeInfo, tab) => {
+// --- PlayingTabs Listener Handler
+
+const playingTabs = {};
+
+const updatePlayingTabs = (_, changeInfo, tab) => {
   return Promise.resolve(tab)
-    .then((_tab) => ({
-      name: tab.id,
-      tabId: tab.id,
-      windowId: tab.windowId,
-      muted: tab.mutedInfo.muted,
-      title: tab.title,
-      url: tab.url,
-      playing: tab.audible,
-      article: tab.isArticle,
-      changed: changeInfo,
-    }))
-    .then(browser.runtime.sendMessage)
-    .then(proxy.print.success_update_tab)
-    .catch(proxy.print.failure_update_tab);
+    .then(_tab => {
+      if (changeInfo.audible !== undefined) {
+        if (!playingTabs[_tab.tabId]) {
+          playingTabs[_tab.tabId] = {
+            tabId: _tab.tabId,
+            title: _tab.title,
+            url: _tab.url,
+            isPlaying: _tab.audible
+          };
+        } else {
+          playingTabs[_tab.tabId].isPlaying = _tab.audible;
+        }
+      }
+    })
+    .then(proxy.print.status_update_playing_tabs)
+    .catch(proxy.print.failure_update_playing_tabs)
+}
+
+
+const removeTabFromPlaying = (tabId) => {
+  return Promise.resolve(tabId)
+    .then(_tabId => {
+      if (playingTabs[tabId]) {
+        delete playingTabs[tabId];
+      }
+    })
+    .then(proxy.print.status_remove_tab_from_playing)
+    .catch(proxy.print.failure_remove_tab_from_playing)
+};
+
+// Function to scan all tabs and update playingTabs
+const scanAllTabs = () => {
+  return browser.tabs.query({ audible: true})
+    .then(_tabs => {
+      _tabs.forEach((tab) => {
+        playingTabs[tab.id] = {
+          tabId: tab.id,
+          windowId: tab.windowId,
+          title: tab.title,
+          url: tab.url,
+          isPlaying: tab.audible
+        };
+      });
+      return playingTabs;
+    })
+    .then(proxy.print.status_scan_all_tabs)
+    .catch(proxy.print.failure_scan_all_tabs)
 };
 
 // ------ COMMAND SEARCH
 
 let lastInput = ''; // hack cache to move the whole input to the actuation
 let prevSuggestions = [];
+
+export const renderPlayingTabs = () => {
+  return Promise.resolve(playingTabs)
+    .then(Object.values)
+    .then(_tabs => _tabs.map(tab => {
+      return {
+        content: 'playing '+tab.tabId+' '+tab.windowId,
+        description: `${tab.isPlaying ? '🔊' : '🔇'} ${tab.title}`
+      }
+    }))
+    .then(proxy.print.status_render_playing_tabs)
+    .catch(proxy.print.failure_render_playing_tabs);
+};
 
 export const renderSuggestions = (_cmds) => {
   return (
@@ -109,10 +158,6 @@ export const renderSuggestions = (_cmds) => {
   );
 };
 
-const materialzeCommandPaths = (_cmds) => {
-  return Promise.resolve(_cmds).then((_cmds) => Object.entities(_cmds));
-};
-
 const findCommands = (_input) => {
   return Promise.resolve(_input)
     .then(value => value.toLowerCase())
@@ -139,13 +184,14 @@ const omniboxOnInputChanged = (text, addSuggestions) => {
 
   try {
     return Promise.resolve(lastInput)
-      .then(findCommands)
-      .then(renderSuggestions)
-      .then(_result => {
-        prevSuggestions = _result;
-        return _result;
+      .then(_input => {
+        if (_input.toLowerCase() === 'playing history') {
+          return renderPlayingTabs();
+        } else {
+          return findCommands(_input)
+            .then(renderSuggestions);
+        }
       })
-      // .then(proxy.print.status_omnibox_changed)
       .then(addSuggestions)
       .catch(proxy.print.failure_omnibox_changed);
   } catch (err) {
@@ -213,6 +259,15 @@ const commandAction = (name) => {
 try {
   proxy.print.success_background_js_mounted();
 
+  const _filter = {
+    // urls: [pattern1, pattern2],
+    properties: ["audible"],
+  };
+
+  browser.tabs.onUpdated.addListener(updatePlayingTabs, _filter);
+  browser.tabs.onRemoved.addListener(removeTabFromPlaying);
+  
+  
   // GENERAL MESSAGE HANDLER
   browser.runtime.onMessage.addListener(handleMessage);
 
@@ -229,6 +284,8 @@ try {
   // browser.runtime.onInstalled.addListener(setThemeContext);
   // browser.commands.onCommand.addListener(commandAction);
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
+
+  scanAllTabs();
 
 } catch (e) {
   console.log('Caught background.js init error', e);
