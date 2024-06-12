@@ -1,9 +1,10 @@
 {
-  "name": "elos-connect",
-  "version": "v0.0.13",
+  "name": "elos-connect-cli",
+  "version": "0.0.13",
   "type": "module",
   "scripts": {
     "dev": "rollup -c -w --bundleConfigAsCjs",
+    "build": "rollup -c --bundleConfigAsCjs",
     "test": "web-ext run --ci",
     "test2": "jest",
     "storybook": "start-storybook -p 6006",
