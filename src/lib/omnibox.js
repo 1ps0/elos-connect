@@ -50,6 +50,28 @@ const gotoTabAndWindow = args => {
 let _cmds = {};
 try {
   _cmds = {
+    page: {
+      content: 'tweaks for a page',
+      description: 'page modifiers',
+      darkmode: {
+        content: 'set darkmode for this page',
+        description: 'darkmode for this page',
+        action: args => {
+          return Promise.resolve(args)
+            .then(actions.applyDarkMode)
+            .catch(proxy.print.failure_page_darkmode)
+        }
+      },
+      readermode: {
+        content: 'cli to toggle FF readermode',
+        description: 'cli to toggle FF readermode',
+        action: args => {
+          return Promise.resolve(args)
+            .then(browser.tabs.toggleReaderMode)
+            .catch(proxy.print.failure_page_readermode)
+        }
+      }
+    },
     gather: {
       content: 'gather',
       description: 'move input|all tabs to current|new window',
