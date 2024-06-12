@@ -1,0 +1,86 @@
+name: Build and Release Firefox Extension
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16' # Use the Node.js version your project requires
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build the project
+      run: npm run build
+
+    - name: Package the extension
+      run: zip -r elos-connect-cli.zip dist
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: elos-connect-cli.zip
+        path: elos-connect-cli.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Download build artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: elos-connect-cli.zip
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+        files: elos-connect-cli.zip
+
+  latest:
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Download build artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: elos-connect-cli.zip
+
+    - name: Create or Update Latest Release
+      id: update_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: latest
+        release_name: latest
+        draft: false
+        prerelease: false
+        files: elos-connect-cli.zip
