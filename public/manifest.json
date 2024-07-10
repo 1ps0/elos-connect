@@ -1,19 +1,25 @@
 {
   "manifest_version": 2,
   "name": "eLOS Connect CLI",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "eLOS Connect CLI",
   "applications": {
     "gecko": {
-      "id": "elos-connect-cli"
+      "id": "1ps0@norely.github.com"
     }
   },
   "icons": {
     "48": "img/icons/bookmark-it.png",
     "96": "img/icons/bookmark-it@2x.png"
   },
+  "host_permissions": [
+    "*://127.0.0.1:11434/*",
+    "*://localhost:11434/*"
+  ],
   "permissions": [
-    "<all_urls>",
+    // "<all_urls>",
+    "*://127.0.0.1:11434/*",
+    "*://localhost:11434/*",
     "tabs",
     "contextMenus",
     "activeTab",
@@ -35,28 +41,28 @@
     //"devtools",
   ],
   "commands": {
-    // "_execute_sidebar_action": {
-    //   "suggested_key": {
-    //     "default": "Alt+Shift+G",
-    //     "mac": "MacCtrl+E"
-    //   },
-    //   "description": "eLOS Connect - open sidebar"
-    // },
-    // "_execute_browser_action": {
-    //   "suggested_key": {
-    //     "default": "Alt+Shift+F",
-    //     "mac": "MacCtrl+F"
-    //   },
-    //   "description": "eLOS Connect - activate commandline"
-    // },
-  //   "reload": {
-  //     "suggested_key": {
-  //       "default": "Alt+Shift+R",
-  //       "mac": "MacCtrl+R"
-  //     },
-  //     "description": "elos.cmds.reload"
-  //   }
-  // },
+    "_execute_sidebar_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+G",
+        "mac": "MacCtrl+E"
+      },
+      "description": "eLOS Connect - open sidebar"
+    },
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+F",
+        "mac": "MacCtrl+F"
+      },
+      "description": "eLOS Connect - activate commandline"
+    },
+    "reload": {
+      "suggested_key": {
+        "default": "Alt+Shift+R",
+        "mac": "MacCtrl+R"
+      },
+      "description": "elos.cmds.reload"
+    }
+  },
   "sidebar_action": {
     "default_icon": "img/icons/star-empty-38.png",
     "default_title": "eLOS Connect",

@@ -11,6 +11,7 @@
     "build-storybook": "build-storybook"
   },
   "dependencies": {
+    "@langchain/community": "^0.2.17",
     "carbon-icons-svelte": "^11.4.0",
     "chart.js": "^4.2.1",
     "npm-check-updates": "^16.9.0",
@@ -22,7 +23,6 @@
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {
-    "rollup": "^3.29.4",
     "@babel/core": "^7.18.2",
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",

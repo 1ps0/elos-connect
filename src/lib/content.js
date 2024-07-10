@@ -1,4 +1,5 @@
 import * as proxy from './apis/proxy.js';
+import * as send from './send.js';
 import * as contextMenu from './apis/context_menu.js';
 
 // ------- Register content script
@@ -121,6 +122,25 @@ export const extractReaderText = () => {
     contentBody: document.querySelectorAll('.page'),
   };
 };
+
+
+export const extractPageContent = () => {
+  const content = document.body.innerText;
+  return {
+    url: window.location.href,
+    title: document.title,
+    content: content
+  };
+};
+
+// Add this function to content.js
+
+
+browser.runtime.onMessage.addListener((message) => {
+  if (message.action === 'analyze.page') {
+    send.pageContentToBackground();
+  }
+});
 
 // ----- Element Select
 

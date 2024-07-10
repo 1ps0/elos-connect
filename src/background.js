@@ -1,6 +1,6 @@
 // import browser from "webextension-polyfill";
-import { writable } from 'svelte/store';
 import * as network from './lib/apis/network.js';
+
 
 import * as proxy from './lib/apis/proxy.js';
 import * as theme from './lib/apis/theme.js';
@@ -26,8 +26,38 @@ $: {
 
 // ------ MESSAGING
 
-// const handleMessage = (request, sender, sendResponse) => {
-const handleMessage = (message) => {
+const enrichPrompt = (content) => {
+  const systemMessage = `
+    Analyze the following text. If it's legalese:
+    1. Classify the type of legal document
+    2. Summarize it in simple terms (ELI5)
+    3. Highlight any non-standard provisions that might catch a layman unaware
+    If it's not legalese, simply respond with "Not a legal document."
+  `;
+
+ return `${systemMessage}\n\nContent: ${content}`;
+}
+
+const analyzeWithOllama = async (content) => {
+  const _prompt = enrichPrompt(content)
+  //network._
+  return await fetch('http://localhost:11434/api/generate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'mistral',
+      prompt: _prompt,
+      stream: false
+    })
+  })
+  .then(response => response.json())
+  .then(data => data.response)
+  .catch(proxy.print.failure_ollama_analysis);
+};
+
+const handleMessage = (message, sender, sendResponse) => {
   proxy.print.status_background_got_message(message);
   if (message.action === 'set.readerMode') {
     // Toggle Reader Mode
@@ -40,7 +70,14 @@ const handleMessage = (message) => {
         browser.tabs.sendMessage(tabId, { action: 'set.readerMode' })
       )
       .catch(proxy.print.failure_set_readermode);
-  } else if (message.action === 'processMarkdown') {
+  } else if (message.action === 'analyze.pageContent') {
+    return Promise.resolve(message.payload.content)
+      .then(analyzeWithOllama)
+      .then(_analysis => {
+        sendResponse({ analysis: _analysis });
+      })
+      .catch(proxy.print.failure_analyze_page_content);
+  } else if (message.action === 'process.markdown') {
     return Promise.resolve(message)
       .then((msg) => msg.markdown)
       .then((mkdown) => ({
@@ -62,6 +99,7 @@ const updatePlayingTabs = (_, changeInfo, tab) => {
         if (!playingTabs[_tab.tabId]) {
           playingTabs[_tab.tabId] = {
             tabId: _tab.tabId,
+            windowId: _tab.windowId,
             title: _tab.title,
             url: _tab.url,
             isPlaying: _tab.audible
@@ -249,7 +287,7 @@ const omniboxOnInputCancelled = () => {
 const createContextMenu = () => {
   return new Promise((resolve, reject) => {
     browser.contextMenus.create({
-      id: 'unloadTab',
+      id: 'unload.tab',
       title: 'Unload Tab',
       contexts: ['tab']
     }, () => {
@@ -265,7 +303,7 @@ const createContextMenu = () => {
 const handleContextMenuClick = (info, tab) => {
   return Promise.resolve({ info: info, tabId: tab.id })
     .then(_info => {
-      if (info.menuItemId === 'unloadTab') {
+      if (info.menuItemId === 'unload.tab') {
         browser.tabs.discard(tab.id);
       }
     })

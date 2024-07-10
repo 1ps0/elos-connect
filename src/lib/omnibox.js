@@ -50,26 +50,66 @@ const gotoTabAndWindow = args => {
 let _cmds = {};
 try {
   _cmds = {
-    page: {
-      content: 'tweaks for a page',
-      description: 'page modifiers',
-      darkmode: {
-        content: 'set darkmode for this page',
-        description: 'darkmode for this page',
-        action: args => {
-          return Promise.resolve(args)
-            .then(actions.applyDarkMode)
-            .catch(proxy.print.failure_page_darkmode)
-        }
+    unload: {
+      content: 'unload a tab or window',
+      description: 'unload a tab or window',
+      action: args => {
+        return tabs.getQueried(args)
+        .then(proxy.print.status_queried_tabs)
+        .then(_tabs => _tabs.map(_tab => _tab.tabId))
+        .then(browser.tabs.discard)
+        .catch(proxy.print.failure_unload)
+      }, 
+      suggestions: args => {
+        return tabs.getQueried(args)
+          .catch(proxy.print.failure_unload);
       },
-      readermode: {
-        content: 'cli to toggle FF readermode',
-        description: 'cli to toggle FF readermode',
-        action: args => {
-          return Promise.resolve(args)
-            .then(browser.tabs.toggleReaderMode)
-            .catch(proxy.print.failure_page_readermode)
-        }
+      // window: args => {
+      //   return Promise.resolve(args)
+      //     .then(windowIdQueries)
+      //     .then(_windows => _windows.map(_window => {
+      //       return browser.windows.discard(window.id)
+      //         .catch(proxy.print.failure_discard_window)
+      //     }))
+      //     .catch(proxy.print.failure_unload);
+      // }, 
+      // tab: args => {
+      //   return Promise.resolve(args)
+      //     .then(tabIdQueries)
+      //     .then(_tabs => _tabs.map(_tab => {
+      //       return browser.tabs.discard(tab.id)
+      //         .catch(proxy.print.failure_discard_tab)
+      //     }))
+      //     .catch(proxy.print.failure_unload);
+      // }, 
+    },
+
+    analyze: {
+      content: 'Analyze current page content',
+      description: 'Analyze the current page for legal content',
+      action: () => {
+        return browser.tabs.query({ active: true, currentWindow: true })
+          .then(tabs => tabs[0])
+          .then(tab => browser.tabs.sendMessage(tab.id, { action: 'analyze.page' }))
+          .catch(proxy.print.failure_analyze_command)
+      }
+    },
+    darkmode: {
+      content: 'set darkmode for this page',
+      description: 'darkmode for this page',
+      action: args => {
+        return Promise.resolve(args)
+          .then(actions.applyDarkMode)
+          .catch(proxy.print.failure_page_darkmode)
+      }
+    },
+    readermode: {
+      content: 'cli to toggle FF readermode',
+      description: 'cli to toggle FF readermode',
+      action: args => {
+        return Promise.resolve(args)
+          .then(browser.tabs.toggleReaderMode)
+          .catch(proxy.print.failure_page_readermode)
       }
     },
     gather: {
@@ -168,7 +208,7 @@ try {
       //   action: send.clickNext
       // }
     }
-  };
+  }
 } catch (err) {
   proxy.print.failure_omnibox(err);
 }

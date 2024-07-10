@@ -12,6 +12,16 @@ export const all = (args) => {
     .catch(proxy.print.failure_get_all_tabs);
 };
 
+export const all_else = (args) => {
+  return Promise.resolve(args)
+    .then(queried('all'))
+    .then(_all_tabs => {
+      return _all_tabs - queried('this')
+    })
+    .then(proxy.print.status_get_all_else)
+    .catch(proxy.print.failure_get_all_else);
+}
+
 export const move = (tabs, _window) => {
   console.log('MOVE TAB', tabs, _window);
   return browser.tabs
@@ -71,17 +81,6 @@ export const addActiveTabId = (data) => {
     .catch(proxy.print.failure_add_active_tab_id);
 };
 
-export const tabIdQueries = (arg) => {
-  return {
-    single: tabQueries('this')
-      .then((tab) => tab.id)
-      .catch(proxy.print.failure_tab_id_single),
-    plural: tabQueries('window')
-      .then((tabs) => tabs.map((tab) => tab.id))
-      .catch(proxy.print.failure_tab_id_plural),
-  }[arg];
-};
-
 export const filterBy = (args) => {
   return {
     url: tabs => tabs.filter((tab) => new RegExp(args[1]).test(tab.url)),
@@ -134,28 +133,29 @@ export const queries = (arg) => {
     window: currentWindow,
     selected: highlighted,
     all: all,
+    else: all_else,
     playing: playing,
   }[arg];
 };
 
 export const getQueried = (args) => {
-  return (
-    Promise.resolve(args)
-      .then((_args) => (_args.length ? _args[0] : 'this'))
-      .then(queries) // keyword
-      // .then(proxy.print.status_tab_query)
-      .then((tabQuery) => tabQuery())
-      .then(reduce)
-      .then((tabs) => {
-        return tabs.map((tab) => ({
-          ...tab,
-          tag: [args.slice(1)].flat(1),
-          timestamp: Date.now(),
-          // language: browser.tabs.detectLanguage(tab.id)
-        }));
-      })
-      .catch(proxy.print.failure_stash_tabs)
-  );
+  return Promise.resolve(args)
+  .then(_args => _args ? _args : [])
+  .then(_args => _args.length ? _args[0] : 'this')
+  .then(queries) // keyword
+  // .then(proxy.print.status_tab_query)
+  .then(tabQuery => tabQuery())
+  .then(_tabs => _tabs.length ? _tabs.map(reduce) : reduce(_tabs))
+  .then(_tabs => (_tabs.length ? _tabs : [_tabs]))
+  .then(_tabs => {
+    return _tabs.map((tab) => ({
+      ...tab,
+      // tag: [args.slice(1)].flat(1),
+      timestamp: Date.now(),
+      // language: browser.tabs.detectLanguage(tab.id)
+    }));
+  })
+  .catch(proxy.print.failure_tabs_get_queried)
 };
 
 export const reduce = (tab) => {

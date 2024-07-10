@@ -107,6 +107,76 @@ export const toContentScript = async (params) => {
     .catch(proxy.print.failure_send_to_content_script);
 };
 
+export const extractPageContent = () => {
+  const content = document.body.innerText;
+  return {
+    url: window.location.href,
+    title: document.title,
+    content: content
+  };
+};
+
+const displayAnalysis = (analysis) => {
+  const container = document.createElement('div');
+  container.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 9999;
+    font-family: Arial, sans-serif;
+  `;
+
+  const closeButton = document.createElement('button');
+  closeButton.textContent = 'Close';
+  closeButton.onclick = () => container.remove();
+
+  const content = document.createElement('div');
+  content.innerHTML = analysis.replace(/\n/g, '<br>');
+
+  container.appendChild(closeButton);
+  container.appendChild(content);
+  document.body.appendChild(container);
+};
+
+export const pageContentToBackground = () => {
+  return Promise.resolve()
+    .then(extractPageContent)
+    .then(content => 
+      new Promise((resolve, reject) => {
+        browser.runtime.sendMessage(
+          {
+            action: 'analyze.pageContent',
+            payload: content
+          },
+          response => {
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+            } else if (response && response.analysis) {
+              resolve(response.analysis);
+            } else if (response && response.error) {
+              reject(new Error(response.error));
+            } else {
+              reject(new Error('Failed to get analysis'));
+            }
+          }
+        );
+      })
+    )
+    .then(displayAnalysis)
+    .catch(error => {
+      console.error('Error in sendPageContentToBackground:', error);
+      proxy.print.failure_send_page_content(error);
+      displayAnalysis("Failed to analyze content. Please try again.");
+    });
+};
+
 // ------- Send composites
 
 export const openAIApi = (prompt) => {
