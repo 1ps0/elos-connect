@@ -61,8 +61,8 @@ try {
         .catch(proxy.print.failure_unload)
       }, 
       suggestions: args => {
-        return tabs.getQueried(args)
-          .catch(proxy.print.failure_unload);
+        // return tabs.getQueried(args)
+        //   .catch(proxy.print.failure_unload);
       },
       // window: args => {
       //   return Promise.resolve(args)

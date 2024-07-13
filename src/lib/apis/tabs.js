@@ -144,9 +144,9 @@ export const getQueried = (args) => {
   .then(_args => _args.length ? _args[0] : 'this')
   .then(queries) // keyword
   // .then(proxy.print.status_tab_query)
-  .then(tabQuery => tabQuery())
-  .then(_tabs => _tabs.length ? _tabs.map(reduce) : reduce(_tabs))
+  .then(tabQuery => (tabQuery || currentActive)())
   .then(_tabs => (_tabs.length ? _tabs : [_tabs]))
+  .then(_tabs => _tabs.map(reduce))
   .then(_tabs => {
     return _tabs.map((tab) => ({
       ...tab,
