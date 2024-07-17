@@ -284,33 +284,40 @@ const omniboxOnInputCancelled = () => {
 
 // -------------------
 
-const createContextMenu = () => {
-  return new Promise((resolve, reject) => {
-    browser.contextMenus.create({
-      id: 'unload.tab',
-      title: 'Unload Tab',
-      contexts: ['tab']
-    }, () => {
-      if (browser.runtime.lastError) {
-        reject(browser.runtime.lastError);
-      } else {
-        resolve();
-      }
-    });
-  });
+const createContextMenu = (item) => {
+  return Promise.resolve(item)
+    .then(browser.contextMenus.create)
+    .catch(proxy.print.failure_create_context_menu);
 };
 
 const handleContextMenuClick = (info, tab) => {
   return Promise.resolve({ info: info, tabId: tab.id })
     .then(_info => {
-      if (info.menuItemId === 'unload.tab') {
-        browser.tabs.discard(tab.id);
+      switch (info.menuItemId) {
+        case 'unload.tab':
+          return browser.tabs.discard(tab.id);
+        case 'unload.selected.tabs':
+          return unloadSelectedTabs();
+        case 'unload.all.tabs':
+          return unloadAllTabs();
+        default:
+          console.log('Unknown menu item clicked');
       }
     })
     .catch(proxy.print.failure_handle_context_menu_click);
 };
 
+const unloadSelectedTabs = () => {
+  return browser.tabs.query({ highlighted: true, currentWindow: true })
+    .then(tabs => tabs.map(tab => browser.tabs.discard(tab.id)))
+    .catch(proxy.print.failure_unload_selected_tabs);
+};
 
+const unloadAllTabs = () => {
+  return browser.tabs.query({ currentWindow: true })
+    .then(tabs => tabs.map(tab => browser.tabs.discard(tab.id)))
+    .catch(proxy.print.failure_unload_all_tabs);
+};
 // ----
 
 try {
@@ -339,7 +346,21 @@ try {
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
 
   browser.contextMenus.onClicked.addListener(handleContextMenuClick);
-  createContextMenu();
+  createContextMenu({
+    id: 'unload.tab',
+    title: 'Unload Tab',
+    contexts: ['tab']
+  });
+  createContextMenu({
+    id: 'unload.selected.tabs',
+    title: 'Unload Selected Tab',
+    contexts: ['tab']
+  });
+  createContextMenu({
+    id: 'unload.all.tabs',
+    title: 'Unload All Tabs',
+    contexts: ['tab']
+  });
 
 } catch (e) {
   console.log('Caught background.js init error', e);
