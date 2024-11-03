@@ -6,32 +6,43 @@ Download and install the eLOS Connect extension from the releases page.
 Restart your browser.
 
 ## Usage
-Command-Line Interface (CLI)
-eLOS Connect provides a CLI in the address bar for quick access to its features. Here are some examples of commands you can use:
+
+### Command-Line Interface (CLI)
+
+eLOS Connect provides a CLI in the address bar for quick access to its features. The command palette is activated by typing `- ` in the url bar.
+Here are some examples of commands you can use:
 
 - Dark Mode Toggle: Toggle dark mode for the current website.
-`- darkmode`
 
-Reader Mode Toggle: Toggle reader mode for the current website.
-`- readermode`
+```- darkmode```
 
-Gather Tabs: Move all tabs matching a query to a new window.
+- Reader Mode Toggle: Toggle reader mode for the current website.
+
+```- readermode```
+
+- Gather Tabs: Move all tabs matching a query to a new window.
 `- gather <query> [--type <tab_type>] [--tag <tag>]`
 
-Replace <query> with a domain name, a tag, a title pattern, or use all to gather all tabs. Use --type to filter by tab type (e.g., video, audio, article). Add a --tag to apply a specific tag to the gathered tabs.
+- Replace <query> with a domain name, a tag, a title pattern, or use all to gather all tabs. Use --type to filter by tab type (e.g., video, audio, article). Add a --tag to apply a specific tag to the gathered tabs.
 
-List Playing Tabs: Display a list of actively playing tabs and navigate to the selected one.
+- List Playing Tabs: Display a list of actively playing tabs and navigate to the selected one.
 
 `- playing [--history]`
+
 Use --history to display the history of playing tabs.
 
-Analyze Page Content: Analyze the current page for legal content.
+- Analyze Page Content: Analyze the current page for legal content.
+
 `- analyze`
 
-Unload Tab/Window: Close a tab or a window by its ID.
+- Unload Tab/Window: Close a tab or a window by its ID.
+
 `- unload <tab_id|window_id>`
 
-Set Window/Tab Title: Set the title of the active window or tab.
+Also available as a right-click menu option on any tab.
+
+- Set Window/Tab Title: Set the title of the active window or tab.
+
 `- title <new_title>`
 
 For more information on available commands and their usage, refer to the omnibox.js file.
