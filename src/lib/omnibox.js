@@ -83,7 +83,16 @@ try {
       //     .catch(proxy.print.failure_unload);
       // }, 
     },
-
+    title: {
+      content: 'title',
+      description: 'set the title of the window/tab',
+      action: (args) => {
+        return Promise.resolve(args)
+          .then(windows.setTitle)
+          .then(proxy.notify.success_window_title)
+          .catch(proxy.print.failure_set_window_title);
+      },
+    },
     analyze: {
       content: 'Analyze current page content',
       description: 'Analyze the current page for legal content',

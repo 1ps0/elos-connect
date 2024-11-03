@@ -88,6 +88,32 @@ const handleMessage = (message, sender, sendResponse) => {
   }
 };
 
+// Add this function to handle window focus changes
+const handleWindowFocusChanged = (windowId) => {
+  return Promise.resolve(windowId)
+    .then(_windowId => {
+      if (_windowId === browser.windows.WINDOW_ID_NONE) {
+        return browser.windows.getLastFocused();
+      }
+      return Promise.reject('Window not minimized');
+    })
+    .then(window => {
+      if (window.state === "minimized") {
+        return unloadAllTabs(window.id);
+      }
+      return Promise.reject('Window not in minimized state');
+    })
+    .then(proxy.print.status_window_focus_changed)
+    .catch(error => {
+      if (error === 'Window not minimized' || error === 'Window not in minimized state') {
+        // These are expected in normal operation, so we'll just log them
+        return proxy.print.status_window_focus_unchanged(error);
+      }
+      // For unexpected errors, we'll use the failure handler
+      return proxy.print.failure_window_focus_changed(error);
+    });
+};
+
 // --- PlayingTabs Listener Handler
 
 const playingTabs = {};
@@ -344,6 +370,8 @@ try {
   // browser.runtime.onInstalled.addListener(setThemeContext);
   // browser.commands.onCommand.addListener(commandAction);
   // browser.runtime.onSuspend.addListener(omniboxOnInputCancelled);
+
+  browser.windows.onFocusChanged.addListener(handleWindowFocusChanged);
 
   browser.contextMenus.onClicked.addListener(handleContextMenuClick);
   createContextMenu({

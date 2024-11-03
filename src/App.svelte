@@ -14,8 +14,8 @@
   const genId = () => "_" + Math.random().toString(36).substr(2, 9)
 
   let objects = {};
-  // const panelItems = writable([])
-  const panelItems = [];
+  const panelItems = writable([]);
+  // const panelItems = [];
 
   const _addToWritable = (item) => {
     return Promise.resolve(item)
@@ -43,7 +43,13 @@
         ..._opts,
       }))
       .then(layout.makeItem)
-      .then(positionItem)
+      // .then(positionItem)
+      .then(item => layout.findSpace(item, $panelItems, layoutConfig.columnCount))
+      .then(position => {
+        const newItem = { ...item, ...position };
+        panelItems.update(items => [...items, newItem]);
+        return newItem;
+      })
       .then(_addToWritable)
       .catch(proxy.print.failure_panels_add_item)
   };
@@ -57,7 +63,11 @@
 
   const removePanel = (item) => {
     return Promise.resolve(item)
-      .then(_removeFromWritable)
+      // .then(_removeFromWritable)
+      .then(_item => {
+        panelItems.update(items => items.filter(i => i.target !== _item.target));
+        return _item;
+      })
       .then(items => items.length > 0 ? delete objects[item] : null)
       .catch(proxy.print.failure_panels_remove_item)
   };
@@ -156,7 +166,7 @@
 
   <section>
     <LayoutGrid
-      panelItems={panelItems}
+      panelItems={$panelItems}
       cols={layoutConfig.columnCount}
       rowHeight={layoutConfig.rowHeight}
       gap={[layoutConfig.panelGap]}

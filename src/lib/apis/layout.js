@@ -15,7 +15,6 @@ export const getRowsCount = (panelItems) => {
 };
 
 // --- helper.js
-
 export const findSpace = (item, panelItems, cols) => {
   return Promise.resolve({ item, panelItems, cols })
     .then(({ item, _panelItems, cols }) =>
@@ -26,7 +25,6 @@ export const findSpace = (item, panelItems, cols) => {
         rowCount,
       }))
     )
-    .then(proxy.print.status_find_space)
     .then(({ item, _panelItems, cols, rowCount }) =>
       makeMatrixFromItems(_panelItems, rowCount, cols).then((matrix) => ({
         item,

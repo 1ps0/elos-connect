@@ -1,101 +1,79 @@
 ## eLOS Connect
-
-eLOS Connect is a browser plugin extension of the eLOS web project.
-
-### Overview
-
-1. Installing
-2. What is it?
-3. Current Features
-4. Design
+eLOS Connect is a browser extension that brings eLOS functionality directly to your browser. It provides a command-line interface (CLI) in the address bar, allowing you to interact with the eLOS server, manage tabs, and perform various operations.
 
 ## Installation
+Download and install the eLOS Connect extension from the releases page.
+Restart your browser.
 
-> NOTE: Currently only Firefox is supported.
-> However, manifest v2 standards make Chrome support an approachable feature.
+## Usage
+Command-Line Interface (CLI)
+eLOS Connect provides a CLI in the address bar for quick access to its features. Here are some examples of commands you can use:
 
-### Dev Install
-1. `npm install rollup && npm install && npm run dev`
-2. In browser bar, navigate to: [about:debugging](about:debugging#/runtime/this-firefox)
-3. Find and click the button labeled `Load Temporary Add-on...`
-4. Navigate to `public/manifest.json` and submit the selected file.
-5. Use 'Ctrl+e' on mac to open the sidebar, or open history,et al. and change the tab to `eLOS Connect`
+- Dark Mode Toggle: Toggle dark mode for the current website.
+`- darkmode`
 
-## What is it?
+Reader Mode Toggle: Toggle reader mode for the current website.
+`- readermode`
 
-eLOS is short for the e-Learning Operating System; a toolchain for handling, organizing, exporting, formatting and otherwise using your content.
+Gather Tabs: Move all tabs matching a query to a new window.
+`- gather <query> [--type <tab_type>] [--tag <tag>]`
 
-Content is ambiguous on purpose, with a primary goal of organizing and bringing together material from continuous learning type sources. This is hard, and so narrow by necessity.
+Replace <query> with a domain name, a tag, a title pattern, or use all to gather all tabs. Use --type to filter by tab type (e.g., video, audio, article). Add a --tag to apply a specific tag to the gathered tabs.
 
-eLOS Connect is the most directly usable aspect of the eLOS platform. It is designed to integrate with the daily use scenarios; such as saving a video, stashing an article, saving links to your personal library.
+List Playing Tabs: Display a list of actively playing tabs and navigate to the selected one.
 
-eLOS Connect is a toolkit itself. The goal is to bring all of your needs as close and easy as possible.
+`- playing [--history]`
+Use --history to display the history of playing tabs.
 
-Adding new features is a little bit of development work, and well documented and templated. The main display panels live in
+Analyze Page Content: Analyze the current page for legal content.
+`- analyze`
 
-### Current Features
+Unload Tab/Window: Close a tab or a window by its ID.
+`- unload <tab_id|window_id>`
 
-> Plugin Only
+Set Window/Tab Title: Set the title of the active window or tab.
+`- title <new_title>`
 
-- Copy Selected Tabs to Clipboard (format: `title,url`)
-- Darkmode current site (applies to all sites)
-- HackerNews default darkmode
-- Track, Control, Access actively playing tabs
-- CLI for a motley of combined operations
+For more information on available commands and their usage, refer to the omnibox.js file.
 
-> eLOS Server/API integrated
-
-- Download Video (ytdl to cache a video/song/ locally)
-- tag location/url and save to server
+## eLOS Server Integration
+eLOS Connect integrates with the eLOS server to provide additional functionality, such as saving articles and videos to your personal library. To use these features, you'll need to have the eLOS server running on your local machine or have access to a remote instance.
 
 ## Design
+eLOS Connect is designed to provide a seamless and intuitive user experience, bringing the power of eLOS directly to your browser. The extension is structured as follows:
 
-Currently, `elos-connect` is figuring out the path to its core purpose.
-In the mean-time, the structure is as below:
-
-1. eLOS connect browser plugin
-2. eLOS panel UI (referred to as `connect`)
-3. eLOS unified api/processing server
-
-The eLOS server can:
-
-- be run on the local machine
-- facilitate filesystem-level operations
-- run processing jobs
-- integrate with sqlite via json schema/interface
-
-The eLOS connect UI can:
-
-- provide a faux control environment
-- uses a panel system to contain function widgets
-- provide a sidebar space for the eLOS UI
-- provide deeper access to the data and capabilities available to the browser
-- directly interact with a website in a controlled manner
-- enable the eLOS UI to monitor the status of active elements in a website
-
----
-
-The eLOS connect plugin is the current entrypoint and focus driving the project.
-The plugin should be able to connect and interact with the server
+- eLOS Connect Browser Extension: The main entry point for user interaction.
+- eLOS Panel UI: Provides a sidebar space for the eLOS UI and displays function widgets for deeper access to browser capabilities.
+- eLOS Unified API/Processing Server: Handles filesystem-level operations, runs processing jobs, and integrates with the eLOS database.
 
 ## Features
+- Command-line interface (CLI) for quick access to features.
+- Dark mode toggle for websites.
+- Reader mode toggle for websites.
+- Gather tabs based on queries and move them to a new window.
+- List actively playing tabs and navigate to the selected one.
+- Analyze the current page for legal content.
+- Unload tabs and windows.
+- Set the title of the active window or tab.
 
-1. Send activetab's url to localhost:3000/api/location/add via POST with format
+Integrate with the eLOS server for saving articles and videos to your personal library (requires eLOS server running locally or remotely).
 
-```json
-{
-  "title": "...",
-  "url": "...",
-  "tag": "..."
-}
-```
+## Roadmap
+- Add support for more eLOS server features, such as tagging and exporting content.
+- Integrate with the eLOS UI for a more seamless user experience.
+- Improve the command-line interface with auto-completion and suggestions.
+- Add support for more browsers, such as Chrome and Edge.
+- Enhance the eLOS Connect extension with user-defined scripts and customizations.
 
-2. On plugin activation, display a menu with tags available, click tag to save with that term.
+## Contributing
+Contributions are welcome! If you'd like to contribute to eLOS Connect, please follow these guidelines:
 
-3. A "add tag" box at the top of 2.
+- Fork the repository.
+- Create a new branch for your changes.
+- Make your changes and commit them with descriptive commit messages.
+- Push your changes to your fork.
+- Open a pull request against the main branch, describing the changes you've made and their purpose.
+- For more information on contributing, refer to the Contributing file.
 
-4. A button to copy URLs of all selected tabs
-
-5. A button to render page as Firefox Reader state, then save the current page as PDF (in lieu of article content preprocessing).
-
-6. IN PROGRESS: send reader rendered html to local server for handling.
+## License
+eLOS Connect is licensed under the MIT License.
