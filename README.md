@@ -12,36 +12,37 @@ Restart your browser.
 eLOS Connect provides a CLI in the address bar for quick access to its features. The command palette is activated by typing `- ` in the url bar.
 Here are some examples of commands you can use:
 
-- Dark Mode Toggle: Toggle dark mode for the current website.
+### Dark Mode Toggle: Toggle dark mode for the current website.
 
 ```- darkmode```
 
-- Reader Mode Toggle: Toggle reader mode for the current website.
+### Reader Mode Toggle: Toggle reader mode for the current website.
 
 ```- readermode```
 
-- Gather Tabs: Move all tabs matching a query to a new window.
-`- gather <query> [--type <tab_type>] [--tag <tag>]`
+### Gather Tabs (Fix Needed): Move all tabs matching a query to a new window.
 
-- Replace <query> with a domain name, a tag, a title pattern, or use all to gather all tabs. Use --type to filter by tab type (e.g., video, audio, article). Add a --tag to apply a specific tag to the gathered tabs.
+```- gather <query> [--type <tab_type>] [--tag <tag>]```
 
-- List Playing Tabs: Display a list of actively playing tabs and navigate to the selected one.
+Replace <query> with a domain name, a tag, a title pattern, or use all to gather all tabs. Use --type to filter by tab type (e.g., video, audio, article). Add a --tag to apply a specific tag to the gathered tabs.
+
+### List Playing Tabs: Display a list of actively playing tabs and navigate to the selected one.
 
 `- playing [--history]`
 
 Use --history to display the history of playing tabs.
 
-- Analyze Page Content: Analyze the current page for legal content.
+### Analyze Page Content (Fix Needed): Analyze the current page for legal content.
 
 `- analyze`
 
-- Unload Tab/Window: Close a tab or a window by its ID.
+### Unload Tab/Window: Close a tab or a window by its ID.
 
 `- unload <tab_id|window_id>`
 
 Also available as a right-click menu option on any tab.
 
-- Set Window/Tab Title: Set the title of the active window or tab.
+### Set Window/Tab Title (Fix Needed): Set the title of the active window or tab.
 
 `- title <new_title>`
 
