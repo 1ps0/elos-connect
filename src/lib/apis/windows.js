@@ -17,9 +17,10 @@ export const createWindow = (args) => {
 };
 
 export const setTitle = (data) => {
-  return Promise.resolve({
-    titlePreface: data && data.length ? `${data[0]} | ` : 'Preface | ',
-  })
+  return Promise.resolve(data)
+    .then(_data => ({
+      titlePreface: (_data && _data.length ? `${_data[0]} | ` : 'Preface | '),
+    }))
     .then((preface) => {
       return browser.windows.update(browser.windows.WINDOW_ID_CURRENT, preface);
     })

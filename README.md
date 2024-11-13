@@ -42,7 +42,7 @@ Use --history to display the history of playing tabs.
 
 Also available as a right-click menu option on any tab.
 
-### Set Window/Tab Title (Fix Needed): Set the title of the active window or tab.
+### Set Window/Tab Title: Set the title of the active window or tab.
 
 `- title <new_title>`
 
