@@ -1,4 +1,3 @@
-
 <script>
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
@@ -17,6 +16,19 @@
   const panelItems = writable([]);
   // const panelItems = [];
 
+  // Modify store subscription to avoid Promise issues
+  panelItems.subscribe(items => {
+    if (items && items.length) {
+      // Handle only actual array data
+      const safeItems = items.map(item => ({
+        ...item,
+        // Remove any potential Promise properties
+        props: item.props ? safeClone(item.props) : {}
+      }));
+      stores.layoutItems.set(safeItems);
+    }
+  });
+  
   const _addToWritable = (item) => {
     return Promise.resolve(item)
       .then(_item => {
@@ -25,13 +37,13 @@
       })
       .catch(proxy.print.failure_add_writable)
   }
-
   const addPanel = (panelTarget, options={}) => {
     // TODO render icons into menupanelItems
     // TODO render source/dataStore props into actual stores
     if (!panelTypes.hasOwnProperty(panelTarget)) {
       console.log("MISSING PANEL", panelTarget)
     }
+
     return Promise.resolve(panelTarget)
       .then(_target => panelTypes[_target])
       .then(_type => ({..._type, ...options}))
@@ -43,16 +55,60 @@
         ..._opts,
       }))
       .then(layout.makeItem)
-      // .then(positionItem)
+      // .then(positionItem)  // Keep commented positioning logic
       .then(item => layout.findSpace(item, $panelItems, layoutConfig.columnCount))
       .then(position => {
         const newItem = { ...item, ...position };
-        panelItems.update(items => [...items, newItem]);
+        // Use safe cloning for store updates while preserving structure
+        const safeItem = {
+          ...newItem,
+          props: newItem.props ? safeClone(newItem.props) : {},
+          // Preserve future extension points
+          _pendingUpdates: [],
+          _lifecycleHooks: {}
+        };
+        panelItems.update(items => [...items, safeItem]);
         return newItem;
       })
-      .then(_addToWritable)
-      .catch(proxy.print.failure_panels_add_item)
-  };
+      .then(_addToWritable)  // Preserve the writable store pattern
+      .catch(proxy.print.failure_panels_add_item);
+    };
+
+  function hydrateParams(item) {
+    return Promise.resolve(item)
+      .then(_item => {
+        if (!components.hasOwnProperty(_item.componentName)) {
+          proxy.print.failure_hydrate_missing_component(_item.componentName);
+          return _item; // Continue with invalid component rather than reject
+        }
+
+        // Handle dataStore if specified
+        if (_item.props?.dataStore && stores[_item.props.dataStore]) {
+          _item.props.dataStore = stores[_item.props.dataStore];
+          
+          // Update existing instance if it exists
+          if (_item.target in objects && objects[_item.target]) {
+            objects[_item.target].$set("dataStore", _item.props.dataStore);
+          }
+        }
+
+        // Handle event binding
+        if (_item.event) {
+          // Map event callback string to function
+          if (_item.event.callback === "togglePanel") {
+            _item.event.callback = togglePanel;
+          }
+          
+          // Bind to existing instance
+          if (_item.target in objects && objects[_item.target]) {
+            objects[_item.target].$on(_item.event.name, _item.event.callback);
+          }
+        }
+
+        return _item;
+      })
+      .catch(proxy.print.failure_hydrate_params);
+  }
 
   const _removeFromWritable = (item) => {
     return Promise.resolve(item)
@@ -71,33 +127,6 @@
       .then(items => items.length > 0 ? delete objects[item] : null)
       .catch(proxy.print.failure_panels_remove_item)
   };
-
-  function hydrateParams(item) {
-    if (!components.hasOwnProperty(item.componentName)) {
-      console.log("MISSING COMPONENT", item.componentName)
-    }
-
-    if (item.props !== undefined
-        && item.props.dataStore !== undefined
-        && item.props.dataStore) {
-
-      item.props.dataStore = stores[item.props.dataStore];
-
-      if (item.target in objects && objects[item.target]) {
-        objects[item.target].$set("dataStore", item.props.dataStore)
-      }
-    }
-
-    if (item.event !== undefined) {
-      switch(item.event.callback) {
-        case "togglePanel": item.event.callback = togglePanel; break;
-      }
-      if (item && item.target && item.target in objects && objects[item.target] !== null) {
-        objects[item.target].$on(item.event.name, item.event.callback)
-      }
-    }
-    return item;
-  }
 
   const positionItem = (item) => {
     return Promise.resolve(item)

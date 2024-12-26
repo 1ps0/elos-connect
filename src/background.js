@@ -59,17 +59,18 @@ const analyzeWithOllama = async (content) => {
 
 const handleMessage = (message, sender, sendResponse) => {
   proxy.print.status_background_got_message(message);
+  
   if (message.action === 'set.readerMode') {
-    // Toggle Reader Mode
-    return Promise.resolve(message)
-      .then(browser.readerMode.toggleReaderMode)
-      .then((_) => ({ active: true, currentWindow: true }))
-      .then(browser.tabs.query)
-      .then((_tabs) => _tabs[0].id)
-      .then((tabId) =>
-        browser.tabs.sendMessage(tabId, { action: 'set.readerMode' })
-      )
-      .catch(proxy.print.failure_set_readermode);
+    browser.readerMode.toggleReaderMode()
+      .then(() => browser.tabs.query({ active: true, currentWindow: true }))
+      .then(tabs => tabs[0].id)
+      .then(tabId => browser.tabs.sendMessage(tabId, { action: 'set.readerMode' }))
+      .then(() => sendResponse({ success: true }))
+      .catch(err => {
+        proxy.print.failure_set_readermode(err);
+        sendResponse({ success: false, error: err.message });
+      });
+    return true; // Keep message channel open for async response
   } else if (message.action === 'analyze.pageContent') {
     return Promise.resolve(message.payload.content)
       .then(analyzeWithOllama)
@@ -326,12 +327,22 @@ const handleContextMenuClick = (info, tab) => {
           return unloadSelectedTabs();
         case 'unload.all.tabs':
           return unloadAllTabs();
+        case 'capture.video-clip': 
+          return captureVideoClip(tab);
         default:
-          console.log('Unknown menu item clicked');
+          console.log('Unknown menu item clicked', info.menuItemId);
       }
     })
     .catch(proxy.print.failure_handle_context_menu_click);
 };
+
+const captureVideoClip = (tab) => {
+  return Promise.resolve(tab)
+    .then(tab => browser.tabs.sendMessage(tab.id, { 
+      message: 'capture.video-clip' 
+    }))
+    .catch(proxy.print.failure_capture_video_clip);
+}
 
 const unloadSelectedTabs = () => {
   return browser.tabs.query({ highlighted: true, currentWindow: true })
@@ -389,7 +400,33 @@ try {
     title: 'Unload All Tabs',
     contexts: ['tab']
   });
+  createContextMenu({
+    id: 'capture.video-clip',
+    title: 'Capture 5s Clip',
+    contexts: ['video'],
+    documentUrlPatterns: ['<all_urls>']
+  });
 
+  // Handle video clip downloads
+  browser.runtime.onMessage.addListener((message, sender) => {
+    if (message.action === 'save.video_clip') {
+      // Convert array back to blob
+      const blob = new Blob([new Uint8Array(message.data)], { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      
+      browser.downloads.download({
+        url: url,
+        filename: message.filename,
+        saveAs: true
+      }).finally(() => {
+        // Clean up the blob URL
+        URL.revokeObjectURL(url);
+      });
+  
+      // Store metadata if needed
+      browser.storage.local.set({ [`clip-${message.filename}`]: message.metadata });
+    }
+  });
 } catch (e) {
   console.log('Caught background.js init error', e);
 }

@@ -1,5 +1,35 @@
 import * as proxy from './proxy.js';
 
+export const redistributePanels = (items, cols) => {
+  return Promise.resolve({ items, cols })
+    .then(({ items, cols }) => {
+      let currentRow = 0;
+      let currentX = 0;
+      
+      return items.map(item => {
+        // If item won't fit on current row, move to next row
+        if (currentX + item.w > cols) {
+          currentRow++;
+          currentX = 0;
+        }
+        
+        const newPosition = {
+          ...item,
+          x: currentX,
+          y: currentRow
+        };
+        
+        currentX += item.w;
+        
+        // Add gap between items
+        currentX += 1;
+        
+        return newPosition;
+      });
+    })
+    .catch(proxy.print.failure_redistribute_panels);
+};
+
 // TODO convert items et al to be {items, rowCount, etc} in one blob
 // call this blob: LayoutInterface
 

@@ -3,6 +3,8 @@
 import * as proxy from './lib/apis/proxy.js';
 import * as content from './lib/content.js';
 import * as send from './lib/send.js';
+import * as recorder from './video_capture.js';
+
 proxy.print.load_elos_connect_content_actions();
 
 // ----- Util
@@ -34,9 +36,10 @@ const handleMediaMessage = (obj, sendResponse) => {
     .then(content.getPlayingInfo)
     .then(content.renderPlayingStatus)
     .then(sendResponse)
-    .catch(proxy.print.failure_handle_media_message);
+    .catch(proxy.print.failure_content_handle_media_message);
 };
 
+let recording = null;
 const handleMessage = (request, sender, sendResponse) => {
   console.log(
     '[CONTENT] Message from the page script:',
@@ -60,7 +63,15 @@ const handleMessage = (request, sender, sendResponse) => {
       }))
       .then(sendResponse)
       .catch(proxy.print.failure_handle_message_set_dark_mode);
-  } else if (message.action === 'set.readerMode') {
+  } else if (request.message === 'capture.video-clip') {
+    return Promise.resolve(request.message)
+      .then(_msg => {
+        let video = document.querySelector('video');
+        recording = recorder.captureVideoClip(video);
+      })
+      .then(() => sendResponse({success: true}))
+      .catch(proxy.print.failure_capture_video);
+  } else if (request.message === 'set.readerMode') {
     return Promise.resolve()
       .then(zipImagesAndText)
       .then((zipBuffer) => ({

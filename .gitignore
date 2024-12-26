@@ -1,7 +1,11 @@
 .storybook
 .DS_Store
 docs
+reference
+resources
 node_modules
+elos_connect*
+public/web-ext-artifacts
 public/bundle.*
 public/build/css/bundle.css
 public/build/*.js

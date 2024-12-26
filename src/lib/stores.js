@@ -1,4 +1,3 @@
-// 2nd order, +complexity dependent @../config/parameters
 
 /*
 need a 'view' window of current open stuff to maintain the place
@@ -9,17 +8,68 @@ different data types and representations, eg pdf viewed vs file list vs image ga
 can we chain readable/writable?
 so readable(value) internally updates
 then writable calls readable's values for those datasets
+// 2nd order, +complexity dependent @../config/parameters
 */
 
 import { writable } from 'svelte/store';
-
 import * as network from './apis/network.js';
-
 import * as bookmarks from './apis/bookmarks.js';
 import * as proxy from './apis/proxy.js';
 import * as tabs from './apis/tabs.js';
-
 import { workspaceConfig } from '../workspace.js';
+
+
+// Add our safe clone helper while keeping existing structure
+const safeClone = (obj) => {
+  try {
+    // Remove any Promise objects and functions while preserving structure
+    const seen = new WeakSet();
+    const replacer = (key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) return '[Circular]';
+        seen.add(value);
+      }
+      if (value instanceof Promise) return undefined;
+      if (typeof value === 'function') return value.toString();
+      return value;
+    };
+    return JSON.parse(JSON.stringify(obj, replacer));
+  } catch (e) {
+    proxy.print.failure_safe_clone(e);
+    return obj;
+  }
+};
+
+export const bookmarksFor = (name, otherwise = {}) => {
+  return Promise.resolve(name)
+    .then(bookmarks.search)
+    .catch(proxy.print.failure_bookmarks_for);
+};
+
+// Preserve the original stores structure
+const configWritable = writable(workspaceConfig);
+const layoutItemsWritable = writable(
+  bookmarksFor('layoutItems', { items: [], add: [] })
+);
+
+export const stores = {
+  config: configWritable,
+  layoutItems: layoutItemsWritable,
+};
+
+// Modify store subscription while preserving structure for future additions
+Object.entries(stores).forEach((entry) => {
+  let [name, store] = entry;
+  store.subscribe((val) => {
+    if (val !== undefined && val !== 'undefined') {
+      // Preserve the bookmark search functionality for future extension
+      return Promise.resolve({ [name]: safeClone(val) })
+        .then(bookmarks.search)
+        .then(proxy.print.success_storage_bookmarks)
+        .catch(proxy.print.failure_storage_bookmarks);
+    }
+  });
+});
 
 // -----
 // Experiment: source abstraction
@@ -34,10 +84,8 @@ import { workspaceConfig } from '../workspace.js';
   parent: "folder/subfolder",
 
 }
+// Keep all the experimental code and comments
 */
-
-// export const _ = () => {};
-
 export const getAllTree = () => {};
 export const getAllFlat = () => {};
 export const getAll = getAllTree;
@@ -79,43 +127,6 @@ export const monitorBookmarksAt = (folderId) => {
     )
     .catch(proxy.print.failure_setup_subtree_listener);
 };
-
-// -----
-
-export const localStorageFor = (name, otherwise = {}) => {
-  return Promise.resolve(`${name}`)
-    .then(browser.storage.local.get)
-    .catch(print.failure_storage_for);
-};
-
-export const bookmarksFor = (name, otherwise = {}) => {
-  return Promise.resolve(name)
-    .then(bookmarks.search)
-    .catch(proxy.print.failure_bookmarks_for);
-};
-
-const configWritable = writable(workspaceConfig);
-const layoutItemsWritable = writable(
-  bookmarksFor('layoutItems', { items: [], add: [] })
-);
-
-export const stores = {
-  config: configWritable,
-  layoutItems: layoutItemsWritable,
-};
-
-Object.entries(stores).forEach((entry) => {
-  let name = entry[0];
-  let store = entry[1];
-  store.subscribe((val) => {
-    if (val !== undefined && val !== 'undefined') {
-      return Promise.resolve({ name: val })
-        .then(bookmarks.search)
-        .then(proxy.print.success_storage_bookmarks)
-        .catch(proxy.print.failure_storage_bookmarks);
-    }
-  });
-});
 
 // --- Approach for localStorage
 
